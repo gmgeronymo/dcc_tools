@@ -21,7 +21,6 @@
 
 import zipfile
 import base64
-import xml.etree.ElementTree as ET
 from lxml import etree
 from io import BytesIO
 
@@ -52,7 +51,8 @@ def lambda_handler(event, context):
             }
 
         # Read the XML file
-        xml_file_content = zip_ref.read(xml_filename).decode('utf-8')
+        #xml_file_content = zip_ref.read(xml_filename).decode('utf-8')
+        xml_file_content = zip_ref.read(xml_filename)
 
         # Read the PDF file and convert to base64
         pdf_file_content = zip_ref.read(pdf_filename)
@@ -85,25 +85,25 @@ def lambda_handler(event, context):
 
 def add_pdf_to_xml(xml_content, base64_pdf):
     # Parse the XML content
-    root = ET.fromstring(xml_content)
+    root = etree.fromstring(xml_content)
 
     # Create the dcc:document node
-    document_node = ET.SubElement(root, '{https://ptb.de/dcc}document')
+    document_node = etree.SubElement(root, '{https://ptb.de/dcc}document')
 
     # Create the dcc:fileName node
-    file_name_node = ET.SubElement(document_node, '{https://ptb.de/dcc}fileName')
+    file_name_node = etree.SubElement(document_node, '{https://ptb.de/dcc}fileName')
     file_name_node.text = 'name_of_pdf_file.pdf'
 
     # Create the dcc:mimeType node
-    mime_type_node = ET.SubElement(document_node, '{https://ptb.de/dcc}mimeType')
+    mime_type_node = etree.SubElement(document_node, '{https://ptb.de/dcc}mimeType')
     mime_type_node.text = 'application/pdf'
 
     # Create the dcc:dataBase64 node
-    data_base64_node = ET.SubElement(document_node, '{https://ptb.de/dcc}dataBase64')
+    data_base64_node = etree.SubElement(document_node, '{https://ptb.de/dcc}dataBase64')
     data_base64_node.text = base64_pdf
 
     # Convert the XML tree back to string
-    xml_data = ET.tostring(root, encoding='utf-8').decode('utf-8')
+    xml_data = etree.tostring(root, encoding='utf-8').decode('utf-8')
 
     return xml_data
 
@@ -124,3 +124,4 @@ def validate_xml(xml_content):
 #     except etree.DocumentInvalid as e:
 #         return str(e)  # XML is invalid with error message
     return True
+
