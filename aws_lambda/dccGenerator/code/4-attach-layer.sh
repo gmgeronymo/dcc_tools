@@ -1,4 +1,6 @@
-# pass the layers string as parameter to the script
-aws lambda update-function-configuration --function-name dccGeneratorNew \
+# parameters:
+# 1st: function name
+# 2nd: layers arn string
+aws lambda update-function-configuration --function-name $1 \
     --cli-binary-format raw-in-base64-out \
-    --layers $1
+    --layers $2
