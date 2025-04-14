@@ -1,0 +1,9 @@
+{
+    "Cors": {
+        "AllowOrigins": ["*"],
+        "AllowMethods": ["POST"],
+        "AllowHeaders": ["*"]
+    }
+}
+
+

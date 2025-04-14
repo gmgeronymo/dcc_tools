@@ -2,44 +2,81 @@ import json
 import pandas as pd
 import tempfile
 import requests
+from io import BytesIO
 import base64
+# dependencies for excel2json function
+from openpyxl import load_workbook
+from openpyxl.styles import Font, Alignment
+from openpyxl.utils import get_column_letter
 
 def lambda_handler(event, context):
     try:
-        # Handle binary data
+        # Check if it's a base64 encoded payload (API Gateway proxy)
         if event.get('isBase64Encoded', False):
-            file_content = base64.b64decode(event['body'])
+            body = base64.b64decode(event['body'])
         else:
-            return error_response("Non-binary payload not supported")
-
-        # Write to temp file
+            #body = event['body'].encode('utf-8') if isinstance(event['body'], str) else event['body']
+            body = bytes(event['body'], 'iso-8859-1') if isinstance(event['body'], str) else event['body']
+        
+        # Parse multipart form data manually
+        content_type = event['headers'].get('content-type', event['headers'].get('Content-Type', ''))
+        boundary = content_type.split("boundary=")[-1]
+        
+        parts = []
+        current_part = {}
+        
+        for line in body.split(b'--' + boundary.encode()):
+            if not line.strip():
+                continue
+                
+            headers, _, content = line.partition(b'\r\n\r\n')
+            if not headers:
+                continue
+                
+            part_headers = {}
+            for header_line in headers.split(b'\r\n'):
+                if b':' in header_line:
+                    name, value = header_line.split(b':', 1)
+                    part_headers[name.strip().decode()] = value.strip().decode()
+            
+            if 'filename' in part_headers.get('content-disposition', ''):
+                current_part = {
+                    'filename': part_headers['content-disposition'].split('filename="')[1].split('"')[0],
+                    'content': content.split(b'\r\n')[0]  # Remove trailing boundary
+                }
+                parts.append(current_part)
+        
+        if not parts:
+            return error_response('No file uploaded')
+        
+        # Process the first file found
+        file_content = parts[0]['content']
+        
         with tempfile.NamedTemporaryFile(suffix='.xlsx') as tmp:
             tmp.write(file_content)
             tmp.flush()
             
             # Convert to JSON
-            try:
-                converted_data = excel_to_json(tmp.name)
-            except Exception as e:
-                return error_response(f"Excel conversion failed: {str(e)}")
-
-            # Send to API
-            try:
-                api_response = requests.post(
-                    'https://i3nqpfvs5fkdr72e4dm53ox7dq0tzvxc.lambda-url.sa-east-1.on.aws/',
-                    json=converted_data,
-                    headers={'Content-Type': 'application/json'},
-                    timeout=10
-                )
-                api_response.raise_for_status()
-                return success_response(api_response.json().get('id'))
-            except requests.exceptions.RequestException as e:
-                return error_response(f"API request failed: {str(e)}")
-                #return error_response(f"API request failed: {str(converted_data)}")
-
-
+            converted_data = excel_to_json(tmp.name)
+            
+            # Send to your API
+            api_response = requests.post(
+                'YOUR_API_ENDPOINT',
+                json=converted_data,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'id': api_response.json().get('id'),
+                    'message': 'File processed successfully'
+                })
+            }
+    
     except Exception as e:
-        return error_response(f"Unexpected error: {str(e)}")
+        return error_response(str(e))
 
 def excel_to_json(excel_path):
     # Read all sheets with specified dtypes
@@ -155,16 +192,10 @@ def excel_to_json(excel_path):
 
     return data
 
-def success_response(id):
-    return {
-        'statusCode': 200,
-        'headers': {'Content-Type': 'application/json'},
-        'body': json.dumps({'id': id, 'status': 'success'})
-    }
 
 def error_response(message):
     return {
         'statusCode': 400,
-        'headers': {'Content-Type': 'application/json'},
+        'headers': {'Access-Control-Allow-Origin': '*'},
         'body': json.dumps({'error': message})
     }
