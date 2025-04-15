@@ -23,7 +23,6 @@ def lambda_handler(event, context):
             except Exception as e:
                 return error_response(f"Excel conversion failed: {str(e)}")
 
-            # Send to API
             try:
                 api_response = requests.post(
                     'https://i3nqpfvs5fkdr72e4dm53ox7dq0tzvxc.lambda-url.sa-east-1.on.aws/',
@@ -32,11 +31,11 @@ def lambda_handler(event, context):
                     timeout=10
                 )
                 api_response.raise_for_status()
-                return success_response(api_response.json().get('id'))
+                
+                return api_response.content
+                    
             except requests.exceptions.RequestException as e:
                 return error_response(f"API request failed: {str(e)}")
-                #return error_response(f"API request failed: {str(converted_data)}")
-
 
     except Exception as e:
         return error_response(f"Unexpected error: {str(e)}")
