@@ -59,7 +59,9 @@ def excel_to_json(excel_path):
         'faixa': str,
         'voltage': str,
         'frequency': str
-    })
+    },
+    engine='openpyxl'
+)
     
     # Initialize JSON structure
     data = {
