@@ -24,7 +24,11 @@ from lxml import etree
 
 # parametros do programa
 __name__ = 'dccGenerator'
-__version__ = '0.8'
+__version__ = '0.9'
+
+# versao 0.9
+# 17/04/2024
+# incluida possibilidade de multiplos resultados
 
 # namespaces
 nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb.de/dcc', 'si': 'https://ptb.de/si'}
@@ -34,7 +38,6 @@ schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schem
 def lambda_handler(event, context):
     
     # recebe os dados de entrada por json
-    # TODO -> opcao de receber os dados por planilha Excel / ODS
     dados = json.loads(event["body"])
     dados['desc_chefe_div'] = 'Chefe da '+dados['nome_div']
     dados['desc_chefe_lab'] = 'Chefe do '+dados['nome_lab']
@@ -247,29 +250,32 @@ def dccGen(dcc_version, dados, declaracao) :
             count+=1
 
     # measurementResults block
+    # generalizado para a possibilidade de multiplos blocos de resultados
     measurementResults = etree.SubElement(dcc, etree.QName(nsmap['dcc'], 'measurementResults'))
     measurementResult = etree.SubElement(measurementResults, etree.QName(nsmap['dcc'], 'measurementResult'))
     campo_name(measurementResult,'Resultados e Declaração da Incerteza de Medição')
     # metodos
     usedMethods = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'usedMethods'))
 
+    # metodo de medicao
+    for i, metodo_medicao in enumerate(declaracao['metodo_medicao']) :
+        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
+        campo_name(usedMethod,'Método de Medição')
+        description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
+      
+        campo_texto(description,'content',metodo_medicao)
+
+        # equacao: campo opcional
+        if 'metodo_medicao_equation' in dados :
+            if i < len(dados['metodo_medicao_equation']) :
+                formula = etree.SubElement(description, etree.QName(nsmap['dcc'], 'formula'))
+                campo_texto(formula, 'latex', dados['metodo_medicao_equation'][i])
+
     # incerteza
     usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
     campo_name(usedMethod,'Declaração da Incerteza de Medição')
     description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
     campo_texto(description,'content',declaracao['incerteza'])
-
-    # metodo de medicao
-    usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
-    campo_name(usedMethod,'Método de Medição')
-    description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
-      
-    campo_texto(description,'content',declaracao['metodo_medicao'])
-
-    # equacao: campo opcional
-    if 'metodo_medicao_equation' in dados :
-        formula = etree.SubElement(description, etree.QName(nsmap['dcc'], 'formula'))
-        campo_texto(formula, 'latex', dados['metodo_medicao_equation'])
 
     # measuring equipments - rastreabilidade?
     measuringEquipments = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'measuringEquipments'))
@@ -319,78 +325,112 @@ def dccGen(dcc_version, dados, declaracao) :
         else : # caso contrario, texto
             text = etree.SubElement(data, etree.QName(nsmap['dcc'], 'text'))
             campo_texto(text, 'content', informacoes_pertinentes['text'])
-            
+    
+
+    # 22/04/2025
+    # mensurando como array
+    # possibilidade de mais de uma tabela de resultados
+
     indexes = {}
-    value = []
-    unc = []
-    k = []
+
+    # value, unc e k
+    # listas de listas, referenciados ao mensurando
+    value = {}
+    unc = {} 
+    k = {}
+    
+    # organizar nomes e unidades dos mensurandos e indices de forma indexada
+    mensurando_data = {}
+    indices_data = {}
+
+    # mensurando
+    if 'mensurando' in dados :
+        for i, linha in enumerate(dados['mensurando']) : 
+            indexes[linha['label']] = {}
+            value[linha['label']] = []
+            unc[linha['label']] = []
+            k[linha['label']] = []
+            # dados
+            mensurando_data[linha['label']] = linha
+            indices_data[linha['label']] = {}
 
     # indices auxiliares -> campo 'indexes'
     if 'indices' in dados :            
-            for index in dados['indices'] :
-                indexes[index] = []
+        #for index in dados['indices'] :
+        for i, linha in enumerate(dados['indices']) :
+            indexes[linha['mensurando']][linha['label']] = []
+            indices_data[linha['mensurando']][linha['label']] = linha
 
 
     # loop resultados
     for i, resultados in enumerate(dados['resultados']) :
     # criar vetores com os dados para usar nas si:realListXMLList
-        for index in indexes :
-            if index in resultados:
-                indexes[index].append(resultados[index])
+        for mensurando in indexes :
+            if resultados['mensurando'] == mensurando :
+                for index in indexes[mensurando] :
+                    if index in resultados:
+                        indexes[mensurando][index].append(resultados[index])
     
+                # resultados
+                value[mensurando].append(resultados['value'])                
 
-        value.append(resultados['value'])
-
-        # se incerteza esta em ppm, converter para valor absoluto
-        if (dados['unc_ppm']) :
-            unc.append("{:.2E}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
-        else :
-            unc.append(resultados['unc'])
-        k.append(resultados['k'])
+                # se incerteza esta em ppm, converter para valor absoluto
+                if (mensurando_data[mensurando]['unc_relativa']) :
+                    unc[mensurando].append("{:.2E}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
+                else :
+                    unc[mensurando].append(resultados['unc'])
+                
+                k[mensurando].append(resultados['k'])
 
     # results
     results = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'results'))
-    result = etree.SubElement(results, etree.QName(nsmap['dcc'], 'result'))
-    campo_name(result,'Resultados')
-    data = etree.SubElement(result, etree.QName(nsmap['dcc'], 'data'))
-    # list -> dados em formato de tabela, mesmo se for um ponto unico
-    lista = etree.SubElement(data, etree.QName(nsmap['dcc'], 'list'))
+    # loop resultados
+    for mensurando in mensurando_data :
 
-    for index in indexes :
-        label = None
-        # se for label, sem unidade
-        if 'unit' not in dados['indices'][index] :
-            label = ' '.join(indexes[index])
+        result = etree.SubElement(results, etree.QName(nsmap['dcc'], 'result'))
+        # usar o campo 'mensurando' para dar nome ao grupo results
+        campo_name(result, mensurando_data[mensurando]['name'])
+        data = etree.SubElement(result, etree.QName(nsmap['dcc'], 'data'))
+        # list -> dados em formato de tabela, mesmo se for um ponto unico
+        lista = etree.SubElement(data, etree.QName(nsmap['dcc'], 'list'))
+
+        for index in indexes[mensurando] :
+            label = None
+            # se for label, sem unidade
+            if 'unit' not in indices_data[mensurando][index] :
+                label = ' '.join(indexes[mensurando][index])
             
-        else :
-            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
-            campo_name(quantity,dados['indices'][index]['name'])
-            si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
-            si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
-            si_valueXMLList.text = ' '.join(indexes[index])
-            si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
-            si_unitXMLList.text = dados['indices'][index]['unit']
+            else :
+                quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+                campo_name(quantity,indices_data[mensurando][index]['name'])
+                si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
+                si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
+                si_valueXMLList.text = ' '.join(indexes[mensurando][index])
+                si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
+                si_unitXMLList.text = indices_data[mensurando][index]['unit']
 
 
-    # resultados de medicao
-    quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
-    campo_name(quantity, dados['mensurando'])
-    si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
+        # resultados de medicao
+        quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+        # nome da coluna de resultados 
+        campo_name(result, mensurando_data[mensurando]['col_name'])
+        si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
 
-    if label :
-        si_labelXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'labelXMLList'))
-        si_labelXMLList.text = label
+        if label :
+            si_labelXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'labelXMLList'))
+            si_labelXMLList.text = label
     
-    si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
-    si_valueXMLList.text = ' '.join(value)
-    si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
-    si_unitXMLList.text = dados['unit']
-    si_expandedUncXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'expandedUncXMLList'))
-    si_uncertaintyXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'uncertaintyXMLList'))
-    si_uncertaintyXMLList.text = ' '.join(unc)
-    si_coverageFactorXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageFactorXMLList'))
-    si_coverageFactorXMLList.text = ' '.join(k)
-    si_converageProbabilityXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageProbabilityXMLList'))
-    si_converageProbabilityXMLList.text = '0.9545'
+        si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
+        si_valueXMLList.text = ' '.join(value[mensurando])
+        si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
+        si_unitXMLList.text = mensurando_data[mensurando]['unit']
+        si_expandedUncXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'expandedUncXMLList'))
+        si_uncertaintyXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'uncertaintyXMLList'))
+        si_uncertaintyXMLList.text = ' '.join(unc[mensurando])
+        si_coverageFactorXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageFactorXMLList'))
+        si_coverageFactorXMLList.text = ' '.join(k[mensurando])
+        si_converageProbabilityXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageProbabilityXMLList'))
+        # parametro fixo, estudar se vale a pena ser ajustavel
+        si_converageProbabilityXMLList.text = '0.9545'
   
     return etree.tostring(dcc, encoding="utf-8", xml_declaration=True, pretty_print=True)
