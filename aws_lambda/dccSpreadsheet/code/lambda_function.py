@@ -46,10 +46,12 @@ def excel_to_json(excel_path):
         "Metadados Principais",
         "Cliente",
         "Informações Pertinentes",  # Updated sheet name
-        "Rastreabilidade",
-        "Resultados",
-        "Índices",
         "Declarações",
+        "Método de Medição",
+        "Mensurando",
+        "Rastreabilidade",
+        "Índices",
+        "Resultados",
         "Observações"
     ], dtype={
         'numero': str,
@@ -101,38 +103,47 @@ def excel_to_json(excel_path):
             for _, row in sheets["Rastreabilidade"].iterrows()
         ],
         "declaracao_incerteza": str(sheets["Declarações"].iloc[1,1]),
-        "metodo_medicao": str(sheets["Declarações"].iloc[2,1]),
-        "metodo_medicao_equation": str(sheets["Declarações"].iloc[3,1]),
-        "mensurando": str(sheets["Declarações"].iloc[4,1]),
-        "unit": str(sheets["Declarações"].iloc[5,1]),
-        "unc_ppm": sheets["Declarações"].iloc[6,1] == "Sim",
+
+        # metodo de medicao
+        "metodo_medicao": [
+            str(row['text']) 
+            for _, row in sheets["Método de Medição"].iterrows()
+        ],
+        "metodo_medicao_equation": [
+            str(row['equation']) 
+            for _, row in sheets["Método de Medição"].iterrows()
+        ] if 'equation' in sheets["Método de Medição"].columns else [],
+
+
+        # informacoes sobre o mensurando
+        "mensurando": [
+            {
+            "label": str(row['label']),
+            "name": str(row['name']),
+            "col_name": str(row['col_name']),
+            "unit": str(row['unit']),
+            "unc_relativa": row['unc_relativa'] == "Sim", 
+            }
+            for _, row in sheets["Mensurando"].iterrows()
+        ], 
+
 
         # Measurement indices
-        "indices": {
-            "faixa": {
-                "name": str(sheets["Índices"].iloc[0,1]),
-                "unit": str(sheets["Índices"].iloc[0,2])
-            },
-            "voltage": {
-                "name": str(sheets["Índices"].iloc[1,1]),
-                "unit": str(sheets["Índices"].iloc[1,2])
-            },
-            "frequency": {
-                "name": str(sheets["Índices"].iloc[2,1]),
-                "unit": str(sheets["Índices"].iloc[2,2])
+        "indices": [
+            {
+            "mensurando": str(row['mensurando']),
+            "label": str(row['label']),
+            "name": str(row['name']),
+            # Conditionally add "unit" if the column exists
+            **({"unit": str(row['unit'])} if 'unit' in sheets["Índices"].columns else {})
             }
-        },
+            for _, row in sheets["Índices"].iterrows()
+        ],        
+
         
         # Results with string preservation
         "resultados": [
-            {
-                "faixa": str(row['faixa']),
-                "voltage": str(row['voltage']),
-                "frequency": str(row['frequency']),
-                "value": str(row['value']),
-                "unc": str(row['unc']),
-                "k": str(row['k'])
-            }
+            {col: str(row[col]) for col in row.index}
             for _, row in sheets["Resultados"].iterrows()
         ],
         
