@@ -62,10 +62,12 @@
   ],
   "declaracao_incerteza": "As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.",
   "metodo_medicao": [
-    "As entradas de tensão do instrumento padrão e do instrumento sob calibração foram conectadas em paralelo através de um conector T cujo plano médio é o plano de referência para a calibração. Os resultados foram determinados a partir do valor médio de seis ciclos de medição para todos os pontos indicados. A calibração é realizada por comparação direta,  e o valor da diferença ac-dc do objeto é definido pela equação a seguir, onde U_dc é o valor absoluto médio de tensão contínua aplicada ao circuito, em regime de polarização direta e reversa, e U_ac  é o valor rms de tensão alternada que, quando aplicada ao circuito, produz uma leitura média de saída que corresponde à aplicação de U_dc."
+    "As entradas de tensão do instrumento padrão e do instrumento sob calibração foram conectadas em paralelo através de um conector T cujo plano médio é o plano de referência para a calibração. Os resultados foram determinados a partir do valor médio de seis ciclos de medição para todos os pontos indicados. A calibração é realizada por comparação direta,  e o valor da diferença ac-dc do objeto é definido pela equação a seguir, onde U_dc é o valor absoluto médio de tensão contínua aplicada ao circuito, em regime de polarização direta e reversa, e U_ac  é o valor rms de tensão alternada que, quando aplicada ao circuito, produz uma leitura média de saída que corresponde à aplicação de U_dc.",
+    "Método de medição 2 teste"
   ],
   "metodo_medicao_equation": [
-    "\\delta_u = \\dfrac{U_{ac} - U_{dc}}{U_{dc}}"
+    "\\delta_u = \\dfrac{U_{ac} - U_{dc}}{U_{dc}}",
+    "nan"
   ],
   "mensurando": [
     {
@@ -74,6 +76,13 @@
       "col_name": "\\delta_u",
       "unit": "\\micro\\volt\\volt\\tothe{-1}",
       "unc_relativa": false
+    },
+    {
+      "label": "rstdc",
+      "name": "Resistência em Corrente Contínua",
+      "col_name": "V.m.",
+      "unit": "\\ohm",
+      "unc_relativa": true
     }
   ],
   "indices": [
@@ -94,9 +103,25 @@
       "label": "frequency",
       "name": "Frequência",
       "unit": "\\kilo\\hertz"
+    },
+    {
+      "mensurando": "rstdc",
+      "label": "current",
+      "name": "Corrente",
+      "unit": "\\ampere"
     }
   ],
   "resultados": [
+    {
+      "mensurando": "rstdc",
+      "faixa": "nan",
+      "voltage": "nan",
+      "frequency": "nan",
+      "value": "1.0002341",
+      "unc": "0.14",
+      "k": "2",
+      "current": "1.0"
+    },
     {
       "mensurando": "acdc",
       "faixa": "0.022",
@@ -104,7 +129,8 @@
       "frequency": "0.01",
       "value": "-280",
       "unc": "44",
-      "k": "2.13"
+      "k": "2.13",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -113,7 +139,8 @@
       "frequency": "0.02",
       "value": "3",
       "unc": "37",
-      "k": "2.28"
+      "k": "2.28",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -122,7 +149,8 @@
       "frequency": "0.04",
       "value": "38",
       "unc": "36",
-      "k": "2.21"
+      "k": "2.21",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -131,7 +159,8 @@
       "frequency": "0.055",
       "value": "74",
       "unc": "51",
-      "k": "2.65"
+      "k": "2.65",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -140,7 +169,8 @@
       "frequency": "0.06",
       "value": "68",
       "unc": "37",
-      "k": "2.32"
+      "k": "2.32",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -149,7 +179,8 @@
       "frequency": "0.4",
       "value": "48",
       "unc": "45",
-      "k": "2.23"
+      "k": "2.23",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -158,7 +189,8 @@
       "frequency": "1",
       "value": "4",
       "unc": "44",
-      "k": "2.65"
+      "k": "2.65",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -167,7 +199,8 @@
       "frequency": "10",
       "value": "16",
       "unc": "53",
-      "k": "2.65"
+      "k": "2.65",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -176,7 +209,8 @@
       "frequency": "20",
       "value": "-23",
       "unc": "45",
-      "k": "2.65"
+      "k": "2.65",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -185,7 +219,8 @@
       "frequency": "50",
       "value": "-24",
       "unc": "51",
-      "k": "2.17"
+      "k": "2.17",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -194,7 +229,8 @@
       "frequency": "100",
       "value": "-28",
       "unc": "68",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -203,7 +239,8 @@
       "frequency": "500",
       "value": "51",
       "unc": "78",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -212,7 +249,8 @@
       "frequency": "1000",
       "value": "41",
       "unc": "121",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -221,7 +259,8 @@
       "frequency": "0.01",
       "value": "-304",
       "unc": "22",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -230,7 +269,8 @@
       "frequency": "0.02",
       "value": "-2",
       "unc": "28",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -239,7 +279,8 @@
       "frequency": "0.04",
       "value": "72",
       "unc": "27",
-      "k": "2.14"
+      "k": "2.14",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -248,7 +289,8 @@
       "frequency": "0.055",
       "value": "68",
       "unc": "25",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -257,7 +299,8 @@
       "frequency": "0.06",
       "value": "70",
       "unc": "20",
-      "k": "2.02"
+      "k": "2.02",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -266,7 +309,8 @@
       "frequency": "0.4",
       "value": "57",
       "unc": "21",
-      "k": "2.08"
+      "k": "2.08",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -275,7 +319,8 @@
       "frequency": "1",
       "value": "15",
       "unc": "23",
-      "k": "2.02"
+      "k": "2.02",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -284,7 +329,8 @@
       "frequency": "10",
       "value": "11",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -293,7 +339,8 @@
       "frequency": "20",
       "value": "-22",
       "unc": "23",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -302,7 +349,8 @@
       "frequency": "50",
       "value": "-19",
       "unc": "29",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -311,7 +359,8 @@
       "frequency": "100",
       "value": "-22",
       "unc": "61",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -320,7 +369,8 @@
       "frequency": "500",
       "value": "40",
       "unc": "71",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -329,7 +379,8 @@
       "frequency": "1000",
       "value": "28",
       "unc": "111",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -338,7 +389,8 @@
       "frequency": "0.01",
       "value": "-262",
       "unc": "20",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -347,7 +399,8 @@
       "frequency": "0.02",
       "value": "20",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -356,7 +409,8 @@
       "frequency": "0.04",
       "value": "66",
       "unc": "20",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -365,7 +419,8 @@
       "frequency": "0.055",
       "value": "70",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -374,7 +429,8 @@
       "frequency": "0.06",
       "value": "81",
       "unc": "18",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -383,7 +439,8 @@
       "frequency": "0.4",
       "value": "59",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -392,7 +449,8 @@
       "frequency": "1",
       "value": "14",
       "unc": "20",
-      "k": "2.02"
+      "k": "2.02",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -401,7 +459,8 @@
       "frequency": "10",
       "value": "3",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -410,7 +469,8 @@
       "frequency": "20",
       "value": "-23",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -419,7 +479,8 @@
       "frequency": "50",
       "value": "-18",
       "unc": "25",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -428,7 +489,8 @@
       "frequency": "100",
       "value": "-24",
       "unc": "54",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -437,7 +499,8 @@
       "frequency": "500",
       "value": "39",
       "unc": "64",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -446,7 +509,8 @@
       "frequency": "1000",
       "value": "16",
       "unc": "102",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -455,7 +519,8 @@
       "frequency": "0.01",
       "value": "-101",
       "unc": "16",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -464,7 +529,8 @@
       "frequency": "0.02",
       "value": "56",
       "unc": "16",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -473,7 +539,8 @@
       "frequency": "0.04",
       "value": "69",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -482,7 +549,8 @@
       "frequency": "0.055",
       "value": "71",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -491,7 +559,8 @@
       "frequency": "0.06",
       "value": "69",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -500,7 +569,8 @@
       "frequency": "0.4",
       "value": "55",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -509,7 +579,8 @@
       "frequency": "1",
       "value": "13",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -518,7 +589,8 @@
       "frequency": "10",
       "value": "0",
       "unc": "18",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -527,7 +599,8 @@
       "frequency": "20",
       "value": "-22",
       "unc": "17",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -536,7 +609,8 @@
       "frequency": "50",
       "value": "-22",
       "unc": "18",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -545,7 +619,8 @@
       "frequency": "100",
       "value": "-28",
       "unc": "48",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -554,7 +629,8 @@
       "frequency": "500",
       "value": "10",
       "unc": "57",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -563,7 +639,8 @@
       "frequency": "1000",
       "value": "-101",
       "unc": "92",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -572,7 +649,8 @@
       "frequency": "0.01",
       "value": "-126",
       "unc": "16",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -581,7 +659,8 @@
       "frequency": "0.02",
       "value": "-14",
       "unc": "16",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -590,7 +669,8 @@
       "frequency": "0.04",
       "value": "20",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -599,7 +679,8 @@
       "frequency": "0.055",
       "value": "21",
       "unc": "14",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -608,7 +689,8 @@
       "frequency": "0.06",
       "value": "25",
       "unc": "14",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -617,7 +699,8 @@
       "frequency": "0.4",
       "value": "15",
       "unc": "14",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -626,7 +709,8 @@
       "frequency": "1",
       "value": "5",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -635,7 +719,8 @@
       "frequency": "10",
       "value": "-5",
       "unc": "18",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -644,7 +729,8 @@
       "frequency": "20",
       "value": "3",
       "unc": "17",
-      "k": "2.03"
+      "k": "2.03",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -653,7 +739,8 @@
       "frequency": "50",
       "value": "21",
       "unc": "18",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -662,7 +749,8 @@
       "frequency": "100",
       "value": "37",
       "unc": "40",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -671,7 +759,8 @@
       "frequency": "500",
       "value": "303",
       "unc": "49",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -680,7 +769,8 @@
       "frequency": "1000",
       "value": "996",
       "unc": "85",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -689,7 +779,8 @@
       "frequency": "0.01",
       "value": "-168",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -698,7 +789,8 @@
       "frequency": "0.02",
       "value": "-12",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -707,7 +799,8 @@
       "frequency": "0.04",
       "value": "16",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -716,7 +809,8 @@
       "frequency": "0.055",
       "value": "19",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -725,7 +819,8 @@
       "frequency": "0.06",
       "value": "19",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -734,7 +829,8 @@
       "frequency": "0.4",
       "value": "11",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -743,7 +839,8 @@
       "frequency": "1",
       "value": "9",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -752,7 +849,8 @@
       "frequency": "10",
       "value": "-12",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -761,7 +859,8 @@
       "frequency": "20",
       "value": "0",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -770,7 +869,8 @@
       "frequency": "50",
       "value": "12",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -779,7 +879,8 @@
       "frequency": "100",
       "value": "39",
       "unc": "30",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -788,7 +889,8 @@
       "frequency": "500",
       "value": "294",
       "unc": "47",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -797,7 +899,8 @@
       "frequency": "1000",
       "value": "976",
       "unc": "84",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -806,7 +909,8 @@
       "frequency": "0.01",
       "value": "-129",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -815,7 +919,8 @@
       "frequency": "0.02",
       "value": "-6",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -824,7 +929,8 @@
       "frequency": "0.04",
       "value": "13",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -833,7 +939,8 @@
       "frequency": "0.055",
       "value": "15",
       "unc": "10",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -842,7 +949,8 @@
       "frequency": "0.06",
       "value": "18",
       "unc": "10",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -851,7 +959,8 @@
       "frequency": "0.4",
       "value": "13",
       "unc": "10",
-      "k": "2.03"
+      "k": "2.03",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -860,7 +969,8 @@
       "frequency": "1",
       "value": "14",
       "unc": "10",
-      "k": "2.06"
+      "k": "2.06",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -869,7 +979,8 @@
       "frequency": "10",
       "value": "-10",
       "unc": "10",
-      "k": "2.03"
+      "k": "2.03",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -878,7 +989,8 @@
       "frequency": "20",
       "value": "1",
       "unc": "10",
-      "k": "2.03"
+      "k": "2.03",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -887,7 +999,8 @@
       "frequency": "50",
       "value": "14",
       "unc": "10",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -896,7 +1009,8 @@
       "frequency": "100",
       "value": "36",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -905,7 +1019,8 @@
       "frequency": "500",
       "value": "271",
       "unc": "34",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -914,7 +1029,8 @@
       "frequency": "1000",
       "value": "900",
       "unc": "65",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -923,7 +1039,8 @@
       "frequency": "0.01",
       "value": "-41",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -932,7 +1049,8 @@
       "frequency": "0.02",
       "value": "15",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -941,7 +1059,8 @@
       "frequency": "0.04",
       "value": "19.2",
       "unc": "8.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -950,7 +1069,8 @@
       "frequency": "0.055",
       "value": "18.2",
       "unc": "8.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -959,7 +1079,8 @@
       "frequency": "0.06",
       "value": "17.5",
       "unc": "5.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -968,7 +1089,8 @@
       "frequency": "0.4",
       "value": "12.7",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -977,7 +1099,8 @@
       "frequency": "1",
       "value": "15.0",
       "unc": "3.3",
-      "k": "2.02"
+      "k": "2.02",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -986,7 +1109,8 @@
       "frequency": "10",
       "value": "-10.1",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -995,7 +1119,8 @@
       "frequency": "20",
       "value": "-0.3",
       "unc": "5.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1004,7 +1129,8 @@
       "frequency": "50",
       "value": "12.2",
       "unc": "7.9",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1013,7 +1139,8 @@
       "frequency": "100",
       "value": "29",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1022,7 +1149,8 @@
       "frequency": "500",
       "value": "193",
       "unc": "26",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1031,7 +1159,8 @@
       "frequency": "1000",
       "value": "653",
       "unc": "52",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1040,7 +1169,8 @@
       "frequency": "0.01",
       "value": "37",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1049,7 +1179,8 @@
       "frequency": "0.02",
       "value": "37",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1058,7 +1189,8 @@
       "frequency": "0.04",
       "value": "22.8",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1067,7 +1199,8 @@
       "frequency": "0.055",
       "value": "19.4",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1076,7 +1209,8 @@
       "frequency": "0.06",
       "value": "18.4",
       "unc": "5.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1085,7 +1219,8 @@
       "frequency": "0.4",
       "value": "11.3",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1094,7 +1229,8 @@
       "frequency": "1",
       "value": "13.9",
       "unc": "3.5",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1103,7 +1239,8 @@
       "frequency": "10",
       "value": "-12.2",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1112,7 +1249,8 @@
       "frequency": "20",
       "value": "-2.7",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1121,7 +1259,8 @@
       "frequency": "50",
       "value": "4.4",
       "unc": "7.9",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1130,7 +1269,8 @@
       "frequency": "100",
       "value": "10",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1139,7 +1279,8 @@
       "frequency": "500",
       "value": "-43",
       "unc": "26",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1148,7 +1289,8 @@
       "frequency": "1000",
       "value": "14",
       "unc": "52",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1157,7 +1299,8 @@
       "frequency": "0.01",
       "value": "-147",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1166,7 +1309,8 @@
       "frequency": "0.02",
       "value": "-23",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1175,7 +1319,8 @@
       "frequency": "0.04",
       "value": "0.9",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1184,7 +1329,8 @@
       "frequency": "0.055",
       "value": "4.1",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1193,7 +1339,8 @@
       "frequency": "0.06",
       "value": "4.7",
       "unc": "5.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1202,7 +1349,8 @@
       "frequency": "0.4",
       "value": "6.0",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1211,7 +1359,8 @@
       "frequency": "1",
       "value": "5.2",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1220,7 +1369,8 @@
       "frequency": "10",
       "value": "-15.8",
       "unc": "5.5",
-      "k": "2.15"
+      "k": "2.15",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1229,7 +1379,8 @@
       "frequency": "20",
       "value": "-2.4",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1238,7 +1389,8 @@
       "frequency": "50",
       "value": "13.5",
       "unc": "7.9",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1247,7 +1399,8 @@
       "frequency": "100",
       "value": "33",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1256,7 +1409,8 @@
       "frequency": "500",
       "value": "105",
       "unc": "26",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1265,7 +1419,8 @@
       "frequency": "1000",
       "value": "273",
       "unc": "52",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1274,7 +1429,8 @@
       "frequency": "0.01",
       "value": "-120.6",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1283,7 +1439,8 @@
       "frequency": "0.02",
       "value": "-15.7",
       "unc": "7.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1292,7 +1449,8 @@
       "frequency": "0.04",
       "value": "2.4",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1301,7 +1459,8 @@
       "frequency": "0.055",
       "value": "5.1",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1310,7 +1469,8 @@
       "frequency": "0.06",
       "value": "4.6",
       "unc": "3.9",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1319,7 +1479,8 @@
       "frequency": "0.4",
       "value": "4.4",
       "unc": "2.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1328,7 +1489,8 @@
       "frequency": "1",
       "value": "4.2",
       "unc": "2.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1337,7 +1499,8 @@
       "frequency": "10",
       "value": "-16.2",
       "unc": "3.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1346,7 +1509,8 @@
       "frequency": "20",
       "value": "-4.3",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1355,7 +1519,8 @@
       "frequency": "50",
       "value": "10.8",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1364,7 +1529,8 @@
       "frequency": "100",
       "value": "29.3",
       "unc": "6.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1373,7 +1539,8 @@
       "frequency": "500",
       "value": "90",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1382,7 +1549,8 @@
       "frequency": "1000",
       "value": "225",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1391,7 +1559,8 @@
       "frequency": "0.01",
       "value": "-12.3",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1400,7 +1569,8 @@
       "frequency": "0.02",
       "value": "8.0",
       "unc": "5.9",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1409,7 +1579,8 @@
       "frequency": "0.04",
       "value": "6.4",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1418,7 +1589,8 @@
       "frequency": "0.055",
       "value": "5.8",
       "unc": "4.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1427,7 +1599,8 @@
       "frequency": "0.06",
       "value": "5.2",
       "unc": "3.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1436,7 +1609,8 @@
       "frequency": "0.4",
       "value": "2.3",
       "unc": "2.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1445,7 +1619,8 @@
       "frequency": "1",
       "value": "1.9",
       "unc": "2.5",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1454,7 +1629,8 @@
       "frequency": "10",
       "value": "-18.1",
       "unc": "3.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1463,7 +1639,8 @@
       "frequency": "20",
       "value": "-6.2",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1472,7 +1649,8 @@
       "frequency": "50",
       "value": "9.1",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1481,7 +1659,8 @@
       "frequency": "100",
       "value": "26.5",
       "unc": "6.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1490,7 +1669,8 @@
       "frequency": "500",
       "value": "54",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1499,7 +1679,8 @@
       "frequency": "1000",
       "value": "95",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1508,7 +1689,8 @@
       "frequency": "0.01",
       "value": "37.6",
       "unc": "6.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1517,7 +1699,8 @@
       "frequency": "0.02",
       "value": "21.2",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1526,7 +1709,8 @@
       "frequency": "0.04",
       "value": "8.9",
       "unc": "4.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1535,7 +1719,8 @@
       "frequency": "0.055",
       "value": "6.3",
       "unc": "4.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1544,7 +1729,8 @@
       "frequency": "0.06",
       "value": "6.2",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1553,7 +1739,8 @@
       "frequency": "0.4",
       "value": "1.1",
       "unc": "2.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1562,7 +1749,8 @@
       "frequency": "1",
       "value": "1.9",
       "unc": "2.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1571,7 +1759,8 @@
       "frequency": "10",
       "value": "-19.1",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1580,7 +1769,8 @@
       "frequency": "20",
       "value": "-6.7",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1589,7 +1779,8 @@
       "frequency": "50",
       "value": "8.4",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1598,7 +1789,8 @@
       "frequency": "100",
       "value": "25.9",
       "unc": "6.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1607,7 +1799,8 @@
       "frequency": "500",
       "value": "35",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1616,7 +1809,8 @@
       "frequency": "1000",
       "value": "24",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1625,7 +1819,8 @@
       "frequency": "0.01",
       "value": "91.0",
       "unc": "5.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1634,7 +1829,8 @@
       "frequency": "0.02",
       "value": "35.4",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1643,7 +1839,8 @@
       "frequency": "0.04",
       "value": "10.7",
       "unc": "3.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1652,7 +1849,8 @@
       "frequency": "0.055",
       "value": "6.8",
       "unc": "3.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1661,7 +1859,8 @@
       "frequency": "0.06",
       "value": "5.8",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1670,7 +1869,8 @@
       "frequency": "0.4",
       "value": "0.2",
       "unc": "2.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1679,7 +1879,8 @@
       "frequency": "1",
       "value": "-0.1",
       "unc": "2.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1688,7 +1889,8 @@
       "frequency": "10",
       "value": "-19.7",
       "unc": "3.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1697,7 +1899,8 @@
       "frequency": "20",
       "value": "-7.5",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1706,7 +1909,8 @@
       "frequency": "50",
       "value": "7.8",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1715,7 +1919,8 @@
       "frequency": "100",
       "value": "24.8",
       "unc": "6.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1724,7 +1929,8 @@
       "frequency": "500",
       "value": "18",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1733,7 +1939,8 @@
       "frequency": "1000",
       "value": "-38",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1742,7 +1949,8 @@
       "frequency": "0.01",
       "value": "68.5",
       "unc": "2.8",
-      "k": "2.03"
+      "k": "2.03",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1751,7 +1959,8 @@
       "frequency": "0.02",
       "value": "9.4",
       "unc": "2.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1760,7 +1969,8 @@
       "frequency": "0.04",
       "value": "1.1",
       "unc": "1.7",
-      "k": "2.11"
+      "k": "2.11",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1769,7 +1979,8 @@
       "frequency": "0.055",
       "value": "0.2",
       "unc": "1.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1778,7 +1989,8 @@
       "frequency": "0.06",
       "value": "-0.8",
       "unc": "2.7",
-      "k": "2.52"
+      "k": "2.52",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1787,7 +1999,8 @@
       "frequency": "0.4",
       "value": "-0.6",
       "unc": "1.7",
-      "k": "2.13"
+      "k": "2.13",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1796,7 +2009,8 @@
       "frequency": "1",
       "value": "-2.2",
       "unc": "2.8",
-      "k": "2.37"
+      "k": "2.37",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1805,7 +2019,8 @@
       "frequency": "10",
       "value": "0.1",
       "unc": "2.3",
-      "k": "2.07"
+      "k": "2.07",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1814,7 +2029,8 @@
       "frequency": "20",
       "value": "2.8",
       "unc": "2.8",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1823,7 +2039,8 @@
       "frequency": "50",
       "value": "10.4",
       "unc": "4.0",
-      "k": "2.13"
+      "k": "2.13",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1832,7 +2049,8 @@
       "frequency": "100",
       "value": "21.3",
       "unc": "5.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1841,7 +2059,8 @@
       "frequency": "500",
       "value": "51",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1850,7 +2069,8 @@
       "frequency": "1000",
       "value": "22",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1859,7 +2079,8 @@
       "frequency": "0.01",
       "value": "93.5",
       "unc": "2.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1868,7 +2089,8 @@
       "frequency": "0.02",
       "value": "17.7",
       "unc": "2.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1877,7 +2099,8 @@
       "frequency": "0.04",
       "value": "2.3",
       "unc": "1.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1886,7 +2109,8 @@
       "frequency": "0.055",
       "value": "1.2",
       "unc": "1.8",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1895,7 +2119,8 @@
       "frequency": "0.06",
       "value": "-1.8",
       "unc": "3.3",
-      "k": "2.87"
+      "k": "2.87",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1904,7 +2129,8 @@
       "frequency": "0.4",
       "value": "-2.0",
       "unc": "1.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1913,7 +2139,8 @@
       "frequency": "1",
       "value": "-1.3",
       "unc": "1.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1922,7 +2149,8 @@
       "frequency": "10",
       "value": "-0.4",
       "unc": "2.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1931,7 +2159,8 @@
       "frequency": "20",
       "value": "1.8",
       "unc": "2.6",
-      "k": "2.04"
+      "k": "2.04",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1940,7 +2169,8 @@
       "frequency": "50",
       "value": "10.8",
       "unc": "3.2",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1949,7 +2179,8 @@
       "frequency": "100",
       "value": "23.1",
       "unc": "5.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1958,7 +2189,8 @@
       "frequency": "500",
       "value": "52",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1967,7 +2199,8 @@
       "frequency": "1000",
       "value": "25",
       "unc": "19",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1976,7 +2209,8 @@
       "frequency": "0.01",
       "value": "247.0",
       "unc": "4.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1985,7 +2219,8 @@
       "frequency": "0.02",
       "value": "52.3",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -1994,7 +2229,8 @@
       "frequency": "0.04",
       "value": "8.3",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2003,7 +2239,8 @@
       "frequency": "0.055",
       "value": "1.2",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2012,7 +2249,8 @@
       "frequency": "0.06",
       "value": "-0.3",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2021,7 +2259,8 @@
       "frequency": "0.4",
       "value": "-6.7",
       "unc": "2.1",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2030,7 +2269,8 @@
       "frequency": "1",
       "value": "-5.8",
       "unc": "2.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2039,7 +2279,8 @@
       "frequency": "10",
       "value": "-3.4",
       "unc": "2.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2048,7 +2289,8 @@
       "frequency": "20",
       "value": "-0.8",
       "unc": "2.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2057,7 +2299,8 @@
       "frequency": "50",
       "value": "8.4",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2066,7 +2309,8 @@
       "frequency": "100",
       "value": "21.1",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2075,7 +2319,8 @@
       "frequency": "500",
       "value": "51",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2084,7 +2329,8 @@
       "frequency": "1000",
       "value": "21",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2093,7 +2339,8 @@
       "frequency": "0.01",
       "value": "66.2",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2102,7 +2349,8 @@
       "frequency": "0.02",
       "value": "10.3",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2111,7 +2359,8 @@
       "frequency": "0.04",
       "value": "2.4",
       "unc": "4.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2120,7 +2369,8 @@
       "frequency": "0.055",
       "value": "1.4",
       "unc": "4.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2129,7 +2379,8 @@
       "frequency": "0.06",
       "value": "1.0",
       "unc": "4.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2138,7 +2389,8 @@
       "frequency": "0.4",
       "value": "-0.7",
       "unc": "2.9",
-      "k": "2.02"
+      "k": "2.02",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2147,7 +2399,8 @@
       "frequency": "1",
       "value": "-0.6",
       "unc": "2.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2156,7 +2409,8 @@
       "frequency": "10",
       "value": "0.6",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2165,7 +2419,8 @@
       "frequency": "20",
       "value": "3.3",
       "unc": "3.9",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2174,7 +2429,8 @@
       "frequency": "50",
       "value": "11.0",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2183,7 +2439,8 @@
       "frequency": "100",
       "value": "16.6",
       "unc": "5.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2192,7 +2449,8 @@
       "frequency": "500",
       "value": "22",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2201,7 +2459,8 @@
       "frequency": "1000",
       "value": "-16",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2210,7 +2469,8 @@
       "frequency": "0.01",
       "value": "95.6",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2219,7 +2479,8 @@
       "frequency": "0.02",
       "value": "19.2",
       "unc": "4.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2228,7 +2489,8 @@
       "frequency": "0.04",
       "value": "4.2",
       "unc": "4.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2237,7 +2499,8 @@
       "frequency": "0.055",
       "value": "2.2",
       "unc": "4.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2246,7 +2509,8 @@
       "frequency": "0.06",
       "value": "1.7",
       "unc": "4.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2255,7 +2519,8 @@
       "frequency": "0.4",
       "value": "0.2",
       "unc": "2.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2264,7 +2529,8 @@
       "frequency": "1",
       "value": "0.1",
       "unc": "2.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2273,7 +2539,8 @@
       "frequency": "10",
       "value": "1.9",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2282,7 +2549,8 @@
       "frequency": "20",
       "value": "3.6",
       "unc": "3.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2291,7 +2559,8 @@
       "frequency": "50",
       "value": "10.2",
       "unc": "4.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2300,7 +2569,8 @@
       "frequency": "100",
       "value": "17.2",
       "unc": "5.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2309,7 +2579,8 @@
       "frequency": "500",
       "value": "22",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2318,7 +2589,8 @@
       "frequency": "1000",
       "value": "-15",
       "unc": "21",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2327,7 +2599,8 @@
       "frequency": "0.01",
       "value": "206.1",
       "unc": "5.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2336,7 +2609,8 @@
       "frequency": "0.02",
       "value": "45.6",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2345,7 +2619,8 @@
       "frequency": "0.04",
       "value": "10.8",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2354,7 +2629,8 @@
       "frequency": "0.055",
       "value": "6.0",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2363,7 +2639,8 @@
       "frequency": "0.06",
       "value": "5.4",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2372,7 +2649,8 @@
       "frequency": "0.4",
       "value": "0.7",
       "unc": "3.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2381,7 +2659,8 @@
       "frequency": "1",
       "value": "0.8",
       "unc": "3.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2390,7 +2669,8 @@
       "frequency": "10",
       "value": "3.2",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2399,7 +2679,8 @@
       "frequency": "20",
       "value": "5.4",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2408,7 +2689,8 @@
       "frequency": "50",
       "value": "11.9",
       "unc": "5.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2417,7 +2699,8 @@
       "frequency": "100",
       "value": "17.6",
       "unc": "6.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2426,7 +2709,8 @@
       "frequency": "500",
       "value": "22",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2435,7 +2719,8 @@
       "frequency": "1000",
       "value": "-18",
       "unc": "23",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2444,7 +2729,8 @@
       "frequency": "0.01",
       "value": "255.4",
       "unc": "5.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2453,7 +2739,8 @@
       "frequency": "0.02",
       "value": "59.8",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2462,7 +2749,8 @@
       "frequency": "0.04",
       "value": "15.2",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2471,7 +2759,8 @@
       "frequency": "0.055",
       "value": "8.6",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2480,7 +2769,8 @@
       "frequency": "0.06",
       "value": "7.2",
       "unc": "4.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2489,7 +2779,8 @@
       "frequency": "0.4",
       "value": "1.1",
       "unc": "3.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2498,7 +2789,8 @@
       "frequency": "1",
       "value": "1.1",
       "unc": "3.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2507,7 +2799,8 @@
       "frequency": "10",
       "value": "4.0",
       "unc": "3.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2516,7 +2809,8 @@
       "frequency": "20",
       "value": "5.9",
       "unc": "4.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2525,7 +2819,8 @@
       "frequency": "50",
       "value": "12.5",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2534,7 +2829,8 @@
       "frequency": "100",
       "value": "17.8",
       "unc": "6.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2543,7 +2839,8 @@
       "frequency": "500",
       "value": "22",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2552,7 +2849,8 @@
       "frequency": "1000",
       "value": "-18",
       "unc": "23",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2561,7 +2859,8 @@
       "frequency": "0.01",
       "value": "57.3",
       "unc": "5.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2570,7 +2869,8 @@
       "frequency": "0.02",
       "value": "8.4",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2579,7 +2879,8 @@
       "frequency": "0.04",
       "value": "2.1",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2588,7 +2889,8 @@
       "frequency": "0.055",
       "value": "0.6",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2597,7 +2899,8 @@
       "frequency": "0.06",
       "value": "0.9",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2606,7 +2909,8 @@
       "frequency": "0.4",
       "value": "0.1",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2615,7 +2919,8 @@
       "frequency": "1",
       "value": "0.8",
       "unc": "3.3",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2624,7 +2929,8 @@
       "frequency": "10",
       "value": "1.1",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2633,7 +2939,8 @@
       "frequency": "20",
       "value": "5.6",
       "unc": "5.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2642,7 +2949,8 @@
       "frequency": "50",
       "value": "10.9",
       "unc": "6.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2651,7 +2959,8 @@
       "frequency": "100",
       "value": "18.3",
       "unc": "9.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2660,7 +2969,8 @@
       "frequency": "500",
       "value": "36",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2669,7 +2979,8 @@
       "frequency": "1000",
       "value": "33",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2678,7 +2989,8 @@
       "frequency": "0.01",
       "value": "78.6",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2687,7 +2999,8 @@
       "frequency": "0.02",
       "value": "13.2",
       "unc": "3.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2696,7 +3009,8 @@
       "frequency": "0.04",
       "value": "3.5",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2705,7 +3019,8 @@
       "frequency": "0.055",
       "value": "2.7",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2714,7 +3029,8 @@
       "frequency": "0.06",
       "value": "1.3",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2723,7 +3039,8 @@
       "frequency": "0.4",
       "value": "0.4",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2732,7 +3049,8 @@
       "frequency": "1",
       "value": "0.4",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2741,7 +3059,8 @@
       "frequency": "10",
       "value": "1.6",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2750,7 +3069,8 @@
       "frequency": "20",
       "value": "5.2",
       "unc": "5.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2759,7 +3079,8 @@
       "frequency": "50",
       "value": "12.1",
       "unc": "6.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2768,7 +3089,8 @@
       "frequency": "100",
       "value": "18.7",
       "unc": "9.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2777,7 +3099,8 @@
       "frequency": "500",
       "value": "35",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2786,7 +3109,8 @@
       "frequency": "1000",
       "value": "32",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2795,7 +3119,8 @@
       "frequency": "0.01",
       "value": "94.6",
       "unc": "5.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2804,7 +3129,8 @@
       "frequency": "0.02",
       "value": "19.0",
       "unc": "3.2",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2813,7 +3139,8 @@
       "frequency": "0.04",
       "value": "5.1",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2822,7 +3149,8 @@
       "frequency": "0.055",
       "value": "4.2",
       "unc": "3.3",
-      "k": "2.01"
+      "k": "2.01",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2831,7 +3159,8 @@
       "frequency": "0.06",
       "value": "3.0",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2840,7 +3169,8 @@
       "frequency": "0.4",
       "value": "1.4",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2849,7 +3179,8 @@
       "frequency": "1",
       "value": "0.8",
       "unc": "3.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2858,7 +3189,8 @@
       "frequency": "10",
       "value": "1.6",
       "unc": "5.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2867,7 +3199,8 @@
       "frequency": "20",
       "value": "5.3",
       "unc": "5.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2876,7 +3209,8 @@
       "frequency": "50",
       "value": "11.8",
       "unc": "6.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2885,7 +3219,8 @@
       "frequency": "100",
       "value": "18.7",
       "unc": "9.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2894,7 +3229,8 @@
       "frequency": "500",
       "value": "35",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2903,7 +3239,8 @@
       "frequency": "1000",
       "value": "32",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2912,7 +3249,8 @@
       "frequency": "0.01",
       "value": "257.8",
       "unc": "8.9",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2921,7 +3259,8 @@
       "frequency": "0.02",
       "value": "62.7",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2930,7 +3269,8 @@
       "frequency": "0.04",
       "value": "18.1",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2939,7 +3279,8 @@
       "frequency": "0.055",
       "value": "11.4",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2948,7 +3289,8 @@
       "frequency": "0.06",
       "value": "9.9",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2957,7 +3299,8 @@
       "frequency": "0.4",
       "value": "5.1",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2966,7 +3309,8 @@
       "frequency": "1",
       "value": "4.4",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2975,7 +3319,8 @@
       "frequency": "10",
       "value": "5.3",
       "unc": "7.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2984,7 +3329,8 @@
       "frequency": "20",
       "value": "8.7",
       "unc": "7.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -2993,7 +3339,8 @@
       "frequency": "50",
       "value": "15",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3002,7 +3349,8 @@
       "frequency": "100",
       "value": "22",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3011,7 +3359,8 @@
       "frequency": "500",
       "value": "36",
       "unc": "17",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3020,7 +3369,8 @@
       "frequency": "1000",
       "value": "32",
       "unc": "27",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3029,7 +3379,8 @@
       "frequency": "0.01",
       "value": "66.5",
       "unc": "9.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3038,7 +3389,8 @@
       "frequency": "0.02",
       "value": "11.2",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3047,7 +3399,8 @@
       "frequency": "0.04",
       "value": "2.6",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3056,7 +3409,8 @@
       "frequency": "0.055",
       "value": "1.4",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3065,7 +3419,8 @@
       "frequency": "0.06",
       "value": "1.5",
       "unc": "6.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3074,7 +3429,8 @@
       "frequency": "0.4",
       "value": "1.1",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3083,7 +3439,8 @@
       "frequency": "1",
       "value": "0.8",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3092,7 +3449,8 @@
       "frequency": "10",
       "value": "1.4",
       "unc": "7.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3101,7 +3459,8 @@
       "frequency": "20",
       "value": "4.8",
       "unc": "7.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3110,7 +3469,8 @@
       "frequency": "50",
       "value": "12",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3119,7 +3479,8 @@
       "frequency": "100",
       "value": "22",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3128,7 +3489,8 @@
       "frequency": "500",
       "value": "130",
       "unc": "17",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3137,7 +3499,8 @@
       "frequency": "1000",
       "value": "36",
       "unc": "27",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3146,7 +3509,8 @@
       "frequency": "0.01",
       "value": "95.3",
       "unc": "9.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3155,7 +3519,8 @@
       "frequency": "0.02",
       "value": "19.4",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3164,7 +3529,8 @@
       "frequency": "0.04",
       "value": "6.0",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3173,7 +3539,8 @@
       "frequency": "0.055",
       "value": "4.6",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3182,7 +3549,8 @@
       "frequency": "0.06",
       "value": "3.7",
       "unc": "6.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3191,7 +3559,8 @@
       "frequency": "0.4",
       "value": "1.8",
       "unc": "6.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3200,7 +3569,8 @@
       "frequency": "1",
       "value": "1.2",
       "unc": "6.6",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3209,7 +3579,8 @@
       "frequency": "10",
       "value": "1.8",
       "unc": "7.1",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3218,7 +3589,8 @@
       "frequency": "20",
       "value": "5.8",
       "unc": "7.5",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3227,7 +3599,8 @@
       "frequency": "50",
       "value": "11",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3236,7 +3609,8 @@
       "frequency": "100",
       "value": "23",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3245,7 +3619,8 @@
       "frequency": "500",
       "value": "131",
       "unc": "17",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3254,7 +3629,8 @@
       "frequency": "0.01",
       "value": "206",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3263,7 +3639,8 @@
       "frequency": "0.02",
       "value": "47.6",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3272,7 +3649,8 @@
       "frequency": "0.04",
       "value": "13.8",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3281,7 +3659,8 @@
       "frequency": "0.055",
       "value": "9.4",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3290,7 +3669,8 @@
       "frequency": "0.06",
       "value": "7.9",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3299,7 +3679,8 @@
       "frequency": "0.4",
       "value": "4.3",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3308,7 +3689,8 @@
       "frequency": "1",
       "value": "4.2",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3317,7 +3699,8 @@
       "frequency": "10",
       "value": "3.9",
       "unc": "8.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3326,7 +3709,8 @@
       "frequency": "20",
       "value": "7.7",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3335,7 +3719,8 @@
       "frequency": "50",
       "value": "14",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3344,7 +3729,8 @@
       "frequency": "100",
       "value": "24",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3353,7 +3739,8 @@
       "frequency": "0.01",
       "value": "258",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3362,7 +3749,8 @@
       "frequency": "0.02",
       "value": "63.3",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3371,7 +3759,8 @@
       "frequency": "0.04",
       "value": "18.9",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3380,7 +3769,8 @@
       "frequency": "0.055",
       "value": "11.9",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3389,7 +3779,8 @@
       "frequency": "0.06",
       "value": "10.7",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3398,7 +3789,8 @@
       "frequency": "0.4",
       "value": "6.0",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3407,7 +3799,8 @@
       "frequency": "1",
       "value": "5.4",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3416,7 +3809,8 @@
       "frequency": "10",
       "value": "5.6",
       "unc": "8.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3425,7 +3819,8 @@
       "frequency": "20",
       "value": "8.8",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3434,7 +3829,8 @@
       "frequency": "50",
       "value": "15",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3443,7 +3839,8 @@
       "frequency": "100",
       "value": "25",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3452,7 +3849,8 @@
       "frequency": "0.01",
       "value": "313",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3461,7 +3859,8 @@
       "frequency": "0.02",
       "value": "80.3",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3470,7 +3869,8 @@
       "frequency": "0.04",
       "value": "24.5",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3479,7 +3879,8 @@
       "frequency": "0.055",
       "value": "15.7",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3488,7 +3889,8 @@
       "frequency": "0.06",
       "value": "14.6",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3497,7 +3899,8 @@
       "frequency": "0.4",
       "value": "7.7",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3506,7 +3909,8 @@
       "frequency": "1",
       "value": "7.3",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3515,7 +3919,8 @@
       "frequency": "10",
       "value": "6.6",
       "unc": "8.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3524,7 +3929,8 @@
       "frequency": "20",
       "value": "10.5",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3533,7 +3939,8 @@
       "frequency": "50",
       "value": "17",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3542,7 +3949,8 @@
       "frequency": "100",
       "value": "26",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3551,7 +3959,8 @@
       "frequency": "0.01",
       "value": "70",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3560,7 +3969,8 @@
       "frequency": "0.02",
       "value": "11.3",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3569,7 +3979,8 @@
       "frequency": "0.04",
       "value": "2.9",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3578,7 +3989,8 @@
       "frequency": "0.055",
       "value": "1.3",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3587,7 +3999,8 @@
       "frequency": "0.06",
       "value": "1.3",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3596,7 +4009,8 @@
       "frequency": "0.4",
       "value": "1.0",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3605,7 +4019,8 @@
       "frequency": "1",
       "value": "0.4",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3614,7 +4029,8 @@
       "frequency": "10",
       "value": "0.7",
       "unc": "8.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3623,7 +4039,8 @@
       "frequency": "20",
       "value": "3.6",
       "unc": "8.4",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3632,7 +4049,8 @@
       "frequency": "50",
       "value": "8",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3641,7 +4059,8 @@
       "frequency": "100",
       "value": "10",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3650,7 +4069,8 @@
       "frequency": "0.01",
       "value": "95",
       "unc": "10",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3659,7 +4079,8 @@
       "frequency": "0.02",
       "value": "19.6",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3668,7 +4089,8 @@
       "frequency": "0.04",
       "value": "5.8",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3677,7 +4099,8 @@
       "frequency": "0.055",
       "value": "3.9",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3686,7 +4109,8 @@
       "frequency": "0.06",
       "value": "3.3",
       "unc": "7.8",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3695,7 +4119,8 @@
       "frequency": "0.4",
       "value": "1.9",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3704,7 +4129,8 @@
       "frequency": "1",
       "value": "1.6",
       "unc": "7.7",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3713,7 +4139,8 @@
       "frequency": "10",
       "value": "1.2",
       "unc": "8.0",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3722,7 +4149,8 @@
       "frequency": "20",
       "value": "4.3",
       "unc": "8.3",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3731,7 +4159,8 @@
       "frequency": "50",
       "value": "7",
       "unc": "11",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3740,7 +4169,8 @@
       "frequency": "100",
       "value": "11",
       "unc": "14",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3749,7 +4179,8 @@
       "frequency": "0.01",
       "value": "256",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3758,7 +4189,8 @@
       "frequency": "0.02",
       "value": "62",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3767,7 +4199,8 @@
       "frequency": "0.04",
       "value": "19",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3776,7 +4209,8 @@
       "frequency": "0.055",
       "value": "12",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3785,7 +4219,8 @@
       "frequency": "0.06",
       "value": "11",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3794,7 +4229,8 @@
       "frequency": "0.4",
       "value": "6",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3803,7 +4239,8 @@
       "frequency": "1",
       "value": "5",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3812,7 +4249,8 @@
       "frequency": "10",
       "value": "4",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3821,7 +4259,8 @@
       "frequency": "20",
       "value": "6",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3830,7 +4269,8 @@
       "frequency": "50",
       "value": "9",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3839,7 +4279,8 @@
       "frequency": "100",
       "value": "12",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3848,7 +4289,8 @@
       "frequency": "0.01",
       "value": "48",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3857,7 +4299,8 @@
       "frequency": "0.02",
       "value": "4",
       "unc": "12",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3866,7 +4309,8 @@
       "frequency": "0.04",
       "value": "1",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3875,7 +4319,8 @@
       "frequency": "0.055",
       "value": "1",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3884,7 +4329,8 @@
       "frequency": "0.06",
       "value": "1",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3893,7 +4339,8 @@
       "frequency": "0.4",
       "value": "0",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3902,7 +4349,8 @@
       "frequency": "1",
       "value": "-1",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3911,7 +4359,8 @@
       "frequency": "10",
       "value": "-4",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3920,7 +4369,8 @@
       "frequency": "20",
       "value": "-5",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3929,7 +4379,8 @@
       "frequency": "50",
       "value": "-8",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3938,7 +4389,8 @@
       "frequency": "100",
       "value": "-20",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3947,7 +4399,8 @@
       "frequency": "0.04",
       "value": "2",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3956,7 +4409,8 @@
       "frequency": "0.055",
       "value": "2",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3965,7 +4419,8 @@
       "frequency": "0.06",
       "value": "1",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3974,7 +4429,8 @@
       "frequency": "0.4",
       "value": "0",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3983,7 +4439,8 @@
       "frequency": "1",
       "value": "0",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -3992,7 +4449,8 @@
       "frequency": "10",
       "value": "-3",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4001,7 +4459,8 @@
       "frequency": "20",
       "value": "-4",
       "unc": "13",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4010,7 +4469,8 @@
       "frequency": "50",
       "value": "-9",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4019,7 +4479,8 @@
       "frequency": "100",
       "value": "-19",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4028,7 +4489,8 @@
       "frequency": "0.04",
       "value": "5",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4037,7 +4499,8 @@
       "frequency": "0.055",
       "value": "4",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4046,7 +4509,8 @@
       "frequency": "0.06",
       "value": "3",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4055,7 +4519,8 @@
       "frequency": "0.4",
       "value": "1",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4064,7 +4529,8 @@
       "frequency": "1",
       "value": "2",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4073,7 +4539,8 @@
       "frequency": "10",
       "value": "-2",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4082,7 +4549,8 @@
       "frequency": "20",
       "value": "-4",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4091,7 +4559,8 @@
       "frequency": "50",
       "value": "-8",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4100,7 +4569,8 @@
       "frequency": "100",
       "value": "-19",
       "unc": "28",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4109,7 +4579,8 @@
       "frequency": "0.04",
       "value": "7",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4118,7 +4589,8 @@
       "frequency": "0.055",
       "value": "4",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4127,7 +4599,8 @@
       "frequency": "0.06",
       "value": "4",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4136,7 +4609,8 @@
       "frequency": "0.4",
       "value": "1",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4145,7 +4619,8 @@
       "frequency": "1",
       "value": "2",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4154,7 +4629,8 @@
       "frequency": "10",
       "value": "-1",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4163,7 +4639,8 @@
       "frequency": "20",
       "value": "-3",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4172,7 +4649,8 @@
       "frequency": "50",
       "value": "-8",
       "unc": "15",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4181,7 +4659,8 @@
       "frequency": "100",
       "value": "-19",
       "unc": "28",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4190,7 +4669,8 @@
       "frequency": "0.04",
       "value": "13",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4199,7 +4679,8 @@
       "frequency": "0.055",
       "value": "8",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4208,7 +4689,8 @@
       "frequency": "0.06",
       "value": "7",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4217,7 +4699,8 @@
       "frequency": "0.4",
       "value": "3",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4226,7 +4709,8 @@
       "frequency": "1",
       "value": "3",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4235,7 +4719,8 @@
       "frequency": "10",
       "value": "0",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4244,7 +4729,8 @@
       "frequency": "20",
       "value": "-2",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4253,7 +4739,8 @@
       "frequency": "0.04",
       "value": "19",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4262,7 +4749,8 @@
       "frequency": "0.055",
       "value": "12",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4271,7 +4759,8 @@
       "frequency": "0.06",
       "value": "11",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4280,7 +4769,8 @@
       "frequency": "0.4",
       "value": "5",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4289,7 +4779,8 @@
       "frequency": "1",
       "value": "5",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4298,7 +4789,8 @@
       "frequency": "10",
       "value": "1",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     },
     {
       "mensurando": "acdc",
@@ -4307,7 +4799,8 @@
       "frequency": "20",
       "value": "-1",
       "unc": "22",
-      "k": "2.00"
+      "k": "2.00",
+      "current": "nan"
     }
   ],
   "observacoes": [

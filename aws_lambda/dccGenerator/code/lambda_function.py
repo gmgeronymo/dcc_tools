@@ -42,7 +42,7 @@ def lambda_handler(event, context):
     dados['desc_chefe_div'] = 'Chefe da '+dados['nome_div']
     dados['desc_chefe_lab'] = 'Chefe do '+dados['nome_lab']
     
-    filename = 'CC_'+dados['sigla_lab']+'_DIMCI '+dados['num_certif'].replace('/','_')+'.xml'
+    filename = 'CC_DIMCI_'+dados['num_certif'].replace('/','_')+'.xml'
     
     declaracao = declaracoes(dados)
     
@@ -413,7 +413,7 @@ def dccGen(dcc_version, dados, declaracao) :
         # resultados de medicao
         quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
         # nome da coluna de resultados 
-        campo_name(result, mensurando_data[mensurando]['col_name'])
+        campo_name(quantity, mensurando_data[mensurando]['col_name'])
         si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
 
         if label :

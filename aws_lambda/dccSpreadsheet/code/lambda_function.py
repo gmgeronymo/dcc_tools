@@ -25,14 +25,24 @@ def lambda_handler(event, context):
 
             try:
                 api_response = requests.post(
-                    'https://i3nqpfvs5fkdr72e4dm53ox7dq0tzvxc.lambda-url.sa-east-1.on.aws/',
+                    'https://5u62nsrl3utq2qwurh345xmofq0wnnal.lambda-url.sa-east-1.on.aws',
                     json=converted_data,
                     headers={'Content-Type': 'application/json'},
                     timeout=10
                 )
                 api_response.raise_for_status()
-                
-                return api_response.content
+
+                # Get headers from API response
+                headers = dict(api_response.headers)
+                # Add CORS headers
+                #headers['Access-Control-Allow-Origin'] = '*'
+                headers['Access-Control-Expose-Headers'] = 'Content-Disposition' 
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': base64.b64encode(api_response.content).decode('utf-8'),
+                    'isBase64Encoded': True
+                }
                     
             except requests.exceptions.RequestException as e:
                 return error_response(f"API request failed: {str(e)}")
