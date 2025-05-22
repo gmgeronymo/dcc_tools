@@ -80,4 +80,6 @@ def attach_xml_to_pdfa3b(pdf_path, xml_path, output_path):
     print(f"XML file attached successfully to {output_path}")
 
 # Example usage
-attach_xml_to_pdfa3b("input.pdf", "data.xml", "output_with_xml.pdf")
+#attach_xml_to_pdfa3b("CC_DIMCI_0519_2025_input.PDF", "CC_DIMCI_0519_2025.XML", "CC_DIMCI_0519_2025.PDF")
+#attach_xml_to_pdfa3b("CC_DIMCI_0520_2025_input.PDF", "CC_DIMCI_0520_2025.XML", "CC_DIMCI_0520_2025.PDF")
+attach_xml_to_pdfa3b("CC_DIMCI_0521_2025_input.PDF", "CC_DIMCI_0521_2025.XML", "CC_DIMCI_0521_2025.PDF")
