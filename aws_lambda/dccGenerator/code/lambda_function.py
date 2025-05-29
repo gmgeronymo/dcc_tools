@@ -187,6 +187,13 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_texto(coreData,'endPerformanceDate',dados['data_calibracao'])
     # local de execucao
     campo_texto(coreData,'performanceLocation','laboratory')
+
+    # data de emissao (opcional)
+    # no fluxo atual da Dimci a data de emissao eh a data da assinatura eletronica do certificado
+
+    if 'data_emissao' in dados:
+        campo_texto(coreData,'issueDate',dados['data_emissao'])
+    
     # items block
     items = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'items'))
 
