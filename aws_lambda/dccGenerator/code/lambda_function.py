@@ -114,8 +114,55 @@ def dccGen(dcc_version, dados, declaracao) :
 
     campo_name(software,__name__)
     campo_texto(software,'release',__version__)
-    # coreData block
 
+    # por padrao inclui informacao desse software (dccGenerator)
+    # opcional: incluir tambem informacao de software recebida via API
+    # chave: software
+    # subchaves: name e version
+    if 'software' in dados :
+        for sfw in dados['software'] :
+            software = etree.SubElement(dccSoftware, etree.QName(nsmap['dcc'], 'software'))
+            campo_name(software,sfw['name'])
+            campo_texto(software,'release',sfw['version'])
+
+    # refTypes
+    # campos opcionais porem muito uteis para o processamento automatizado dos DCCs
+    refTypeDefinitions = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
+    # definicao do namespace basic - incluida por padrao
+    refTypeDefinition = etree.SubElement(refTypeDefinitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
+    #content_basic_en = "Namespace for Cross-Community RefTypes"
+    #campo_name(refTypeDefinition,content_basic_en,'en')
+    content_basic_pt = "Espaço de nomes com RefTypes comuns a múltiplas áreas"
+    campo_name(refTypeDefinition,content_basic_pt)
+
+    description = etree.SubElement(refTypeDefinition, etree.QName(nsmap['dcc'], 'description'))
+    #desc_basic_en = "The 'basic' namespace contains RefTypes common for multiple communities."
+    #campo_texto(description,'content',desc_basic_en,'en')
+    desc_basic_pt = "O espaço de nomes 'basic' contém RefTypes comuns a múltiplas áreas."
+    campo_texto(description,'content',desc_basic_pt)
+
+    # namespace
+    campo_texto(refTypeDefinition,'namespace','basic')
+    # link
+    campo_texto(refTypeDefinition,'link','https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2')
+
+    # possibilidade de receber mais definicoes de refTypes via API
+    # chave: refTypeDefinitions
+    # subchaves: name, description, namespace e link
+    if 'refTypeDefinitions' in dados:
+        for refTypeDef in dados['refTypeDefinitions'] :
+                refTypeDefinition = etree.SubElement(refTypeDefinitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
+                campo_name(refTypeDefinition,refTypeDef['name'])
+
+                description = etree.SubElement(refTypeDefinition, etree.QName(nsmap['dcc'], 'description'))
+                campo_texto(description,'content',refTypeDef['description'])
+
+                # namespace
+                campo_texto(refTypeDefinition,'namespace',refTypeDef['namespace'])
+                # link
+                campo_texto(refTypeDefinition,'link',refTypeDef['link'])
+                
+    # coreData block
     coreData = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'coreData'))
     # country code
     campo_texto(coreData,'countryCodeISO3166_1','BR')
@@ -219,6 +266,16 @@ def dccGen(dcc_version, dados, declaracao) :
 
     # bloco statements (declaracoes)
     statements = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'statements'))
+
+    # issueDate
+    # o schema preve um campo dcc:issueDate (optional), que aceita exclusivamente uma data
+    # no modelo de certificado da Dimci existe uma declaracao textual sobre a data de emissao
+
+    issueDate = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))
+    campo_name(issueDate, 'Data de Emissão')
+    description = etree.SubElement(issueDate, etree.QName(nsmap['dcc'], 'description'))
+    issueDateText = 'Ver data da assinatura eletrônica presente no certificado'
+    campo_texto(description,'content', issueDateText)
 
     # caracteristicas do item - presente no modelo de certificado da Dimci
     # receber no campo caracteristicas_item
