@@ -39,9 +39,19 @@ def lambda_handler(event, context):
     
     # recebe os dados de entrada por json
     dados = json.loads(event["body"])
-    dados['desc_chefe_div'] = 'Chefe da '+dados['nome_div']
-    dados['desc_chefe_lab'] = 'Chefe do '+dados['nome_lab']
-    
+
+    # descricao dos cargos
+
+    if 'desc_chefe_div' in dados:
+        dados['desc_chefe_div'] = dados['desc_chefe_div']+' da '+dados['nome_div']
+    else :
+        dados['desc_chefe_div'] = 'Chefe da '+dados['nome_div']
+
+    if 'desc_chefe_lab' in dados:
+        dados['desc_chefe_lab'] = dados['desc_chefe_lab']+' do '+dados['nome_lab']
+    else :
+        dados['desc_chefe_lab'] = 'Chefe do '+dados['nome_lab']
+        
     filename = 'CC_DIMCI_'+dados['num_certif'].replace('/','_')+'.xml'
     
     declaracao = declaracoes(dados)
@@ -209,7 +219,7 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_texto(item,'model',dados['modelo'])
     item_identifications = etree.SubElement(item, etree.QName(nsmap['dcc'], 'identifications'))
     # numero de serie
-    item_ns = etree.SubElement(item_identifications, etree.QName(nsmap['dcc'], 'identification'))
+    item_ns = etree.SubElement(item_identifications, etree.QName(nsmap['dcc'], 'identification'), refType="basic_serialNumber")
     campo_texto(item_ns,'issuer','manufacturer')
     campo_texto(item_ns,'value',dados['num_serie'])
     campo_name(item_ns,'Número de Série')
@@ -278,11 +288,13 @@ def dccGen(dcc_version, dados, declaracao) :
     # o schema preve um campo dcc:issueDate (optional), que aceita exclusivamente uma data
     # no modelo de certificado da Dimci existe uma declaracao textual sobre a data de emissao
 
-    issueDate = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))
-    campo_name(issueDate, 'Data de Emissão')
-    description = etree.SubElement(issueDate, etree.QName(nsmap['dcc'], 'description'))
-    issueDateText = 'Ver data da assinatura eletrônica presente no certificado'
-    campo_texto(description,'content', issueDateText)
+    # se nao receber data_emissao, incluir esse statement
+    if not 'data_emissao' in dados:
+        issueDate = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))
+        campo_name(issueDate, 'Data de Emissão')
+        description = etree.SubElement(issueDate, etree.QName(nsmap['dcc'], 'description'))
+        issueDateText = 'Ver data da assinatura eletrônica presente no certificado'
+        campo_texto(description,'content', issueDateText)
 
     # caracteristicas do item - presente no modelo de certificado da Dimci
     # receber no campo caracteristicas_item
@@ -323,7 +335,7 @@ def dccGen(dcc_version, dados, declaracao) :
 
     # metodo de medicao
     for i, metodo_medicao in enumerate(declaracao['metodo_medicao']) :
-        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
+        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_calibrationMethod")
         campo_name(usedMethod,'Método de Medição')
         description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
       
@@ -368,7 +380,12 @@ def dccGen(dcc_version, dados, declaracao) :
 
     # loop para incluir todas as informacoes pertinentes a atividade realizada
     for informacoes_pertinentes in dados['informacoes_pertinentes'] :
-        influenceCondition = etree.SubElement(influenceConditions, etree.QName(nsmap['dcc'], 'influenceCondition'))
+        # opcional: refType
+        # se o campo for enviado, adicionar
+        if 'refType' in informacoes_pertinentes :
+            influenceCondition = etree.SubElement(influenceConditions, etree.QName(nsmap['dcc'], 'influenceCondition'), refType=informacoes_pertinentes['refType'])
+        else :
+            influenceCondition = etree.SubElement(influenceConditions, etree.QName(nsmap['dcc'], 'influenceCondition'))
         campo_name(influenceCondition,informacoes_pertinentes['name'])
         data = etree.SubElement(influenceCondition, etree.QName(nsmap['dcc'], 'data'))
         # checar se tem unidade
@@ -465,7 +482,12 @@ def dccGen(dcc_version, dados, declaracao) :
                 label = ' '.join(indexes[mensurando][index])
             
             else :
-                quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+                # se existir refType, incluir
+                if 'refType' in indices_data[mensurando][index] :
+                    quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'), refType=indices_data[mensurando][index]['refType'])
+                else :
+                    quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+                    
                 campo_name(quantity,indices_data[mensurando][index]['name'])
                 si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
                 si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
@@ -475,7 +497,12 @@ def dccGen(dcc_version, dados, declaracao) :
 
 
         # resultados de medicao
-        quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+        # refType: opcional
+        if 'refType' in mensurando_data[mensurando] :
+            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'), refType=mensurando_data[mensurando]['refType'])
+        else :
+            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+            
         # nome da coluna de resultados 
         campo_name(quantity, mensurando_data[mensurando]['col_name'])
         si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
