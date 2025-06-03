@@ -1,0 +1,5 @@
+Implementar!
+
+https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=250&/isincmc
+
+refType isInCMC -> junto com campos dcc:valid indica quais resultados estão dentro do CMC e quais resultados não
