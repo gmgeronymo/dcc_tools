@@ -348,7 +348,7 @@ def dccGen(dcc_version, dados, declaracao) :
                 campo_texto(formula, 'latex', dados['metodo_medicao_equation'][i])
 
     # incerteza
-    usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
+    usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_methodMeasurementUncertainty")
     campo_name(usedMethod,'Declaração da Incerteza de Medição')
     description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
     campo_texto(description,'content',declaracao['incerteza'])
@@ -359,20 +359,21 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_name(measuringEquipments,declaracao['rastreabilidade'])
 
     # loop tabela rastreabilidade
-    for rastreabilidade in dados['tabela_rastreabilidade'] :
-        measuringEquipment = etree.SubElement(measuringEquipments, etree.QName(nsmap['dcc'], 'measuringEquipment'))
-        campo_name(measuringEquipment,rastreabilidade['name'])
-        certificate = etree.SubElement(measuringEquipment, etree.QName(nsmap['dcc'], 'certificate'))
-        referral = etree.SubElement(certificate, etree.QName(nsmap['dcc'], 'referral'))
-        campo_texto(referral,'content',rastreabilidade['origem'])
-        campo_texto(certificate,'referralID',rastreabilidade['certificado'])
-        campo_texto(certificate,'procedure','analog')
-        campo_texto(certificate,'value','analog')
-        identifications = etree.SubElement(measuringEquipment, etree.QName(nsmap['dcc'], 'identifications'))
-        identification = etree.SubElement(identifications, etree.QName(nsmap['dcc'], 'identification'))
-        campo_texto(identification, 'issuer', 'calibrationLaboratory')
-        campo_texto(identification, 'value', rastreabilidade['cod_id'])
-        campo_name(identification, 'Código de Identificação')
+    if 'tabela_rastreabilidade' in dados :
+        for rastreabilidade in dados['tabela_rastreabilidade'] :
+            measuringEquipment = etree.SubElement(measuringEquipments, etree.QName(nsmap['dcc'], 'measuringEquipment'))
+            campo_name(measuringEquipment,rastreabilidade['name'])
+            certificate = etree.SubElement(measuringEquipment, etree.QName(nsmap['dcc'], 'certificate'))
+            referral = etree.SubElement(certificate, etree.QName(nsmap['dcc'], 'referral'))
+            campo_texto(referral,'content',rastreabilidade['origem'])
+            campo_texto(certificate,'referralID',rastreabilidade['certificado'])
+            campo_texto(certificate,'procedure','analog')
+            campo_texto(certificate,'value','analog')
+            identifications = etree.SubElement(measuringEquipment, etree.QName(nsmap['dcc'], 'identifications'))
+            identification = etree.SubElement(identifications, etree.QName(nsmap['dcc'], 'identification'))
+            campo_texto(identification, 'issuer', 'calibrationLaboratory')
+            campo_texto(identification, 'value', rastreabilidade['cod_id'])
+            campo_name(identification, 'Código de Identificação')
 
 
     # influence conditions - condicoes ambientais
@@ -400,7 +401,11 @@ def dccGen(dcc_version, dados, declaracao) :
             si_uncertainty = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'uncertainty'))
             si_uncertainty.text = informacoes_pertinentes['unc']
             si_coveragefactor = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageFactor'))
-            si_coveragefactor.text = '2'
+            if 'k' in informacoes_pertinentes :
+                si_coveragefactor.text = informacoes_pertinentes['k']
+            else :
+                si_coveragefactor.text = '2'
+            
             si_coverageprob = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageProbability'))
             si_coverageprob.text = '0.9545'
         else : # caso contrario, texto
