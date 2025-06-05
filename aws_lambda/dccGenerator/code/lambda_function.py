@@ -479,9 +479,9 @@ def dccGen(dcc_version, dados, declaracao) :
         data = etree.SubElement(result, etree.QName(nsmap['dcc'], 'data'))
         # list -> dados em formato de tabela, mesmo se for um ponto unico
         lista = etree.SubElement(data, etree.QName(nsmap['dcc'], 'list'))
-
+        
+        label = None
         for index in indexes[mensurando] :
-            label = None
             # se for label, sem unidade
             if 'unit' not in indices_data[mensurando][index] :
                 label = ' '.join(indexes[mensurando][index])
