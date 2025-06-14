@@ -1,0 +1,9 @@
+services:
+  dccgenerator:
+    image: dccgenerator
+    restart: always
+    volumes:
+    - ./app:/app
+    ports:
+    - 9099:80
+    
