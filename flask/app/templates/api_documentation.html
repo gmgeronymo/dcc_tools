@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação da API DCC Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .doc-header {
+            background: linear-gradient(135deg, #1e5799 0%, #207cca 100%);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+        .card-header {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .key-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .key-table th {
+            background-color: #f1f3f5;
+            text-align: left;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+        }
+        .key-table td {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            vertical-align: top;
+        }
+        .key-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .example-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .page-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .section-title {
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #0d6efd;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .required {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .optional {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        .toc {
+            position: sticky;
+            top: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .toc ul {
+            padding-left: 1.5rem;
+        }
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        .array-table {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .array-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <header class="doc-header">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">Documentação da API DCC Tools</h1>
+            <p class="lead mb-4">API para geração de Digital Calibration Certificates (DCC)</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="toc">
+                    <h5 class="mb-3">Sumário</h5>
+                    <ul>
+                        <li><a href="#introduction">Introdução</a></li>
+                        <li><a href="#keys-description">Descrição das Chaves</a></li>
+                        <li><a href="#software">Software</a></li>
+                        <li><a href="#ref-type">RefTypeDefinitions</a></li>
+                        <li><a href="#client">Cliente</a></li>
+                        <li><a href="#relevant-info">Informações Pertinentes</a></li>
+                        <li><a href="#traceability">Rastreabilidade</a></li>
+                        <li><a href="#uncertainty">Incerteza</a></li>
+                        <li><a href="#measurement-method">Método de Medição</a></li>
+                        <li><a href="#measurand">Mensurando</a></li>
+                        <li><a href="#indices">Índices</a></li>
+                        <li><a href="#results">Resultados</a></li>
+                        <li><a href="#full-example">Exemplo Completo</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <!-- Introdução -->
+                <div class="page-section" id="introduction">
+                    <h2 class="section-title">Introdução</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>API DCC Tools</h3>
+                            <h4>DCC Generator</h4>
+                            <p>A API recebe como entrada um arquivo em formato JSON.</p>
+                            
+                            <h5 class="mt-4">Exemplo de arquivo JSON:</h5>
+                            <div class="example-box">{
+    "chave1": "valor",
+    "chave2": "valor",
+    "chave3": [
+        {
+            "subchave1": "valor",
+            "subchave2": "valor"
+        }
+    ],
+    "chave4": "valor"
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descrição das Chaves -->
+                <div class="page-section" id="keys-description">
+                    <h2 class="section-title">Descrição das Chaves</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">Chaves Principais</div>
+                        <div class="card-body">
+                            <table class="key-table">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                        <th>Observações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>nome_lab</td>
+                                        <td>String com o nome do laboratório</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"nome_lab": "Laboratório de Metrologia em Padronização Elétrica"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>sigla_lab</td>
+                                        <td>String com a sigla do laboratório</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"sigla_lab": "Lampe"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>nome_div</td>
+                                        <td>String com o nome da divisão</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"nome_div": "Divisão de Metrologia Elétrica"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>sigla_div</td>
+                                        <td>String com a sigla da divisão</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"sigla_div": "Diele"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>num_certif</td>
+                                        <td>String com o número do certificado de calibração</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"num_certif": "0856/2024"</td>
+                                        <td>A API adiciona o prefixo DIMCI. Inserir apenas o número do certificado de calibração.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>num_processo</td>
+                                        <td>String com o número do processo</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"num_processo": "0052600.003988/2023-06"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>tipo_item</td>
+                                        <td>String com a identificação do item</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"tipo_item": "Padrão de Transferência AC-DC"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>fabricante</td>
+                                        <td>String com o fabricante do item</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"fabricante": "Fluke"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>modelo</td>
+                                        <td>String com o modelo do item</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"modelo": "792A"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>num_serie</td>
+                                        <td>String com o número de série do item</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"num_serie": "6515002"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>cod_identificacao</td>
+                                        <td>String com o código de identificação do item</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"cod_identificacao": "PT-030"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>caracteristicas_item</td>
+                                        <td>String com características do item</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>data_calibracao</td>
+                                        <td>Data da calibração (ISO 8601)</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"data_calibracao": "2024-08-07"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>data_emissao</td>
+                                        <td>Data de emissão do certificado (ISO 8601)</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"data_emissao": "2024-08-07"</td>
+                                        <td>Se omitido, será incluído: "Ver data da assinatura eletrônica presente no certificado"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>cmc</td>
+                                        <td>Booleano que indica se o certificado possui CMC</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"cmc": true</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>chefe_div</td>
+                                        <td>Nome do chefe da divisão</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"chefe_div": "Edson Afonso"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>desc_chefe_div</td>
+                                        <td>Cargo do chefe da divisão</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"desc_chefe_div": "Chefe Substituto"</td>
+                                        <td>Se omitido, padrão é "Chefe da [nome_div]"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>chefe_lab</td>
+                                        <td>Nome do chefe do laboratório</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"chefe_lab": "Gean Marcos Geronymo"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>desc_chefe_lab</td>
+                                        <td>Cargo do chefe do laboratório</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"desc_chefe_lab": "Chefe Substituto"</td>
+                                        <td>Se omitido, padrão é "Chefe do [nome_lab]"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tecnico_executor</td>
+                                        <td>Nome do técnico executor</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"tecnico_executor": "Gean Marcos Geronymo"</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>desc_tecnico_executor</td>
+                                        <td>Descrição do cargo do técnico executor</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"desc_tecnico_executor": "Técnico Executor"</td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Software -->
+                <div class="page-section" id="software">
+                    <h2 class="section-title">Software</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array com informações do software utilizado para gerar o DCC</p>
+                            <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"software": [
+    {
+        "name": "SYS-LAMPE",
+        "version": "v2.3-69-3526f2d"
+    }
+]</div>
+                            
+                            <h5 class="mt-4">Descrição do array "software":</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>Nome do software</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"name": "SYS-LAMPE"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>version</td>
+                                        <td>Versão do software</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"version": "v2.3-69-3526f2d"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RefTypeDefinitions -->
+                <div class="page-section" id="ref-type">
+                    <h2 class="section-title">RefTypeDefinitions</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array com definições de refTypes adicionais</p>
+                            <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
+                            <p><strong>Documentação:</strong> <a href="https://digilab.ptb.de/dkd/refType/vocalo/index.php?tema=2&/basic" target="_blank">https://digilab.ptb.de/dkd/refType/vocalo/index.php?tema=2&/basic</a></p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"refTypeDefinitions": [
+    {
+        "name": "Namespace for mathematical refTypes",
+        "description": "Namespace for mathematical refTypes used across various domains, such as mass, force, etc., including minimum, maximum, and similar values.",
+        "namespace": "math",
+        "link": "https://digilab.ptb.de/dkd/refType/vocalo/index.php?tema=292"
+    }
+]</div>
+                            
+                            <h5 class="mt-4">Descrição do array:</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>Nome do namespace</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"name": "Namespace for mathematical refTypes"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>description</td>
+                                        <td>Descrição do namespace</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"description": "Namespace for mathematical refTypes used across various domains..."</td>
+                                    </tr>
+                                    <tr>
+                                        <td>namespace</td>
+                                        <td>String identificadora do namespace</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"namespace": "math"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>link</td>
+                                        <td>Link para a definição do namespace</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"link": "https://digilab.ptb.de/dkd/refType/vocalo/index.php?tema=292"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cliente -->
+                <div class="page-section" id="client">
+                    <h2 class="section-title">Cliente</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Objeto com informações do cliente</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatória</span></p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"cliente": {
+    "nome": "Inmetro/Dimci/Diele/Lacel",
+    "email": "test@example.com",
+    "cidade": "Duque de Caxias",
+    "pais": "BR",
+    "cep": "25250-020",
+    "uf": "RJ",
+    "endereco": "Av. Nossa Senhora das Graças",
+    "numero": "50"
+}</div>
+                            
+                            <h5 class="mt-4">Descrição do objeto:</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>nome</td>
+                                        <td>Nome do cliente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"nome": "Inmetro/Dimci/Diele/Lacel"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>email</td>
+                                        <td>E-mail do cliente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"email": "test@example.com"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>cidade</td>
+                                        <td>Cidade do cliente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"cidade": "Duque de Caxias"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>pais</td>
+                                        <td>Código de país (ISO 3166-1)</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"pais": "BR"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>cep</td>
+                                        <td>CEP do cliente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"cep": "25250-020"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>uf</td>
+                                        <td>UF (estado) do cliente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"uf": "RJ"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>endereco</td>
+                                        <td>Endereço do cliente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"endereco": "Av. Nossa Senhora das Graças"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>numero</td>
+                                        <td>Número do endereço</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"numero": "50"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Pertinentes -->
+                <div class="page-section" id="relevant-info">
+                    <h2 class="section-title">Informações Pertinentes</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array com informações pertinentes à calibração</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatória</span> (o conteúdo é opcional)</p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"informacoes_pertinentes": [
+    {
+        "name": "Temperatura",
+        "value": "23.2",
+        "unc": "1.0",
+        "k": "2",
+        "unit": "\degree eeeelsius",
+        "refType": "basic_temperature"
+    },
+    {
+        "name": "Umidade relativa",
+        "value": "49",
+        "unc": "10",
+        "unit": "\percent",
+        "refType": "basic_humidityRelative"
+    },
+    {
+        "name": "Exemplo textual",
+        "text": "Exemplo de informação pertinente textual."
+    }
+]</div>
+                            
+                            <h5 class="mt-4">Descrição do array:</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>Nome da informação pertinente</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"name": "Temperatura"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>unit</td>
+                                        <td>Unidade da informação (formato D-SI)</td>
+                                        <td>Obrigatória se for numérica</td>
+                                        <td>"unit": "\degreecelsius"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>value</td>
+                                        <td>Valor numérico</td>
+                                        <td>Obrigatória se unit existir</td>
+                                        <td>"value": "23.2"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>unc</td>
+                                        <td>Valor da incerteza</td>
+                                        <td>Obrigatória se unit existir</td>
+                                        <td>"unc": "1.0"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>k</td>
+                                        <td>Fator de abrangência</td>
+                                        <td><span class="optional">Opcional</span> (padrão: 2)</td>
+                                        <td>"k": "2"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>text</td>
+                                        <td>Informação textual</td>
+                                        <td>Obrigatório se unit não existir</td>
+                                        <td>"text": "Exemplo textual"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>refType</td>
+                                        <td>RefType da informação</td>
+                                        <td><span class="optional">Opcional</span> (recomendado)</td>
+                                        <td>"refType": "basic_temperature"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rastreabilidade -->
+                <div class="page-section" id="traceability">
+                    <h2 class="section-title">Rastreabilidade</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>declaracao_rastreabilidade</h5>
+                            <p>Campo textual com a declaração da rastreabilidade metrológica</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatória</span></p>
+                            <div class="example-box">"declaracao_rastreabilidade": "Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI), por intermédio dos padrões metrológicos nacionais. As medições realizadas estão referenciadas aos padrões relacionados."</div>
+                            
+                            <h5 class="mt-4">tabela_rastreabilidade</h5>
+                            <p>Array com os padrões utilizados</p>
+                            <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
+                            
+                            <h6 class="mt-3">Exemplo:</h6>
+                            <div class="example-box">"tabela_rastreabilidade": [
+    {
+        "name": "Conversor Térmico PMJTC",
+        "origem": "PTB",
+        "certificado": "PTB 27812/2020",
+        "cod_id": "PR 394"
+    },
+    {
+        "name": "Conversor Térmico PMJTC",
+        "origem": "PTB",
+        "certificado": "PTB 27811/2020",
+        "cod_id": "PR 365"
+    }
+]</div>
+                            
+                            <h6 class="mt-3">Descrição do array:</h6>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>Nome do padrão</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"name": "Conversor Térmico PMJTC"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>origem</td>
+                                        <td>Origem do padrão</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"origem": "PTB"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>certificado</td>
+                                        <td>Certificado do padrão</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"certificado": "PTB 27812/2020"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>cod_id</td>
+                                        <td>Código de identificação</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"cod_id": "PR 394"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incerteza -->
+                <div class="page-section" id="uncertainty">
+                    <h2 class="section-title">Incerteza</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>declaracao_incerteza</h5>
+                            <p>Campo textual com a declaração da incerteza de medição</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatória</span></p>
+                            <div class="example-box">"declaracao_incerteza": "As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade v eff, o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Método de Medição -->
+                <div class="page-section" id="measurement-method">
+                    <h2 class="section-title">Método de Medição</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>metodo_medicao</h5>
+                            <p>Array de strings com a descrição dos métodos de medição</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatória</span> (o conteúdo é opcional)</p>
+                            
+                            <h6 class="mt-3">Exemplo:</h6>
+                            <div class="example-box">"metodo_medicao": [
+    "As entradas de tensão do instrumento padrão e do instrumento sob calibração foram conectadas em paralelo...",
+    "Método de medição 2 teste"
+]</div>
+                            
+                            <h5 class="mt-4">metodo_medicao_equation</h5>
+                            <p>Array de strings com equações em formato LaTeX ou MathML</p>
+                            <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
+                            
+                            <h6 class="mt-3">Exemplo:</h6>
+                            <div class="example-box">"metodo_medicao_equation": [
+    "\delta_u = \dfrac{U_ac}{U_dc} {U_dc}"
+]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensurando -->
+                <div class="page-section" id="measurand">
+                    <h2 class="section-title">Mensurando</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array com as definições do mensurando</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatório</span> (pelo menos um)</p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"mensurando": [
+    {
+        "label": "acdc",
+        "name": "Diferença AC-DC em tensão",
+        "col_name": "\delta_u",
+        "unit": "\micro\volt\volt\tothe{-1}",
+        "unc_relativa": false,
+        "refType": "basic_measuredValue"
+    },
+    {
+        "label": "rstdc",
+        "name": "Resistência em Corrente Contínua",
+        "col_name": "\m",
+        "unit": "\ohm",
+        "unc_relativa": true,
+        "refType": "basic_measuredValue"
+    }
+]</div>
+                            
+                            <h5 class="mt-4">Descrição do array:</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>label</td>
+                                        <td>Identificador do mensurando</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"label": "acdc"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>Título da tabela de resultados</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"name": "Diferença AC-DC em tensão"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>col_name</td>
+                                        <td>Nome da coluna com valores numéricos</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"col_name": "V.m."</td>
+                                    </tr>
+                                    <tr>
+                                        <td>unit</td>
+                                        <td>Unidade do resultado (formato D-SI)</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"unit": "\micro\wolt\wolt\tothe{-1}"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>unc_relativa</td>
+                                        <td>Indica se a incerteza é relativa</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"unc_relativa": false</td>
+                                    </tr>
+                                    <tr>
+                                        <td>refType</td>
+                                        <td>RefType do resultado</td>
+                                        <td><span class="optional">Opcional</span> (recomendado)</td>
+                                        <td>"refType": "basic_measuredValue"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Índices -->
+                <div class="page-section" id="indices">
+                    <h2 class="section-title">Índices</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array com definições de índices para mensurandos</p>
+                            <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"indices": [
+    {
+        "mensurando": "acdc",
+        "label": "faixa",
+        "name": "Faixa",
+        "unit": "\wolt",
+        "refType": "teste_range"
+    },
+    {
+        "mensurando": "acdc",
+        "label": "voltage",
+        "name": "Tensão",
+        "unit": "\wolt",
+        "refType": "teste_voltage"
+    },
+    {
+        "mensurando": "acdc",
+        "label": "frequency",
+        "name": "Frequência",
+        "unit": "\kilowhertz",
+        "refType": "teste_frequency"
+    }
+]</div>
+                            
+                            <h5 class="mt-4">Descrição do array:</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>mensurando</td>
+                                        <td>Identificador do mensurando relacionado</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"mensurando": "acdc"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>label</td>
+                                        <td>Identificador do índice</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"label": "voltage"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>Nome "human-readable" do índice</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"name": "Tensão"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>unit</td>
+                                        <td>Unidade do índice (formato D-SI)</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"unit": "\wolt"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>refType</td>
+                                        <td>RefType do índice</td>
+                                        <td><span class="optional">Opcional</span> (recomendado)</td>
+                                        <td>"refType": "teste_range"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div class="page-section" id="results">
+                    <h2 class="section-title">Resultados</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array com os resultados da calibração</p>
+                            <p><strong>Tipo:</strong> <span class="required">Obrigatória</span></p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"resultados": [
+    {
+        "mensurando": "rstdc",
+        "value": "1.0002341",
+        "unc": "0.14",
+        "k": "2",
+        "current": "1.0"
+    },
+    {
+        "mensurando": "acdc",
+        "faixa": "0.022",
+        "voltage": "0.002",
+        "frequency": "0.01",
+        "value": "-280",
+        "unc": "44",
+        "k": "2.13"
+    },
+    {
+        "mensurando": "acdc",
+        "faixa": "0.022",
+        "voltage": "0.002",
+        "frequency": "0.02",
+        "value": "3",
+        "unc": "37",
+        "k": "2.28"
+    }
+]</div>
+                            
+                            <h5 class="mt-4">Descrição do array:</h5>
+                            <table class="key-table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Chave</th>
+                                        <th>Descrição</th>
+                                        <th>Tipo</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>mensurando</td>
+                                        <td>Identificador do mensurando</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"mensurando": "acdc"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>value</td>
+                                        <td>Valor numérico do resultado</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"value": "1.0002341"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>unc</td>
+                                        <td>Valor da incerteza expandida</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"unc": "0.14"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>k</td>
+                                        <td>Fator de abrangência</td>
+                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>"k": "2.28"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Índices</td>
+                                        <td>Quaisquer índices previamente definidos</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"frequency": "0.02"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exemplo Completo -->
+                <div class="page-section" id="full-example">
+                    <h2 class="section-title">Exemplo Completo</h2>
+                    <div class="card">
+                        <div class="card-header">Exemplo de JSON Completo</div>
+                        <div class="card-body">
+                            <div class="example-box">{
+    "nome_lab": "Laboratório de Metrologia em Padronização Elétrica",
+    "sigla_lab": "Lampe",
+    "nome_div": "Divisão de Metrologia Elétrica",
+    "sigla_div": "Diele",
+    "num_certif": "0856/2024",
+    "num_processo": "0052600.003988/2023-06",
+    "tipo_item": "Padrão de Transferência AC-DC",
+    "fabricante": "Fluke",
+    "modelo": "792A",
+    "num_serie": "6515002",
+    "cod_identificacao": "PT-030",
+    "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
+    "data_calibracao": "2024-08-07",
+    "data_emissao": "2024-08-07",
+    "cmc": true,
+    "chefe_div": "Edson Afonso",
+    "desc_chefe_div": "Chefe Substituto",
+    "chefe_lab": "Gean Marcos Geronymo",
+    "desc_chefe_lab": "Chefe Substituto",
+    "tecnico_executor": "Gean Marcos Geronymo",
+    "desc_tecnico_executor": "Técnico Executor",
+    "software": [
+        {
+            "name": "SYS-LAMPE",
+            "version": "v2.3-69-3526f2d"
+        }
+    ],
+    "refTypeDefinitions": [
+        {
+            "name": "Namespace for mathematical refTypes",
+            "description": "Namespace for mathematical refTypes used across various domains, such as mass, force, etc., including minimum, maximum, and similar values.",
+            "namespace": "math",
+            "link": "https://digilab.ptb.de/dkd/refType/vocalo/index.php?tema=292"
+        }
+    ],
+    "cliente": {
+        "nome": "Inmetro/Dimci/Diele/Lacel",
+        "email": "test@example.com",
+        "cidade": "Duque de Caxias",
+        "pais": "BR",
+        "cep": "25250-020",
+        "uf": "RJ",
+        "endereco": "Av. Nossa Senhora das Graças",
+        "numero": "50"
+    },
+    "informacoes_pertinentes": [
+        {
+            "name": "Temperatura",
+            "value": "23.2",
+            "unc": "1.0",
+            "k": "2",
+            "unit": "\degree eeeelsius",
+            "refType": "basic_temperature"
+        },
+        {
+            "name": "Umidade relativa",
+            "value": "49",
+            "unc": "10",
+            "unit": "\percent",
+            "refType": "basic_humidityRelative"
+        }
+    ],
+    "declaracao_rastreabilidade": "Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI), por intermédio dos padrões metrológicos nacionais. As medições realizadas estão referenciadas aos padrões relacionados.",
+    "tabela_rastreabilidade": [
+        {
+            "name": "Conversor Térmico PMJTC",
+            "origem": "PTB",
+            "certificado": "PTB 27812/2020",
+            "cod_id": "PR 394"
+        },
+        {
+            "name": "Conversor Térmico PMJTC",
+            "origem": "PTB",
+            "certificado": "PTB 27811/2020",
+            "cod_id": "PR 365"
+        }
+    ],
+    "declaracao_incerteza": "As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade v eff, o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.",
+    "metodo_medicao": [
+        "As entradas de tensão do instrumento padrão e do instrumento sob calibração foram conectadas em paralelo através de um conector T cujo plano médio é o plano de referência para a calibração. Os resultados foram determinados a partir do valor médio de seis ciclos de medição para todos os pontos indicados. A calibração é realizada por comparação direta, e o valor da diferença ac-dc do objeto é definido pela equação a seguir, onde U_dc é o valor absoluto médio de tensão contínua aplicada ao circuito, em regime de polarização direta e reversa, e U_ac é o valor rms de tensão alternada que, quando aplicada ao circuito, produz uma leitura média de saída que corresponde à aplicação de U_dc."
+    ],
+    "metodo_medicao_equation": [
+        "\delta_u = \dfrac{U_ac}{U_dc} {U_dc}"
+    ],
+    "mensurando": [
+        {
+            "label": "acdc",
+            "name": "Diferença AC-DC em tensão",
+            "col_name": "\delta_u",
+            "unit": "\micro\volt\volt\tothe{-1}",
+            "unc_relativa": false,
+            "refType": "basic_measuredValue"
+        },
+        {
+            "label": "rstdc",
+            "name": "Resistência em Corrente Contínua",
+            "col_name": "\m",
+            "unit": "\ohm",
+            "unc_relativa": true,
+            "refType": "basic_measuredValue"
+        }
+    ],
+    "indices": [
+        {
+            "mensurando": "acdc",
+            "label": "faixa",
+            "name": "Faixa",
+            "unit": "\wolt",
+            "refType": "teste_range"
+        },
+        {
+            "mensurando": "acdc",
+            "label": "voltage",
+            "name": "Tensão",
+            "unit": "\wolt",
+            "refType": "teste_voltage"
+        },
+        {
+            "mensurando": "acdc",
+            "label": "frequency",
+            "name": "Frequência",
+            "unit": "\kilowhertz",
+            "refType": "teste_frequency"
+        }
+    ],
+    "resultados": [
+        {
+            "mensurando": "rstdc",
+            "value": "1.0002341",
+            "unc": "0.14",
+            "k": "2",
+            "current": "1.0"
+        },
+        {
+            "mensurando": "acdc",
+            "faixa": "0.022",
+            "voltage": "0.002",
+            "frequency": "0.01",
+            "value": "-280",
+            "unc": "44",
+            "k": "2.13"
+        },
+        {
+            "mensurando": "acdc",
+            "faixa": "0.022",
+            "voltage": "0.002",
+            "frequency": "0.02",
+            "value": "3",
+            "unc": "37",
+            "k": "2.28"
+        }
+    ]
+}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="text-center">
+                <p>&copy; 2023 API DCC Tools. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

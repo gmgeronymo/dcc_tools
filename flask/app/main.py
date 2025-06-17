@@ -30,7 +30,8 @@ __author_email__="gmgeronymo@inmetro.gov.br"
 # bibliotecas
 import json
 from lxml import etree
-from flask import Flask,jsonify,request,abort, Response, send_file # flask web server
+from flask import Flask, jsonify, request, abort, Response, send_file, render_template, redirect, flash
+import requests
 from werkzeug.utils import secure_filename
 
 # PDF attach
@@ -55,6 +56,7 @@ schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schem
 
 app = Flask(__name__)
 app.debug = True
+app.secret_key = 'your_secret_key'
 
 # funcoes auxiliares
 
@@ -625,61 +627,79 @@ def attach_xml_to_pdfa3b(pdf_path, xml_path, output_path):
     #print(f"XML file attached successfully to {output_path}")
 
 
-# HTML form template
-HTML_FORM = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Incluir DCC</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="file"] { padding: 10px; border: 1px solid #ddd; width: 100%; }
-        button { 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 16px; 
-            width: 100%;
-        }
-        button:hover { background-color: #45a049; }
-        .container { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
-        h1 { text-align: center; color: #333; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Incluir DCC no PDF do Certificado de Calibração</h1>
-        <form action="/pdf_attach" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="xml_file">Arquivo XML:</label>
-                <input type="file" name="xml_file" accept=".xml" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="pdf_file">Arquivo PDF:</label>
-                <input type="file" name="pdf_file" accept=".pdf" required>
-            </div>
-            
-            <button type="submit">Incluir</button>
-        </form>
-    </div>
-</body>
-</html>
-"""
+@app.route('/upload_xml')
+def upload_xml():
+    return render_template('upload_xml.html')
 
-@app.route('/upload')
-def upload_form():
-    return HTML_FORM
+@app.route('/upload_json', methods=['GET', 'POST'])
+def upload_json():
+    if request.method == 'POST':
+        # Check if a file was uploaded
+        if 'json_file' not in request.files:
+            flash('No file part', 'error')
+            return redirect(request.url)
+            
+        file = request.files['json_file']
+        
+        # Check if file was selected
+        if file.filename == '':
+            flash('No selected file', 'error')
+            return redirect(request.url)
+            
+        # Check if it's a JSON file
+        if not file.filename.lower().endswith('.json'):
+            flash('Invalid file type. Please upload a JSON file', 'error')
+            return redirect(request.url)
+            
+        try:
+            # Parse the JSON file
+            json_data = json.load(file.stream)
 
-# TODO
-# criar uma pagina de boas vindas na rota '/'
-# @app.route("/")
-# def hello_world():
-#     return "Hello, World!"
+            # Send to API endpoint
+            response = requests.post(
+                'http://sgddev-dccgenerator-1/generate',
+                json=json_data,
+                headers={'Content-Type': 'application/json'}
+            )
+            return response
+            # Check for API errors
+            if response.status_code != 200:
+                error_msg = f"API Error: {response.status_code} - {response.text}"
+                flash(error_msg, 'error')
+                return redirect(request.url)
+                
+            # Extract filename from API response headers if available
+            content_disposition = response.headers.get('Content-Disposition', '')
+            if 'filename=' in content_disposition:
+                filename = content_disposition.split('filename=')[1].strip('"')
+            else:
+                # Generate a default filename
+                filename = f"dcc_{json_data.get('num_certif', 'certificate').replace('/', '_')}.xml"
+            
+            # Return XML file for download
+            return Response(
+                response.content,
+                mimetype='text/xml',
+                headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+            )
+            
+        except json.JSONDecodeError:
+            flash('Invalid JSON format', 'error')
+            return redirect(request.url)
+        except Exception as e:
+            flash(f'Error processing file: {str(e)}', 'error')
+            return redirect(request.url)
+    
+    # GET request - show upload form
+    return render_template('upload_json.html')
+
+@app.route('/')
+def landing_page():
+    return render_template('landing.html')
+
+@app.route('/api_doc')
+def api_documentation():
+    return render_template('api_documentation.html')
 
 # TODO
 # criar interface para upload do PDF e XML
@@ -719,8 +739,12 @@ def pdf_attach():
         attach_xml_to_pdfa3b(pdf_caminho, xml_caminho, pdfout_caminho)
 
         # retornar o PDF gerado
-        return send_file(pdfout_caminho, as_attachment=True)
+        return send_file(pdfout_caminho, as_attachment=True, download_name=pdf_filename)
 
+
+## TODO ##
+# usar layout do frontend de envio do PDF e XML para o envio do XLS
+# processamento do XLS: atualizar a funcao excel_to_json e seguir a mesma lógica da funcao pdf_attach
 
 ## TODO ##
 # criar rota para converter XLS em JSON e enviar para API

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerar DCC a partir de JSON</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="file"] { padding: 10px; border: 1px solid #ddd; width: 100%; }
+        button { 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%;
+        }
+        button:hover { background-color: #45a049; }
+        .container { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        h1 { text-align: center; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerar DCC a partir de arquivo JSON</h1>
+        <form action="./upload_json" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="json_file">Arquivo JSON:</label>
+                <input type="file" name="json_file" accept=".json" required>
+            </div>
+            
+            <button type="submit">Incluir</button>
+        </form>
+    </div>
+</body>
+</html>
