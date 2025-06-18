@@ -3,3 +3,5 @@ uwsgi
 lxml
 pikepdf
 requests
+pandas
+openpyxl

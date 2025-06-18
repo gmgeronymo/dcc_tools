@@ -6,7 +6,7 @@
 	<meta name="description" content="">
     <meta name="keywords" content="DCC, Certificado de Calibração Digital, Inmetro">
     <meta name="author" content="PTB DCC Team">
-    <link href="./static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
 
     <title>Inmetro/Dimci - DCC</title>
 
@@ -67,17 +67,17 @@
                 </a>
             </div>
             <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="#">
+                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_xls') }}">
 					<span>Excel para DCC</span>
                 </a>
             </div>
             <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="./upload_json">
+                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_json') }}">
 					<span>JSON para DCC</span>
                 </a>
             </div>
             <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="./upload_xml">
+                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_xml') }}">
 					<span>Embutir DCC no PDF</span>
                 </a>
             </div>
@@ -87,7 +87,7 @@
                 </a>
             </div>
             <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="./api_doc">
+                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('api_doc') }}">
 					<span>Documentação da API</span>
                 </a>
             </div>

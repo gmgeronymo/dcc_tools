@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='utf-8'?>
+<dcc:digitalCalibrationCertificate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dcc="https://ptb.de/dcc" xmlns:si="https://ptb.de/si" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.2.0/dcc.xsd" schemaVersion="3.2.0">
+  <dcc:administrativeData>
+    <dcc:dccSoftware>
+      <dcc:software>
+        <dcc:name>
+          <dcc:content>dccGenerator</dcc:content>
+        </dcc:name>
+        <dcc:release>0.2</dcc:release>
+      </dcc:software>
+    </dcc:dccSoftware>
+    <dcc:coreData>
+      <dcc:countryCodeISO3166_1>BR</dcc:countryCodeISO3166_1>
+      <dcc:usedLangCodeISO639_1>pt</dcc:usedLangCodeISO639_1>
+      <dcc:mandatoryLangCodeISO639_1>pt</dcc:mandatoryLangCodeISO639_1>
+      <dcc:uniqueIdentifier>DIMCI 0000/2023</dcc:uniqueIdentifier>
+      <dcc:identifications>
+        <dcc:identification>
+          <dcc:issuer>calibrationLaboratory</dcc:issuer>
+          <dcc:value>0052600.000000/0000-00</dcc:value>
+          <dcc:name>
+            <dcc:content>Processo Inmetro</dcc:content>
+          </dcc:name>
+        </dcc:identification>
+      </dcc:identifications>
+      <dcc:beginPerformanceDate>2023-02-09</dcc:beginPerformanceDate>
+      <dcc:endPerformanceDate>2023-02-09</dcc:endPerformanceDate>
+      <dcc:performanceLocation>laboratory</dcc:performanceLocation>
+    </dcc:coreData>
+    <dcc:items>
+      <dcc:item>
+        <dcc:name>
+          <dcc:content>Resistor Padrão</dcc:content>
+        </dcc:name>
+        <dcc:manufacturer>
+          <dcc:name>
+            <dcc:content>Tinsley</dcc:content>
+          </dcc:name>
+        </dcc:manufacturer>
+        <dcc:model>5695A</dcc:model>
+        <dcc:identifications>
+          <dcc:identification>
+            <dcc:issuer>manufacturer</dcc:issuer>
+            <dcc:value>9999</dcc:value>
+            <dcc:name>
+              <dcc:content>Número de Série</dcc:content>
+            </dcc:name>
+          </dcc:identification>
+          <dcc:identification>
+            <dcc:issuer>customer</dcc:issuer>
+            <dcc:value>Não identificado</dcc:value>
+            <dcc:name>
+              <dcc:content>Código de Identificação</dcc:content>
+            </dcc:name>
+          </dcc:identification>
+        </dcc:identifications>
+      </dcc:item>
+    </dcc:items>
+    <dcc:calibrationLaboratory>
+      <dcc:contact>
+        <dcc:name>
+          <dcc:content>Laboratório de Metrologia em Padronização Elétrica(Lampe)</dcc:content>
+        </dcc:name>
+        <dcc:eMail>samci@inmetro.gov.br</dcc:eMail>
+        <dcc:phone>+55 21 2679 9077/9010</dcc:phone>
+        <dcc:location>
+          <dcc:city>Xerém - Duque de Caxias</dcc:city>
+          <dcc:countryCode>BR</dcc:countryCode>
+          <dcc:postCode>25250-020</dcc:postCode>
+          <dcc:state>RJ</dcc:state>
+          <dcc:street>Av. Nossa Senhora das Graças</dcc:street>
+          <dcc:streetNo>50</dcc:streetNo>
+        </dcc:location>
+      </dcc:contact>
+    </dcc:calibrationLaboratory>
+    <dcc:respPersons>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content>João da Silva</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Chefe da Divisão de Metrologia Elétrica</dcc:role>
+        <dcc:mainSigner>true</dcc:mainSigner>
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content>Ana Oliveira</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Chefe do Laboratório de Metrologia em Padronização Elétrica</dcc:role>
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content>Pedro Santos</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Técnico Executor</dcc:role>
+      </dcc:respPerson>
+    </dcc:respPersons>
+    <dcc:customer>
+      <dcc:name>
+        <dcc:content>LabTech Calibrations Ltda.</dcc:content>
+      </dcc:name>
+      <dcc:eMail>contato@labtech.com.br</dcc:eMail>
+      <dcc:location>
+        <dcc:city>Cuiabá</dcc:city>
+        <dcc:countryCode>BR</dcc:countryCode>
+        <dcc:postCode>78000-000</dcc:postCode>
+        <dcc:state>MT</dcc:state>
+        <dcc:street>Av. das Amostras</dcc:street>
+        <dcc:streetNo>123</dcc:streetNo>
+      </dcc:location>
+    </dcc:customer>
+    <dcc:statements>
+      <dcc:statement>
+        <dcc:declaration>
+          <dcc:content>Este certificado é consistente com as Capacidades de Medição e Calibração (CMCs) que estão incluídas no apêndice C do Acordo de Reconhecimento Mútuo (MRA) estabelecido pelo Comitê Internacional de Pesos e Medidas (CIPM). Conforme os termos do MRA, todos os institutos participantes reconhecem entre si a validade dos seus certificados de calibração e medição para cada uma das grandezas, faixas e incertezas de medição declaradas no Apêndice C (para maiores detalhes ver http://www.bipm.org).</dcc:content>
+        </dcc:declaration>
+      </dcc:statement>
+      <dcc:statement>
+        <dcc:norm>ABNT NBR ISO/IEC 17025</dcc:norm>
+        <dcc:declaration>
+          <dcc:content>O presente certificado de calibração atende aos requisitos da norma ABNT NBR ISO/IEC 17025 e é válido apenas para o item acima caracterizado, não sendo extensivo a quaisquer outros. Este certificado de calibração somente pode ser reproduzido em sua forma integral. Reproduções parciais devem ser previamente autorizadas pelo Inmetro.</dcc:content>
+        </dcc:declaration>
+      </dcc:statement>
+      <dcc:statement>
+        <dcc:declaration>
+          <dcc:content>Características do Item</dcc:content>
+        </dcc:declaration>
+        <dcc:data>
+          <dcc:quantity>
+            <dcc:name>
+              <dcc:content>Valor Nominal</dcc:content>
+            </dcc:name>
+            <si:real>
+              <si:value>1</si:value>
+              <si:unit>\metre\tothe{2}\kilogram\second\tothe{-3}\ampere\tothe{2}</si:unit>
+            </si:real>
+          </dcc:quantity>
+        </dcc:data>
+      </dcc:statement>
+    </dcc:statements>
+  </dcc:administrativeData>
+  <dcc:measurementResults>
+    <dcc:measurementResult>
+      <dcc:name>
+        <dcc:content>Resultados e Declaração da Incerteza de Medição</dcc:content>
+      </dcc:name>
+      <dcc:usedMethods>
+        <dcc:usedMethod>
+          <dcc:name>
+            <dcc:content>Declaração da Incerteza de Medição</dcc:content>
+          </dcc:name>
+          <dcc:description>
+            <dcc:content>As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição – Guia para a Expressão de Incerteza de medição – GUM 2008.</dcc:content>
+          </dcc:description>
+        </dcc:usedMethod>
+        <dcc:usedMethod>
+          <dcc:name>
+            <dcc:content>Método de Medição</dcc:content>
+          </dcc:name>
+          <dcc:description>
+            <dcc:content>O resultado fornecido refere-se ao valor médio de seis séries de trinta medições pelo método de comparação de corrente na configuração 04 (quatro) terminais. Utilizou-se uma Ponte Automática de Resistência modelo 6010D.</dcc:content>
+          </dcc:description>
+        </dcc:usedMethod>
+      </dcc:usedMethods>
+      <dcc:measuringEquipments>
+        <dcc:name>
+          <dcc:content>Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI), por intermédio dos padrões metrológicos nacionais. As medições realizadas estão referenciadas aos padrões relacionados.</dcc:content>
+        </dcc:name>
+        <dcc:measuringEquipment>
+          <dcc:name>
+            <dcc:content>Resistor Padrão</dcc:content>
+          </dcc:name>
+          <dcc:certificate>
+            <dcc:referral>
+              <dcc:content>BIPM 00/2021</dcc:content>
+            </dcc:referral>
+            <dcc:referralID>PR 991</dcc:referralID>
+            <dcc:procedure>analog</dcc:procedure>
+            <dcc:value>analog</dcc:value>
+          </dcc:certificate>
+        </dcc:measuringEquipment>
+        <dcc:measuringEquipment>
+          <dcc:name>
+            <dcc:content>Resistor Padrão</dcc:content>
+          </dcc:name>
+          <dcc:certificate>
+            <dcc:referral>
+              <dcc:content>BIPM 00/2021</dcc:content>
+            </dcc:referral>
+            <dcc:referralID>PR 992</dcc:referralID>
+            <dcc:procedure>analog</dcc:procedure>
+            <dcc:value>analog</dcc:value>
+          </dcc:certificate>
+        </dcc:measuringEquipment>
+        <dcc:measuringEquipment>
+          <dcc:name>
+            <dcc:content>Resistor Padrão</dcc:content>
+          </dcc:name>
+          <dcc:certificate>
+            <dcc:referral>
+              <dcc:content>BIPM 00/2021</dcc:content>
+            </dcc:referral>
+            <dcc:referralID>PR 993</dcc:referralID>
+            <dcc:procedure>analog</dcc:procedure>
+            <dcc:value>analog</dcc:value>
+          </dcc:certificate>
+        </dcc:measuringEquipment>
+      </dcc:measuringEquipments>
+      <dcc:influenceConditions>
+        <dcc:influenceCondition>
+          <dcc:name>
+            <dcc:content>Temperatura no Banho de Óleo</dcc:content>
+          </dcc:name>
+          <dcc:data>
+            <dcc:quantity>
+              <si:real>
+                <si:value>20.003</si:value>
+                <si:unit>\degreecelsius</si:unit>
+                <si:expandedUnc>
+                  <si:uncertainty>0.008</si:uncertainty>
+                  <si:coverageFactor>2</si:coverageFactor>
+                  <si:coverageProbability>0.9545</si:coverageProbability>
+                </si:expandedUnc>
+              </si:real>
+            </dcc:quantity>
+          </dcc:data>
+        </dcc:influenceCondition>
+      </dcc:influenceConditions>
+      <dcc:results>
+        <dcc:result>
+          <dcc:name>
+            <dcc:content>Resultados</dcc:content>
+          </dcc:name>
+          <dcc:data>
+            <dcc:quantity>
+              <si:real>
+                <si:value>0.99999397</si:value>
+                <si:unit>\metre\tothe{2}\kilogram\second\tothe{-3}\ampere\tothe{2}</si:unit>
+                <si:expandedUnc>
+                  <si:uncertainty>2.10E-07</si:uncertainty>
+                  <si:coverageFactor>2</si:coverageFactor>
+                  <si:coverageProbability>0.9545</si:coverageProbability>
+                </si:expandedUnc>
+              </si:real>
+              <dcc:influenceConditions>
+                <dcc:influenceCondition>
+                  <dcc:name>
+                    <dcc:content>Corrente Aplicada</dcc:content>
+                  </dcc:name>
+                  <dcc:data>
+                    <dcc:quantity>
+                      <si:real>
+                        <si:value>0.003</si:value>
+                        <si:unit>\ampere</si:unit>
+                      </si:real>
+                    </dcc:quantity>
+                  </dcc:data>
+                </dcc:influenceCondition>
+              </dcc:influenceConditions>
+            </dcc:quantity>
+          </dcc:data>
+        </dcc:result>
+      </dcc:results>
+    </dcc:measurementResult>
+  </dcc:measurementResults>
+</dcc:digitalCalibrationCertificate>

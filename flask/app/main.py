@@ -33,6 +33,8 @@ from lxml import etree
 from flask import Flask, jsonify, request, abort, Response, send_file, render_template, redirect
 import requests
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 # PDF attach
 import pikepdf
@@ -40,6 +42,9 @@ from pikepdf import Pdf, Name, String, Array
 import os
 import hashlib
 import tempfile
+
+# excel2json
+import pandas as pd
 
 # namespaces
 nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb.de/dcc', 'si': 'https://ptb.de/si'}
@@ -54,8 +59,11 @@ schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schem
 # biblioteca capacitores
 #import capacitor
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/dcc/static')
 app.debug = True
+
+# App is behind one proxy that sets the -For and -Host headers.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
 # funcoes auxiliares
 
@@ -533,6 +541,168 @@ def dccGen(dcc_version, dados, declaracao) :
     return etree.tostring(dcc, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
 
+# Excel2JSON
+def excel_to_json(excel_path):
+    # Read all sheets with specified dtypes
+    sheets = pd.read_excel(excel_path, sheet_name=[
+        "Metadados Principais",
+        "Software",
+        "RefTypeDefinitions",
+        "Cliente",
+        "Informações Pertinentes",  # Updated sheet name
+        "Declarações",
+        "Rastreabilidade",
+        "Método de Medição",
+        "Mensurando",
+        "Índices",
+        "Resultados",
+        "Observações"
+    ], dtype={
+        'numero': str,
+        'value': str,
+        'unc': str,
+        'k': str,
+        'faixa': str,
+        'voltage': str,
+        'frequency': str
+    },
+    engine='openpyxl'
+)
+    
+    # Initialize JSON structure
+    # tratar campos opcionais
+    # tratar datas para usar formato de data do excel
+    data = {
+        # Main metadata
+        "nome_lab": sheets["Metadados Principais"].iloc[0,1],
+        "sigla_lab": sheets["Metadados Principais"].iloc[1,1],
+        "nome_div": sheets["Metadados Principais"].iloc[2,1],
+        "sigla_div": sheets["Metadados Principais"].iloc[3,1],
+        "num_certif": sheets["Metadados Principais"].iloc[4,1],
+        "num_processo": sheets["Metadados Principais"].iloc[5,1],
+        "tipo_item": sheets["Metadados Principais"].iloc[6,1],
+        "fabricante": sheets["Metadados Principais"].iloc[7,1],
+        "modelo": sheets["Metadados Principais"].iloc[8,1],
+        "num_serie": sheets["Metadados Principais"].iloc[9,1],
+        "cod_identificacao": sheets["Metadados Principais"].iloc[10,1],
+        "caracteristicas_item": sheets["Metadados Principais"].iloc[11,1],
+        "data_calibracao": sheets["Metadados Principais"].iloc[12,1],
+        "data_emissao": str(sheets["Metadados Principais"].iloc[13,1]),
+        "cmc": sheets["Metadados Principais"].iloc[14,1] == "Sim",
+        "chefe_div": sheets["Metadados Principais"].iloc[15,1],
+        "desc_chefe_div": str(sheets["Metadados Principais"].iloc[16,1]),
+        "chefe_lab": sheets["Metadados Principais"].iloc[17,1],
+        "desc_chefe_lab": str(sheets["Metadados Principais"].iloc[18,1]),
+        "tecnico_executor": sheets["Metadados Principais"].iloc[19,1],
+        "desc_tecnico_executor": sheets["Metadados Principais"].iloc[20,1],
+
+        #Software information
+        "software": [
+            {k: str(v) if pd.notnull(v) else None for k, v in row.items()}
+            for _, row in sheets["Software"].iterrows()
+        ],
+
+        "refTypeDefinitions": [
+            {k: str(v) if pd.notnull(v) else None for k, v in row.items()}
+            for _, row in sheets["RefTypeDefinitions"].iterrows()
+        ],
+        
+        # Client information
+        "cliente": sheets["Cliente"].iloc[0].to_dict(),
+        
+        # Environmental conditions (updated sheet name)
+        "informacoes_pertinentes": [
+            {k: str(v) if pd.notnull(v) else None for k, v in row.items()}
+            for _, row in sheets["Informações Pertinentes"].iterrows()
+        ],
+
+        # Declarations
+        "declaracao_rastreabilidade": str(sheets["Declarações"].iloc[0,1]),
+        "tabela_rastreabilidade": [
+            {k: str(v) for k, v in row.items()}
+            for _, row in sheets["Rastreabilidade"].iterrows()
+        ],
+        "declaracao_incerteza": str(sheets["Declarações"].iloc[1,1]),
+
+        # metodo de medicao
+        "metodo_medicao": [
+            str(row['text']) 
+            for _, row in sheets["Método de Medição"].iterrows()
+        ],
+        "metodo_medicao_equation": [
+            str(row['equation']) 
+            for _, row in sheets["Método de Medição"].iterrows()
+        ] if 'equation' in sheets["Método de Medição"].columns else [],
+
+
+        # informacoes sobre o mensurando
+        "mensurando": [
+            {
+            "label": str(row['label']),
+            "name": str(row['name']),
+            "col_name": str(row['col_name']),
+            "unit": str(row['unit']),
+            "unc_relativa": row['unc_relativa'] == "Sim",
+            # refType: somente se existir
+            **({"refType": str(row['refType'])} if str(row['refType']) != 'nan' else {}),
+            }
+            for _, row in sheets["Mensurando"].iterrows()
+        ], 
+
+
+        # Measurement indices
+        "indices": [
+            {
+            "mensurando": str(row['mensurando']),
+            "label": str(row['label']),
+            "name": str(row['name']),
+            # refType: somente se existir
+            **({"refType": str(row['refType'])} if str(row['refType']) != 'nan' else {}),
+            # Conditionally add "unit" if the column exists
+            **({"unit": str(row['unit'])} if 'unit' in sheets["Índices"].columns else {})
+            }
+            for _, row in sheets["Índices"].iterrows()
+        ],        
+
+        
+        # Results with string preservation
+        "resultados": [
+            {col: str(row[col]) for col in row.index}
+            for _, row in sheets["Resultados"].iterrows()
+        ],
+        
+        # Observations
+        "observacoes": [
+            str(obs) for obs in 
+            sheets["Observações"]["Observações"].dropna().tolist()
+        ]
+    }
+
+    # Clean empty values from arrays
+    for item in data["informacoes_pertinentes"]:
+        item.pop('Unnamed: 0', None)
+        for k in list(item.keys()):
+            if item[k] is None:
+                del item[k]
+
+    # clean optional fields
+    if data['data_emissao'] == 'nan' :
+        del data['data_emissao']
+
+    if data['desc_chefe_div'] == 'nan' :
+        del data['desc_chefe_div']
+
+    if data['desc_chefe_lab'] == 'nan' :
+        del data['desc_chefe_lab']
+
+
+    # Save JSON
+    #with open(json_path, 'w', encoding='utf-8') as f:
+    #	json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+
+    return data
+
+
 def attach_stream(pdf, xml_stream, xml_filename, mime_type) :
     
     # Very important: Set the Subtype directly on the stream
@@ -626,11 +796,21 @@ def attach_xml_to_pdfa3b(pdf_path, xml_path, output_path):
     #print(f"XML file attached successfully to {output_path}")
 
 
-@app.route('/upload_xml')
+## ROTAS do webapp
+@app.route('/dcc')
+def landing_page():
+    return render_template('landing.html')
+
+@app.route('/dcc/api_doc')
+def api_doc():
+    return render_template('api_documentation.html')
+
+
+@app.route('/dcc/upload_xml')
 def upload_xml():
     return render_template('upload_xml.html')
 
-@app.route('/upload_json', methods=['GET', 'POST'])
+@app.route('/dcc/upload_json', methods=['GET', 'POST'])
 def upload_json():
     if request.method == 'POST':
         # Check if a file was uploaded
@@ -653,7 +833,7 @@ def upload_json():
 
             # Send to API endpoint
             response = requests.post(
-                'http://dccgenerator/generate',
+                'http://dccgenerator/dcc/generate',
                 json=json_data,
                 headers={'Content-Type': 'application/json'}
             )
@@ -686,19 +866,68 @@ def upload_json():
     # GET request - show upload form
     return render_template('upload_json.html')
 
-@app.route('/')
-def landing_page():
-    return render_template('landing.html')
 
-@app.route('/api_doc')
-def api_documentation():
-    return render_template('api_documentation.html')
+@app.route('/dcc/upload_xls', methods=['GET', 'POST'])
+def upload_xls():
+    if request.method == 'POST':
 
-# TODO
-# criar interface para upload do PDF e XML
+        # Check if a file was uploaded
+        if 'xls_file' not in request.files:
+            return 'erro'
+            
+        file = request.files['xls_file']
+        
+        # Check if file was selected
+        if file.filename == '':
+            return 'No selected file'
+            
+        # Check if it's a JSON file
+        if not file.filename.lower().endswith('.xlsx'):
+            return 'Invalid file type. Please upload a XLSX file'
+            
+        try:
+            # Parse the JSON file
+            json_data = excel_to_json(file.stream)
+
+            # Send to API endpoint
+            response = requests.post(
+                'http://dccgenerator/dcc/generate',
+                json=json_data,
+                headers={'Content-Type': 'application/json'}
+            )
+
+            # Check for API errors
+            if response.status_code != 200:
+                error_msg = f"API Error: {response.status_code} - {response.text}"
+                return error_msg
+                
+            # Extract filename from API response headers if available
+            content_disposition = response.headers.get('Content-Disposition', '')
+            if 'filename=' in content_disposition:
+                filename = content_disposition.split('filename=')[1].strip('"')
+            else:
+                # Generate a default filename
+                filename = f"dcc_{json_data.get('num_certif', 'certificate').replace('/', '_')}.xml"
+            
+            # Return XML file for download
+            return Response(
+                response.content,
+                mimetype='text/xml',
+                headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+            )
+            
+        except json.JSONDecodeError:
+            return 'Invalid JSON format'
+        except Exception as e:
+            return f'Error processing file: {str(e)}'
+    
+    # GET request - show upload form
+    return render_template('upload_xls.html')
+
+
 
 # embutir XML no PDF
-@app.route('/pdf_attach', methods = ['POST'])
+@app.route('/dcc/pdf_attach', methods = ['POST'])
 def pdf_attach():
     if request.method == 'POST' :
         if 'pdf_file' not in request.files :
@@ -745,7 +974,7 @@ def pdf_attach():
 ## TODO ##
 # modularidade: as funcoes podem ficar em arquivos separados, mantendo a versao AWS funcional e atualizada
 
-@app.route('/generate', methods=['POST'])
+@app.route('/dcc/generate', methods=['POST'])
 def generate_dcc():
     # Get JSON data from request body
     try:

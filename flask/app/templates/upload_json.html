@@ -24,7 +24,10 @@
 <body>
     <div class="container">
         <h1>Gerar DCC a partir de arquivo JSON</h1>
-        <form action="./upload_json" method="post" enctype="multipart/form-data">
+	<a href="{{ url_for('static', filename='examples/dcc_json.json') }}" download target="_blank">Exemplo de arquivo JSON</a>
+	<br/>
+	<br/>
+        <form action="{{ url_for('upload_json') }}" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="json_file">Arquivo JSON:</label>
                 <input type="file" name="json_file" accept=".json" required>

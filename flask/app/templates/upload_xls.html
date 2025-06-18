@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerar DCC a partir de Planilha Excel</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="file"] { padding: 10px; border: 1px solid #ddd; width: 100%; }
+        button { 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%;
+        }
+        button:hover { background-color: #45a049; }
+        .container { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        h1 { text-align: center; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerar DCC a partir de planilha Excel</h1>
+	<a href="{{ url_for('static', filename='examples/dcc_excel.xlsx') }}" download target="_blank">Exemplo de planilha Excel</a>
+	<br/>
+	<br/>
+        <form action="{{ url_for('upload_xls') }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="xls_file">Planilha Excel:</label>
+                <input type="file" name="xls_file" accept=".xlsx" required>
+            </div>
+            
+            <button type="submit">Incluir</button>
+        </form>
+    </div>
+</body>
+</html>
