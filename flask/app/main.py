@@ -56,6 +56,7 @@ schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schem
 
 app = Flask(__name__)
 app.debug = True
+# TODO: remover flash ou aprender a usar corretamente
 app.secret_key = 'your_secret_key'
 
 # funcoes auxiliares
@@ -657,11 +658,11 @@ def upload_json():
 
             # Send to API endpoint
             response = requests.post(
-                'http://sgddev-dccgenerator-1/generate',
+                'http://dccgenerator/generate',
                 json=json_data,
                 headers={'Content-Type': 'application/json'}
             )
-            return response
+
             # Check for API errors
             if response.status_code != 200:
                 error_msg = f"API Error: {response.status_code} - {response.text}"
