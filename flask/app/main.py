@@ -30,7 +30,7 @@ __author_email__="gmgeronymo@inmetro.gov.br"
 # bibliotecas
 import json
 from lxml import etree
-from flask import Flask, jsonify, request, abort, Response, send_file, render_template, redirect, flash
+from flask import Flask, jsonify, request, abort, Response, send_file, render_template, redirect
 import requests
 from werkzeug.utils import secure_filename
 
@@ -56,8 +56,6 @@ schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schem
 
 app = Flask(__name__)
 app.debug = True
-# TODO: remover flash ou aprender a usar corretamente
-app.secret_key = 'your_secret_key'
 
 # funcoes auxiliares
 
@@ -637,20 +635,17 @@ def upload_json():
     if request.method == 'POST':
         # Check if a file was uploaded
         if 'json_file' not in request.files:
-            flash('No file part', 'error')
-            return redirect(request.url)
+            return 'erro'
             
         file = request.files['json_file']
         
         # Check if file was selected
         if file.filename == '':
-            flash('No selected file', 'error')
-            return redirect(request.url)
+            return 'No selected file'
             
         # Check if it's a JSON file
         if not file.filename.lower().endswith('.json'):
-            flash('Invalid file type. Please upload a JSON file', 'error')
-            return redirect(request.url)
+            return 'Invalid file type. Please upload a JSON file'
             
         try:
             # Parse the JSON file
@@ -666,8 +661,7 @@ def upload_json():
             # Check for API errors
             if response.status_code != 200:
                 error_msg = f"API Error: {response.status_code} - {response.text}"
-                flash(error_msg, 'error')
-                return redirect(request.url)
+                return error_msg
                 
             # Extract filename from API response headers if available
             content_disposition = response.headers.get('Content-Disposition', '')
@@ -685,11 +679,9 @@ def upload_json():
             )
             
         except json.JSONDecodeError:
-            flash('Invalid JSON format', 'error')
-            return redirect(request.url)
+            return 'Invalid JSON format'
         except Exception as e:
-            flash(f'Error processing file: {str(e)}', 'error')
-            return redirect(request.url)
+            return f'Error processing file: {str(e)}'
     
     # GET request - show upload form
     return render_template('upload_json.html')
