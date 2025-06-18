@@ -801,6 +801,28 @@ def attach_xml_to_pdfa3b(pdf_path, xml_path, output_path):
 def landing_page():
     return render_template('landing.html')
 
+@app.route('/dcc/publications')
+def publications():
+    papers = [
+        {
+            'title': 'DCC Tools Abstract',
+            'file': 'P04_Gean-Geronymo_abstract.pdf'
+        },
+        {
+            'title': 'DCC Tools Presentation Slides',
+            'file': 'P04_Gean-Geronymo_slides.pdf'
+        },
+        {
+            'title': 'DCC Tools Video Presentation',
+            'file': 'P04_Gean-Geronymo_DCC-Tools.mp4'
+        },
+        {
+            'title': 'Metrologia 2023 Paper',
+            'file': 'paper_metrologia2023.pdf'
+        }
+    ]
+    return render_template('publications.html', papers=papers)
+
 @app.route('/dcc/api_doc')
 def api_doc():
     return render_template('api_documentation.html')

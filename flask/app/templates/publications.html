@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicações - DCC</title>
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-top: 2rem;
+        }
+        .publications-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .publication-item {
+            padding: 1.25rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .publication-item:hover {
+            background-color: #f8f9fa;
+        }
+        .publication-item:last-child {
+            border-bottom: none;
+        }
+        .file-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            border-radius: 4px;
+            color: white;
+        }
+        .pdf-icon {
+            background-color: #e63946;
+        }
+        .video-icon {
+            background-color: #4361ee;
+        }
+        .btn-download {
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="publications-container">
+            <div class="page-header">
+                <h1>Publicações</h1>
+                <p class="text-muted">Trabalhos e publicações sobre DCC</p>
+            </div>
+            
+            <div class="list-group">
+                {% for paper in papers %}
+                <div class="publication-item">
+                    <div class="file-icon {{ 'pdf-icon' if paper.file.endswith('.pdf') else 'video-icon' }}">
+                        <i class="fas {{ 'fa-file-pdf' if paper.file.endswith('.pdf') else 'fa-file-video' }}"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">{{ paper.title }}</h5>
+                        <small class="text-muted">{{ paper.file }}</small>
+                    </div>
+                    <a href="{{ url_for('static', filename='papers/' + paper.file) }}" 
+                       class="btn btn-outline-primary btn-download" download>
+                        <i class="fas fa-download me-1"></i> Download
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 mt-4 text-muted">
+        <p>&copy; 2025 Inmetro DCC</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>
