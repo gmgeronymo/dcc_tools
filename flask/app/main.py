@@ -797,7 +797,7 @@ def attach_xml_to_pdfa3b(pdf_path, xml_path, output_path):
 
 
 ## ROTAS do webapp
-@app.route('/dcc')
+@app.route('/dcc/')
 def landing_page():
     return render_template('landing.html')
 
