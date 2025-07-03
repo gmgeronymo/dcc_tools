@@ -129,6 +129,7 @@
                         <li><a href="#measurand">Mensurando</a></li>
                         <li><a href="#indices">Índices</a></li>
                         <li><a href="#results">Resultados</a></li>
+			<li><a href="#obs">Observações</a></li>
                         <li><a href="#full-example">Exemplo Completo</a></li>
                     </ul>
                 </div>
@@ -382,7 +383,8 @@
                     <h2 class="section-title">RefTypeDefinitions</h2>
                     <div class="card">
                         <div class="card-body">
-                            <p>Array com definições de refTypes adicionais</p>
+                            <p>Array com definições de refTypes adicionais.</p>
+			    <p>Obs.: o refType basic é sempre incluído por padrão. Utilizar esse campo apenas para definir refTypes adicionais.</p>
                             <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
                             <p><strong>Documentação:</strong> <a href="https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2&/basic" target="_blank">https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2&/basic</a></p>
                             
@@ -968,6 +970,24 @@
                     </div>
                 </div>
 
+		<!-- Observações -->
+                <div class="page-section" id="obs">
+                    <h2 class="section-title">Observações</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Array de strings com as observações (opcional)</p>
+                            <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
+                            
+                            <h5 class="mt-4">Exemplo:</h5>
+                            <div class="example-box">"observacoes": [
+	"Obs. 1: Texto da primeira observação",
+	"Obs. 2: Texto da segunda observação"
+]</div>
+
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Exemplo Completo -->
                 <div class="page-section" id="full-example">
                     <h2 class="section-title">Exemplo Completo</h2>
@@ -1126,6 +1146,10 @@
             "unc": "37",
             "k": "2.28"
         }
+    ],
+    "observacoes": [
+	"Obs. 1: Texto da primeira observação",
+	"Obs. 2: Texto da segunda observação"
     ]
 }</div>
                         </div>
