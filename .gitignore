@@ -1,4 +1,5 @@
-curl_scripts/endpoints.txt
+aws_lambda/curl_scripts/endpoints.txt
 aws_lambda/dccSpreadsheet/code/__pycache__/*
 aws_lambda/dccSpreadsheet/code/myenv/*
 aws_lambda/dccPdfAttach/code/example/*
+flask/app/__pycache__/*
