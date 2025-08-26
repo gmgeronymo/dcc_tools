@@ -1,12 +1,22 @@
+## DCC TOOLS
+
 Repository with open source tools for working with Digital Calibration Certificates (DCC).
 
-It is still a work in progress.
+# Python Flask (current version)
 
-The python scripts were developed to work with AWS Lambda, but you can adapt them to run locally.
+The current version is built using Python Flask framework, and it is available in the flask directory.
+A docker-compose.yml file is available. You can build the project using the build.sh script (inside flask directory) and then run the project with
 
-To use with AWS Lambda you need to create a Lambda layer with the library lxml. You can use the file dcclayer.zip in the aws_lambda directory. Just create an AWS Lambda layer using this file and add it to the lambda functions.
+```bash
+docker compose up -d
+```
 
-In the curl_scripts directory you can find some bash scripts to interact with the AWS Lambda functions using curl.
+By the default the project will run on http://localhost:9099 (you can adjust the port in the docker-compose.yml file).
 
-In the examples directory you can find an example of a DCC generated using the scripts. There is a human-readable version and a XML withe human-readable pdf attached.
+You can access the system on the url http://localhost:9099/dcc
+
+# AWS Lambda (old version)
+
+The initial version was built using AWS Lambda, and is available in aws_lambda directory. This version is not updated anymore.
+
 
