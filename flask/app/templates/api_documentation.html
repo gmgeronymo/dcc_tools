@@ -994,7 +994,8 @@
                     <div class="card">
                         <div class="card-header">Exemplo de JSON Completo</div>
                         <div class="card-body">
-                            <div class="example-box">{
+                            <div class="example-box">
+{
     "nome_lab": "Laboratório de Metrologia em Padronização Elétrica",
     "sigla_lab": "Lampe",
     "nome_div": "Divisão de Metrologia Elétrica",
@@ -1151,7 +1152,9 @@
 	"Obs. 1: Texto da primeira observação",
 	"Obs. 2: Texto da segunda observação"
     ]
-}</div>
+}
+
+			    </div>
                         </div>
                     </div>
                 </div>
@@ -1167,7 +1170,7 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}"></script>
     <script>
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
