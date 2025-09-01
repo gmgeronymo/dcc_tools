@@ -12,7 +12,7 @@
   "cod_identificacao": "PT-030",
   "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
   "data_calibracao": "2024-08-07",
-	"data_emissao": "2024-08-07",
+  "data_emissao": "2024-08-07",
   "cmc": true,
   "chefe_div": "Edson Afonso",
   "chefe_lab": "Gean Marcos Geronymo",
@@ -140,7 +140,7 @@
       "frequency": "0.01",
       "value": "-280",
       "unc": "44",
-      "k": "2.13",
+      "k": "2.13"
     },
     {
       "mensurando": "acdc",
