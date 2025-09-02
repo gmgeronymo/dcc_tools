@@ -34,6 +34,12 @@ from flask import Flask, jsonify, request, abort, Response, send_file, render_te
 import requests
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
+from urllib.parse import urlparse
+from werkzeug.utils import secure_filename
+import os
+import re
+import tempfile
+import shutil
 
 
 # PDF attach
@@ -832,6 +838,44 @@ def api_doc():
 def upload_xml():
     return render_template('upload_xml.html')
 
+@app.route('/dcc/validate_xml', methods=['GET', 'POST'])
+def validate_xml():
+    if request.method == 'POST':
+        # Check if the post request has the file part
+        if 'xml_file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
+    
+        file = request.files['xml_file']
+    
+        # If the user does not select a file
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+    
+        # Validate the file
+        try:
+            # Create a temporary file for the uploaded XML
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xml') as tmp_file:
+                file.save(tmp_file.name)
+                tmp_xml_path = tmp_file.name
+            
+                # Validate the XML
+                is_valid, errors = validate_dcc_xml_upload(tmp_xml_path)
+        
+                # Clean up
+                os.unlink(tmp_xml_path)
+                
+                if is_valid:
+                    return Response("XML is valid", status=200, mimetype='text/plain')
+                else:
+                    error_message = "XML is invalid\n" + "\n".join(errors)
+                    return Response(error_message, status=400, mimetype='text/plain')
+            
+        except Exception as e:
+            return jsonify({'error': f'Validation failed: {str(e)}'}), 500
+                
+    ## GET Request - exibe formulario de upload
+    return render_template('validate_xml.html')
+
 @app.route('/dcc/upload_json', methods=['GET', 'POST'])
 def upload_json():
     if request.method == 'POST':
@@ -1036,7 +1080,117 @@ def generate_dcc():
         headers={'Content-Disposition': f'attachment; filename="{filename}"'}
     )
 
+# validacao do XML
+def validate_dcc_xml_upload(xml_path):
+    """
+    Validate a DCC XML file from an uploaded file
+    
+    Args:
+        xml_path (str): Path to the temporary XML file
+    
+    Returns:
+        tuple: (is_valid, list_of_errors)
+    """
+    # Create a temporary directory for all XSD files
+    temp_dir = tempfile.mkdtemp()
+    errors = []
+    
+    try:
+        # Read the XML file
+        with open(xml_path, 'r') as f:
+            xml_content = f.read()
         
+        # Extract the schema URL from the XML
+        schema_match = re.search(r'xsi:schemaLocation="[^"]*\.xsd"', xml_content)
+        if not schema_match:
+            raise ValueError("schemaLocation attribute not found or doesn't contain XSD")
+        
+        schema_location = schema_match.group(0)
+        schema_url = schema_location.split()[-1].replace('"', '').strip()
+        
+        # Download the main XSD file
+        main_xsd_name = os.path.basename(urlparse(schema_url).path)
+        main_xsd_path = os.path.join(temp_dir, main_xsd_name)
+        
+        download_file(schema_url, main_xsd_path)
+        
+        # Process dependencies in the main XSD
+        process_xsd_dependencies(main_xsd_path, temp_dir)
+        
+        # Validate the XML using the main XSD
+        is_valid, validation_errors = validate_with_xsd(xml_path, main_xsd_path)
+        errors.extend(validation_errors)
+        
+        return is_valid, errors
+    
+    finally:
+        # Clean up the temporary directory
+        shutil.rmtree(temp_dir)
+
+def download_file(url, local_path):
+    """Download a file from a URL to a local path"""
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        
+        with open(local_path, 'w', encoding='utf-8') as f:
+            f.write(response.text)
+    except Exception as e:
+        raise Exception(f"Failed to download file from {url}: {str(e)}")
+
+def process_xsd_dependencies(xsd_path, temp_dir):
+    """Process an XSD file to download its dependencies and update references"""
+    with open(xsd_path, 'r', encoding='utf-8') as f:
+        xsd_content = f.read()
+    
+    # Find all schemaLocation attributes in the XSD
+    schema_locations = re.findall(r'schemaLocation="([^"]*)"', xsd_content)
+    
+    for schema_url in schema_locations:
+        # Download the dependency
+        dep_xsd_name = os.path.basename(urlparse(schema_url).path)
+        dep_xsd_path = os.path.join(temp_dir, dep_xsd_name)
+        
+        download_file(schema_url, dep_xsd_path)
+        
+        # Update the main XSD to reference the local file
+        xsd_content = xsd_content.replace(schema_url, dep_xsd_name)
+        
+        # Recursively process dependencies of this dependency
+        process_xsd_dependencies(dep_xsd_path, temp_dir)
+    
+    # Write the updated content back to the main XSD
+    with open(xsd_path, 'w', encoding='utf-8') as f:
+        f.write(xsd_content)
+
+def validate_with_xsd(xml_path, xsd_path):
+    """Validate an XML file against an XSD schema"""
+    errors = []
+    
+    try:
+        # Parse the XML and XSD
+        xml_doc = etree.parse(xml_path)
+        xsd_doc = etree.parse(xsd_path)
+        
+        # Create a schema validator
+        xml_schema = etree.XMLSchema(xsd_doc)
+        
+        # Validate the XML
+        is_valid = xml_schema.validate(xml_doc)
+        
+        if not is_valid:
+            for error in xml_schema.error_log:
+                errors.append(f"Line {error.line}: {error.message}")
+        
+        return is_valid, errors
+        
+    except etree.XMLSyntaxError as e:
+        errors.append(f"XML syntax error: {str(e)}")
+        return False, errors
+    except Exception as e:
+        errors.append(f"Validation error: {str(e)}")
+        return False, errors
+
 if __name__ == "__main__":
     # Only for debugging while developing
     app.run(host='0.0.0.0', debug=True, port=80)
