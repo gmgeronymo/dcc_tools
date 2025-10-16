@@ -21,11 +21,15 @@
 
 # dados do programa
 # parametros do programa
-__version__ = '1.0'
-__date__="12/06/2025"
+__version__ = '1.1'
+__date__="16/10/2025"
 __appname__="dccGenerator"
 __author__="Gean Marcos Geronymo"
 __author_email__="gmgeronymo@inmetro.gov.br"
+
+# versao 1.1 (16/10/2025)
+# refType nao eh mais adicionado por padrao
+# solucao temporaria enquanto ontologia brasileira nao for desenvolvida
 
 # bibliotecas
 import json
@@ -56,14 +60,6 @@ import pandas as pd
 nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb.de/dcc', 'si': 'https://ptb.de/si'}
 # schema
 schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation")
-
-#import os
-
-
-# biblioteca potenciometrico
-#import potenciometrico
-# biblioteca capacitores
-#import capacitor
 
 app = Flask(__name__, static_url_path='/dcc/static')
 app.debug = True
@@ -151,29 +147,31 @@ def dccGen(dcc_version, dados, declaracao) :
 
     # refTypes
     # campos opcionais porem muito uteis para o processamento automatizado dos DCCs
-    refTypeDefinitions = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
+    #refTypeDefinitions = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
     # definicao do namespace basic - incluida por padrao
-    refTypeDefinition = etree.SubElement(refTypeDefinitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
+    ## 16/10/2025 - removido como padrao - pode ser enviado como opcional
+    #refTypeDefinition = etree.SubElement(refTypeDefinitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
     #content_basic_en = "Namespace for Cross-Community RefTypes"
     #campo_name(refTypeDefinition,content_basic_en,'en')
-    content_basic_pt = "Espaço de nomes com RefTypes comuns a múltiplas áreas"
-    campo_name(refTypeDefinition,content_basic_pt)
+    #content_basic_pt = "Espaço de nomes com RefTypes comuns a múltiplas áreas"
+    #campo_name(refTypeDefinition,content_basic_pt)
 
-    description = etree.SubElement(refTypeDefinition, etree.QName(nsmap['dcc'], 'description'))
+    #description = etree.SubElement(refTypeDefinition, etree.QName(nsmap['dcc'], 'description'))
     #desc_basic_en = "The 'basic' namespace contains RefTypes common for multiple communities."
     #campo_texto(description,'content',desc_basic_en,'en')
-    desc_basic_pt = "O espaço de nomes 'basic' contém RefTypes comuns a múltiplas áreas."
-    campo_texto(description,'content',desc_basic_pt)
+    #desc_basic_pt = "O espaço de nomes 'basic' contém RefTypes comuns a múltiplas áreas."
+    #campo_texto(description,'content',desc_basic_pt)
 
     # namespace
-    campo_texto(refTypeDefinition,'namespace','basic')
+    #campo_texto(refTypeDefinition,'namespace','basic')
     # link
-    campo_texto(refTypeDefinition,'link','https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2')
+    #campo_texto(refTypeDefinition,'link','https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2')
 
     # possibilidade de receber mais definicoes de refTypes via API
     # chave: refTypeDefinitions
     # subchaves: name, description, namespace e link
     if 'refTypeDefinitions' in dados:
+        refTypeDefinitions = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
         for refTypeDef in dados['refTypeDefinitions'] :
                 refTypeDefinition = etree.SubElement(refTypeDefinitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
                 campo_name(refTypeDefinition,refTypeDef['name'])
@@ -233,7 +231,9 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_texto(item,'model',dados['modelo'])
     item_identifications = etree.SubElement(item, etree.QName(nsmap['dcc'], 'identifications'))
     # numero de serie
-    item_ns = etree.SubElement(item_identifications, etree.QName(nsmap['dcc'], 'identification'), refType="basic_serialNumber")
+    #item_ns = etree.SubElement(item_identifications, etree.QName(nsmap['dcc'], 'identification'), refType="basic_serialNumber")
+    item_ns = etree.SubElement(item_identifications, etree.QName(nsmap['dcc'], 'identification'))
+    
     campo_texto(item_ns,'issuer','manufacturer')
     campo_texto(item_ns,'value',dados['num_serie'])
     campo_name(item_ns,'Número de Série')
@@ -349,7 +349,8 @@ def dccGen(dcc_version, dados, declaracao) :
 
     # metodo de medicao
     for i, metodo_medicao in enumerate(declaracao['metodo_medicao']) :
-        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_calibrationMethod")
+        #usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_calibrationMethod")
+        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
         campo_name(usedMethod,'Método de Medição')
         description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
       
@@ -362,7 +363,8 @@ def dccGen(dcc_version, dados, declaracao) :
                 campo_texto(formula, 'latex', dados['metodo_medicao_equation'][i])
 
     # incerteza
-    usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_methodMeasurementUncertainty")
+    #usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_methodMeasurementUncertainty")
+    usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
     campo_name(usedMethod,'Declaração da Incerteza de Medição')
     description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
     campo_texto(description,'content',declaracao['incerteza'])
