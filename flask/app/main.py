@@ -555,7 +555,7 @@ def excel_to_json(excel_path):
     sheets = pd.read_excel(excel_path, sheet_name=[
         "Metadados Principais",
         "Software",
-        "RefTypeDefinitions",
+        #"RefTypeDefinitions",
         "Cliente",
         "Informações Pertinentes",  # Updated sheet name
         "Declarações",
@@ -610,10 +610,10 @@ def excel_to_json(excel_path):
             for _, row in sheets["Software"].iterrows()
         ],
 
-        "refTypeDefinitions": [
-            {k: str(v) if pd.notnull(v) else None for k, v in row.items()}
-            for _, row in sheets["RefTypeDefinitions"].iterrows()
-        ],
+        # "refTypeDefinitions": [
+        #     {k: str(v) if pd.notnull(v) else None for k, v in row.items()}
+        #     for _, row in sheets["RefTypeDefinitions"].iterrows()
+        # ],
         
         # Client information
         "cliente": sheets["Cliente"].iloc[0].to_dict(),
