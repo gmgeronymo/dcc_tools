@@ -843,6 +843,10 @@ def api_doc():
 def exemplos():
     return render_template('exemplos.html')
 
+@app.route('/dcc/faq')
+def faq():
+    return render_template('faq.html')
+
 @app.route('/dcc/upload_xml')
 def upload_xml():
     return render_template('upload_xml.html')

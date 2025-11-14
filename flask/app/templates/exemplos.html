@@ -144,13 +144,21 @@
 			    <h4> Arquivos de origem </h4>
 			    <p> Disponibilizamos aqui os arquivos de origem usados para gerar o DCC. </p>
 			    <p> O arquivo JSON pode ser enviado diretamente via API ou através do <a href="{{ url_for('upload_json') }}">formulário</a>. </p>
-			    <p> Em breve vamos disponibilizar a planilha Excel. </p>
-			    <p>Resistência em Corrente Contínua (arquivo JSON de origem para construir o DCC)
+			    <p>Resistência em Corrente Contínua (dados em formato JSON utilizados para construir o DCC)
 				<a href="{{ url_for('static', filename='examples/CC_DIMCI_0496_2025.json') }}" 
 				   class="btn btn-outline-primary btn-download" download>
 				    <i class="fas fa-download me-1"></i> 
 				</a>
 			    </p>
+
+			    <p> A planilha Excel pode ser enviada através do <a href="{{ url_for('upload_xls') }}">formulário</a>. </p>
+			    <p>Resistência em Corrente Contínua (dados em formato planilha Excel utilizados para construir o DCC)
+				<a href="{{ url_for('static', filename='examples/CC_DIMCI_0496_2025.xlsx') }}" 
+				   class="btn btn-outline-primary btn-download" download>
+				    <i class="fas fa-download me-1"></i> 
+				</a>
+			    </p>
+			    
 			    
 			</div>
 		    </div>
@@ -175,7 +183,7 @@
 			    <p> Disponibilizamos aqui os arquivos de origem usados para gerar o DCC. </p>
 			    <p> O arquivo JSON pode ser enviado diretamente via API ou através do <a href="{{ url_for('upload_json') }}">formulário</a>. </p>
 			    <p> Em breve vamos disponibilizar a planilha Excel. </p>
-			    <p>Resistência em Corrente Alternada (arquivo JSON de origem para construir o DCC)
+			    <p>Resistência em Corrente Alternada (dados em formato JSON utilizados para construir o DCC)
 				<a href="{{ url_for('static', filename='examples/CC_DIMCI_0515_2025.json') }}" 
 				   class="btn btn-outline-primary btn-download" download>
 				    <i class="fas fa-download me-1"></i> 
@@ -204,7 +212,7 @@
 			    <p> Disponibilizamos aqui os arquivos de origem usados para gerar o DCC. </p>
 			    <p> O arquivo JSON pode ser enviado diretamente via API ou através do <a href="{{ url_for('upload_json') }}">formulário</a>. </p>
 			    <p> Em breve vamos disponibilizar a planilha Excel. </p>
-			    <p>Transferência AC-DC em tensão (arquivo JSON de origem para construir o DCC)
+			    <p>Transferência AC-DC em tensão (dados em formato JSON utilizados para construir o DCC)
 				<a href="{{ url_for('static', filename='examples/CC_DIMCI_0856_2024.json') }}" 
 				   class="btn btn-outline-primary btn-download" download>
 				    <i class="fas fa-download me-1"></i> 
