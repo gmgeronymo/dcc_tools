@@ -1,0 +1,96 @@
+{
+  "nome_lab": "Laboratório de Metrologia em Padronização Elétrica",
+  "sigla_lab": "Lampe",
+  "nome_div": "Divisão de Metrologia Elétrica",
+  "sigla_div": "Diele",
+  "num_certif": "0515/2025",
+  "num_processo": "0052600.002236/2025-81",
+  "tipo_item": "Resistor Padrão",
+  "fabricante": null,
+  "modelo": null,
+  "num_serie": "15",
+  "cod_identificacao": null,
+  "caracteristicas_item": "Resistência Nominal: 1 kΩ",
+  "data_calibracao": "2025-05-08",
+  "cmc": true,
+  "chefe_div": "Rodrigo Simões Ribeiro",
+  "chefe_lab": "Gean Marcos Geronymo",
+  "tecnico_executor": "Gean Marcos Geronymo",
+  "desc_tecnico_executor": "Técnico Executor",
+  "software": [
+    {
+      "name": "SYS-LAMPE",
+      "version": "v"
+    }
+  ],
+  "cliente": {
+    "nome": "Inmetro/Dimci/Diele/Lampe",
+    "email": "lampe@inmetro.gov.br",
+    "cidade": "Duque de Caxias",
+    "pais": "BR",
+    "cep": "25250-020",
+    "uf": "RJ",
+    "endereco": "Av. Nossa Senhora das Graças",
+    "numero": "50"
+  },
+  "informacoes_pertinentes": [
+    {
+      "name": "Temperatura no banho de ar",
+      "value": "22.95",
+      "unc": "0.11",
+      "unit": "\\degreecelsius"
+    },
+    {
+      "name": "Umidade relativa",
+      "value": "52.2",
+      "unc": "1.6",
+      "unit": "\\percent"
+    }
+  ],
+  "declaracao_rastreabilidade": "Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI), por intermédio dos padrões metrológicos nacionais. As medições realizadas estão referenciadas ao padrão primário de resistência elétrica do Inmetro, baseado na constante de von Klitzing (efeito Hall quântico) e estabelecido através das comparações chave BIPM.EM-K13.a e BIPM.EM-K13.b de 2022. As medições realizadas estão referenciadas aos padrões relacionados.",
+  "tabela_rastreabilidade": [
+    {
+      "name": "Resistor Padrão",
+      "origem": "Inmetro",
+      "certificado": "DIMCI 0399/2025",
+      "cod_id": "Lampe TR 699"
+    },
+    {
+      "name": "Resistor Padrão",
+      "origem": "Inmetro",
+      "certificado": "DIMCI 0492/2025",
+      "cod_id": "Lampe PR 484"
+    }
+  ],
+  "declaracao_incerteza": "As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.",
+  "metodo_medicao": [
+    "O resultado fornecido refere-se ao valor médio de seis séries de trinta medições pelo método de comparação de corrente na configuração de 04 (quatro) terminais. Utilizou-se uma ponte automática de resistência modelo 6010D."
+  ],
+  "mensurando": [
+    {
+      "label": "rstdc",
+      "name": "Resistência em Corrente Contínua",
+      "col_name": "V.m.",
+      "unit": "\\kilo\\ohm",
+      "unc_relativa": true
+    }
+  ],
+  "indices": [
+    {
+      "mensurando": "rstdc",
+      "label": "current",
+      "name": "Corrente",
+      "unit": "\\milli\\ampere"
+    }
+  ],
+  "resultados": [
+    {
+      "mensurando": "rstdc",
+      "current": "5",
+      "value": "999.99408",
+      "unc": "0.15",
+      "k": "2"
+    }
+  ],
+  "observacoes": []
+}
