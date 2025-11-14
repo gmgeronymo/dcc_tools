@@ -1,0 +1,277 @@
+<?xml version='1.0' encoding='utf-8'?>
+<dcc:digitalCalibrationCertificate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dcc="https://ptb.de/dcc" xmlns:si="https://ptb.de/si" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.2.0/dcc.xsd" schemaVersion="3.2.0">
+  <dcc:administrativeData>
+    <dcc:dccSoftware>
+      <dcc:software>
+        <dcc:name>
+          <dcc:content lang="pt">dccGenerator</dcc:content>
+        </dcc:name>
+        <dcc:release>1.1</dcc:release>
+      </dcc:software>
+      <dcc:software>
+        <dcc:name>
+          <dcc:content lang="pt">SYS-LAMPE</dcc:content>
+        </dcc:name>
+        <dcc:release>v2.3-103-14bfd50</dcc:release>
+      </dcc:software>
+    </dcc:dccSoftware>
+    <dcc:coreData>
+      <dcc:countryCodeISO3166_1>BR</dcc:countryCodeISO3166_1>
+      <dcc:usedLangCodeISO639_1>pt</dcc:usedLangCodeISO639_1>
+      <dcc:mandatoryLangCodeISO639_1>pt</dcc:mandatoryLangCodeISO639_1>
+      <dcc:uniqueIdentifier>DIMCI 0496/2025</dcc:uniqueIdentifier>
+      <dcc:identifications>
+        <dcc:identification>
+          <dcc:issuer>calibrationLaboratory</dcc:issuer>
+          <dcc:value>0052600.002236/2025-81</dcc:value>
+          <dcc:name>
+            <dcc:content lang="pt">Processo Inmetro</dcc:content>
+          </dcc:name>
+        </dcc:identification>
+      </dcc:identifications>
+      <dcc:beginPerformanceDate>2025-04-04</dcc:beginPerformanceDate>
+      <dcc:endPerformanceDate>2025-04-04</dcc:endPerformanceDate>
+      <dcc:performanceLocation>laboratory</dcc:performanceLocation>
+    </dcc:coreData>
+    <dcc:items>
+      <dcc:item>
+        <dcc:name>
+          <dcc:content lang="pt">Resistor Padrão</dcc:content>
+        </dcc:name>
+        <dcc:manufacturer>
+          <dcc:name>
+            <dcc:content lang="pt">Inmetro</dcc:content>
+          </dcc:name>
+        </dcc:manufacturer>
+        <dcc:model>RST-AC</dcc:model>
+        <dcc:identifications>
+          <dcc:identification>
+            <dcc:issuer>manufacturer</dcc:issuer>
+            <dcc:value>14</dcc:value>
+            <dcc:name>
+              <dcc:content lang="pt">Número de Série</dcc:content>
+            </dcc:name>
+          </dcc:identification>
+          <dcc:identification>
+            <dcc:issuer>customer</dcc:issuer>
+            <dcc:value>TR 486</dcc:value>
+            <dcc:name>
+              <dcc:content lang="pt">Código de Identificação</dcc:content>
+            </dcc:name>
+          </dcc:identification>
+        </dcc:identifications>
+      </dcc:item>
+    </dcc:items>
+    <dcc:calibrationLaboratory>
+      <dcc:contact>
+        <dcc:name>
+          <dcc:content lang="pt">Laboratório de Metrologia em Padronização Elétrica(Lampe)</dcc:content>
+        </dcc:name>
+        <dcc:eMail>samci@inmetro.gov.br</dcc:eMail>
+        <dcc:phone>+55 21 2679 9077/9010</dcc:phone>
+        <dcc:location>
+          <dcc:city>Xerém - Duque de Caxias</dcc:city>
+          <dcc:countryCode>BR</dcc:countryCode>
+          <dcc:postCode>25250-020</dcc:postCode>
+          <dcc:state>RJ</dcc:state>
+          <dcc:street>Av. Nossa Senhora das Graças</dcc:street>
+          <dcc:streetNo>50</dcc:streetNo>
+        </dcc:location>
+      </dcc:contact>
+    </dcc:calibrationLaboratory>
+    <dcc:respPersons>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="pt">Rodrigo Simões Ribeiro</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Chefe da Divisão de Metrologia Elétrica</dcc:role>
+        <dcc:mainSigner>true</dcc:mainSigner>
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="pt">Gean Marcos Geronymo</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Chefe do Laboratório de Metrologia em Padronização Elétrica</dcc:role>
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="pt">Gean Marcos Geronymo</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Técnico Executor</dcc:role>
+      </dcc:respPerson>
+    </dcc:respPersons>
+    <dcc:customer>
+      <dcc:name>
+        <dcc:content lang="pt">Inmetro/Dimci/Diele/Lampe</dcc:content>
+      </dcc:name>
+      <dcc:eMail>lampe@inmetro.gov.br</dcc:eMail>
+      <dcc:location>
+        <dcc:city>Duque de Caxias</dcc:city>
+        <dcc:countryCode>BR</dcc:countryCode>
+        <dcc:postCode>25250-020</dcc:postCode>
+        <dcc:state>RJ</dcc:state>
+        <dcc:street>Av. Nossa Senhora das Graças</dcc:street>
+        <dcc:streetNo>50</dcc:streetNo>
+      </dcc:location>
+    </dcc:customer>
+    <dcc:statements>
+      <dcc:statement>
+        <dcc:name>
+          <dcc:content lang="pt">Data de Emissão</dcc:content>
+        </dcc:name>
+        <dcc:description>
+          <dcc:content lang="pt">Ver data da assinatura eletrônica presente no certificado</dcc:content>
+        </dcc:description>
+      </dcc:statement>
+      <dcc:statement>
+        <dcc:name>
+          <dcc:content lang="pt">Características do Item</dcc:content>
+        </dcc:name>
+        <dcc:description>
+          <dcc:content lang="pt">Resistência Nominal: 100 kΩ</dcc:content>
+        </dcc:description>
+      </dcc:statement>
+      <dcc:statement>
+        <dcc:declaration>
+          <dcc:content lang="pt">Este certificado é consistente com as Capacidades de Medição e Calibração (CMCs) que estão incluídas no apêndice C do Acordo de Reconhecimento Mútuo (MRA) estabelecido pelo Comitê Internacional de Pesos e Medidas (CIPM). Conforme os termos do MRA, todos os institutos participantes reconhecem entre si a validade dos seus certificados de calibração e medição para cada uma das grandezas, faixas e incertezas de medição declaradas no Apêndice C (para maiores detalhes ver http://www.bipm.org).</dcc:content>
+        </dcc:declaration>
+      </dcc:statement>
+      <dcc:statement>
+        <dcc:norm>ABNT NBR ISO/IEC 17025</dcc:norm>
+        <dcc:declaration>
+          <dcc:content lang="pt">O presente certificado de calibração atende aos requisitos da norma ABNT NBR ISO/IEC 17025 e é válido apenas para o item acima caracterizado, não sendo extensivo a quaisquer outros. Este certificado de calibração somente pode ser reproduzido em sua forma integral. Reproduções parciais devem ser previamente autorizadas pelo Inmetro.</dcc:content>
+        </dcc:declaration>
+      </dcc:statement>
+    </dcc:statements>
+  </dcc:administrativeData>
+  <dcc:measurementResults>
+    <dcc:measurementResult>
+      <dcc:name>
+        <dcc:content lang="pt">Resultados e Declaração da Incerteza de Medição</dcc:content>
+      </dcc:name>
+      <dcc:usedMethods>
+        <dcc:usedMethod>
+          <dcc:name>
+            <dcc:content lang="pt">Método de Medição</dcc:content>
+          </dcc:name>
+          <dcc:description>
+            <dcc:content lang="pt">O resultado fornecido refere-se ao valor médio de três séries de seis medições pelo método de comparação potenciométrico por divisor de tensão binário na configuração de 04 (quatro) terminais. Utilizou-se uma ponte automática de resistência modelo 6000A.</dcc:content>
+          </dcc:description>
+        </dcc:usedMethod>
+        <dcc:usedMethod>
+          <dcc:name>
+            <dcc:content lang="pt">Declaração da Incerteza de Medição</dcc:content>
+          </dcc:name>
+          <dcc:description>
+            <dcc:content lang="pt">As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.</dcc:content>
+          </dcc:description>
+        </dcc:usedMethod>
+      </dcc:usedMethods>
+      <dcc:measuringEquipments>
+        <dcc:name>
+          <dcc:content lang="pt">Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI), por intermédio dos padrões metrológicos nacionais. As medições realizadas estão referenciadas ao padrão primário de resistência elétrica do Inmetro, baseado na constante de von Klitzing (efeito Hall quântico) e estabelecido através das comparações chave BIPM.EM-K13.a e BIPM.EM-K13.b de 2022. As medições realizadas estão referenciadas aos padrões relacionados.</dcc:content>
+        </dcc:name>
+        <dcc:measuringEquipment>
+          <dcc:name>
+            <dcc:content lang="pt">Resistor Padrão</dcc:content>
+          </dcc:name>
+          <dcc:certificate>
+            <dcc:referral>
+              <dcc:content lang="pt">Inmetro</dcc:content>
+            </dcc:referral>
+            <dcc:referralID>DIMCI 1263/2024</dcc:referralID>
+            <dcc:procedure>analog</dcc:procedure>
+            <dcc:value>analog</dcc:value>
+          </dcc:certificate>
+          <dcc:identifications>
+            <dcc:identification>
+              <dcc:issuer>calibrationLaboratory</dcc:issuer>
+              <dcc:value>Lampe PR 465</dcc:value>
+              <dcc:name>
+                <dcc:content lang="pt">Código de Identificação</dcc:content>
+              </dcc:name>
+            </dcc:identification>
+          </dcc:identifications>
+        </dcc:measuringEquipment>
+      </dcc:measuringEquipments>
+      <dcc:influenceConditions>
+        <dcc:influenceCondition>
+          <dcc:name>
+            <dcc:content lang="pt">Temperatura no banho de ar</dcc:content>
+          </dcc:name>
+          <dcc:data>
+            <dcc:quantity>
+              <si:real>
+                <si:value>23.06</si:value>
+                <si:unit>\degreecelsius</si:unit>
+                <si:expandedUnc>
+                  <si:uncertainty>0.07</si:uncertainty>
+                  <si:coverageFactor>2</si:coverageFactor>
+                  <si:coverageProbability>0.9545</si:coverageProbability>
+                </si:expandedUnc>
+              </si:real>
+            </dcc:quantity>
+          </dcc:data>
+        </dcc:influenceCondition>
+        <dcc:influenceCondition>
+          <dcc:name>
+            <dcc:content lang="pt">Umidade relativa</dcc:content>
+          </dcc:name>
+          <dcc:data>
+            <dcc:quantity>
+              <si:real>
+                <si:value>54.4</si:value>
+                <si:unit>\percent</si:unit>
+                <si:expandedUnc>
+                  <si:uncertainty>2.8</si:uncertainty>
+                  <si:coverageFactor>2</si:coverageFactor>
+                  <si:coverageProbability>0.9545</si:coverageProbability>
+                </si:expandedUnc>
+              </si:real>
+            </dcc:quantity>
+          </dcc:data>
+        </dcc:influenceCondition>
+      </dcc:influenceConditions>
+      <dcc:results>
+        <dcc:result>
+          <dcc:name>
+            <dcc:content lang="pt">Resistência em Corrente Contínua</dcc:content>
+          </dcc:name>
+          <dcc:data>
+            <dcc:list>
+              <dcc:quantity>
+                <dcc:name>
+                  <dcc:content lang="pt">Tensão</dcc:content>
+                </dcc:name>
+                <si:realListXMLList>
+                  <si:valueXMLList>10</si:valueXMLList>
+                  <si:unitXMLList>\volt</si:unitXMLList>
+                </si:realListXMLList>
+              </dcc:quantity>
+              <dcc:quantity>
+                <dcc:name>
+                  <dcc:content lang="pt">V.m.</dcc:content>
+                </dcc:name>
+                <si:realListXMLList>
+                  <si:valueXMLList>100.000134</si:valueXMLList>
+                  <si:unitXMLList>\kilo\ohm</si:unitXMLList>
+                  <si:expandedUncXMLList>
+                    <si:uncertaintyXMLList>3.90E-05</si:uncertaintyXMLList>
+                    <si:coverageFactorXMLList>2.00</si:coverageFactorXMLList>
+                    <si:coverageProbabilityXMLList>0.9545</si:coverageProbabilityXMLList>
+                  </si:expandedUncXMLList>
+                </si:realListXMLList>
+              </dcc:quantity>
+            </dcc:list>
+          </dcc:data>
+        </dcc:result>
+      </dcc:results>
+    </dcc:measurementResult>
+  </dcc:measurementResults>
+</dcc:digitalCalibrationCertificate>

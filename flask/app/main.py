@@ -827,6 +827,10 @@ def publications():
         {
             'title': 'Metrologia 2023 Paper',
             'file': 'paper_metrologia2023.pdf'
+        },
+        {
+            'title': 'Metrologia 2025 Paper',
+            'file': 'paper_metrologia2025.pdf'
         }
     ]
     return render_template('publications.html', papers=papers)
@@ -835,6 +839,9 @@ def publications():
 def api_doc():
     return render_template('api_documentation.html')
 
+@app.route('/dcc/exemplos')
+def exemplos():
+    return render_template('exemplos.html')
 
 @app.route('/dcc/upload_xml')
 def upload_xml():
