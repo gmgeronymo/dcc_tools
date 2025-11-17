@@ -12,7 +12,7 @@
         <dcc:name>
           <dcc:content lang="pt">SYS-LAMPE</dcc:content>
         </dcc:name>
-        <dcc:release>v2.3-103-14bfd50</dcc:release>
+        <dcc:release>v2.3-104-1453d6f</dcc:release>
       </dcc:software>
     </dcc:dccSoftware>
     <dcc:coreData>
@@ -341,10 +341,10 @@
                   <dcc:content lang="pt">V.m.</dcc:content>
                 </dcc:name>
                 <si:realListXMLList>
-                  <si:valueXMLList>999.99408</si:valueXMLList>
+                  <si:valueXMLList>0.99999408</si:valueXMLList>
                   <si:unitXMLList>\kilo\ohm</si:unitXMLList>
                   <si:expandedUncXMLList>
-                    <si:uncertaintyXMLList>1.50E-04</si:uncertaintyXMLList>
+                    <si:uncertaintyXMLList>1.50E-07</si:uncertaintyXMLList>
                     <si:coverageFactorXMLList>2</si:coverageFactorXMLList>
                     <si:coverageProbabilityXMLList>0.9545</si:coverageProbabilityXMLList>
                   </si:expandedUncXMLList>
