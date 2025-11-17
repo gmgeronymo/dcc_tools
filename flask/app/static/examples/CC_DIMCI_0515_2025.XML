@@ -185,7 +185,7 @@
             <dcc:content lang="pt">Método de Medição</dcc:content>
           </dcc:name>
           <dcc:description>
-            <dcc:content lang="pt">O resultado fornecido em resistência DC refere-se à calibração pelo método de comparação por amostragem digital em ponte de 04 (quatro) terminais, nas frequências de 50 Hz, 64 Hz, 100 Hz, 128 Hz, 199 Hz, 398 Hz, 796 Hz, 1000 Hz, 1200 Hz e 1592 Hz. Os resultados fornecidos referem-se ao valor médio de vinte e cinco séries de cinco medições.</dcc:content>
+            <dcc:content lang="pt">O resultado fornecido em resistência AC refere-se à calibração pelo método de comparação por amostragem digital em ponte de 04 (quatro) terminais, nas frequências de 50 Hz, 64 Hz, 100 Hz, 128 Hz, 199 Hz, 398 Hz, 796 Hz, 1000 Hz, 1200 Hz e 1592 Hz. Os resultados fornecidos referem-se ao valor médio de vinte e cinco séries de cinco medições.</dcc:content>
           </dcc:description>
         </dcc:usedMethod>
         <dcc:usedMethod>

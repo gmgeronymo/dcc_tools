@@ -6,10 +6,10 @@
   "num_certif": "0515/2025",
   "num_processo": "0052600.002236/2025-81",
   "tipo_item": "Resistor Padrão",
-  "fabricante": null,
-  "modelo": null,
-  "num_serie": "15",
-  "cod_identificacao": null,
+  "fabricante": "Inmetro",
+  "modelo": "RST",
+  "num_serie": "RST-15",
+  "cod_identificacao": "TR 490",
   "caracteristicas_item": "Resistência Nominal: 1 kΩ",
   "data_calibracao": "2025-05-08",
   "cmc": true,
@@ -20,7 +20,7 @@
   "software": [
     {
       "name": "SYS-LAMPE",
-      "version": "v"
+      "version": "v2.3-103-14bfd50"
     }
   ],
   "cliente": {
@@ -35,13 +35,25 @@
   },
   "informacoes_pertinentes": [
     {
-      "name": "Temperatura no banho de ar",
+      "name": "Calibração AC: Temperatura ambiente",
+      "value": "22.4",
+      "unc": "0.5",
+      "unit": "\\degreecelsius"
+    },
+    {
+      "name": "Calibração AC: Umidade relativa",
+      "value": "53.0",
+      "unc": "5.0",
+      "unit": "\\percent"
+    },
+    {
+      "name": "Calibração DC: Temperatura no banho de ar",
       "value": "22.95",
       "unc": "0.11",
       "unit": "\\degreecelsius"
     },
     {
-      "name": "Umidade relativa",
+      "name": "Calibração DC: Umidade relativa",
       "value": "52.2",
       "unc": "1.6",
       "unit": "\\percent"
@@ -64,7 +76,8 @@
   ],
   "declaracao_incerteza": "As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.",
   "metodo_medicao": [
-    "O resultado fornecido refere-se ao valor médio de seis séries de trinta medições pelo método de comparação de corrente na configuração de 04 (quatro) terminais. Utilizou-se uma ponte automática de resistência modelo 6010D."
+    "O resultado fornecido em resistência DC refere-se ao valor médio de seis séries de trinta medições pelo método de comparação de corrente na configuração de 04 (quatro) terminais. Utilizou-se uma ponte automática de resistência modelo 6010D.",
+    "O resultado fornecido em resistência AC refere-se à calibração pelo método de comparação por amostragem digital em ponte de 04 (quatro) terminais, nas frequências de 50 Hz, 64 Hz, 100 Hz, 128 Hz, 199 Hz, 398 Hz, 796 Hz, 1000 Hz, 1200 Hz e 1592 Hz. Os resultados fornecidos referem-se ao valor médio de vinte e cinco séries de cinco medições."
   ],
   "mensurando": [
     {
@@ -73,24 +86,225 @@
       "col_name": "V.m.",
       "unit": "\\kilo\\ohm",
       "unc_relativa": true
+    },
+    {
+      "label": "rstac",
+      "name": "Resistência em Corrente Alternada",
+      "col_name": "V.m.",
+      "unit": "\\kilo\\ohm",
+      "unc_relativa": true
+    },
+    {
+      "label": "tau",
+      "name": "Constante de Tempo",
+      "col_name": "V.m.",
+      "unit": "\\nano\\second",
+      "unc_relativa": false
     }
   ],
   "indices": [
     {
       "mensurando": "rstdc",
       "label": "current",
-      "name": "Corrente",
+      "name": "Corrente Aplicada",
       "unit": "\\milli\\ampere"
+    },
+    {
+      "mensurando": "rstac",
+      "label": "frequency",
+      "name": "Frequência",
+      "unit": "\\hertz"
+    },
+    {
+      "mensurando": "rstac",
+      "label": "voltage",
+      "name": "Tensão Aplicada",
+      "unit": "\\volt"
+    },
+    {
+      "mensurando": "tau",
+      "label": "frequency",
+      "name": "Frequência",
+      "unit": "\\hertz"
+    },
+    {
+      "mensurando": "tau",
+      "label": "voltage",
+      "name": "Tensão Aplicada",
+      "unit": "\\volt"
     }
   ],
   "resultados": [
     {
       "mensurando": "rstdc",
       "current": "5",
-      "value": "999.99408",
+      "value": "0.99999408",
       "unc": "0.15",
       "k": "2"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "50",
+      "value": "0.9999940",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "64",
+      "value": "0.9999942",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "100",
+      "value": "0.9999941",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "128",
+      "value": "0.9999941",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "199",
+      "value": "0.9999942",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "398",
+      "value": "0.9999945",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "796",
+      "value": "0.9999953",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "1000",
+      "value": "0.9999961",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "1200",
+      "value": "0.9999966",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "rstac",
+      "frequency": "1592",
+      "value": "0.9999970",
+      "unc": "3.6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "50",
+      "value": "-10",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "64",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "100",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "128",
+      "value": "-13",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "199",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "398",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "796",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "1000",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "1200",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
+    },
+    {
+      "mensurando": "tau",
+      "frequency": "1592",
+      "value": "-11",
+      "unc": "6",
+      "k": "2.00",
+      "voltage": "5"
     }
   ],
-  "observacoes": []
+  "observacoes": [
+    "A impedância Z do resistor AC é definida como: Z = R (1 + j ωτ).",
+    "Os resultados obtidos para a grandeza constante de tempo encontram-se fora do CMC do Acordo de Reconhecimento Mútuo (MRA) estabelecido pelo CIPM. "
+  ]
 }
