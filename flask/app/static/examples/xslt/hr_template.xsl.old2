@@ -242,7 +242,7 @@
         <div class="footer">
           <strong>Inmetro – Av. Nossa Senhora das Graças, 50 – Xerém – Duque de Caxias – RJ – Brasil – CEP: 25250-020</strong><br/>
           <strong>Dimci – Tel: <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:phone"/> – e-mail: <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:eMail"/></strong><br/>
-          <!-- <strong>(Pág 1/4)</strong> -->
+          <strong>(Pág 1/4)</strong>
         </div>
 
         <!-- Page 2 -->
@@ -362,13 +362,13 @@
             <xsl:value-of select="//dcc:usedMethods/dcc:usedMethod[dcc:name/dcc:content='Declaração da Incerteza de Medição']/dcc:description/dcc:content"/>
           </div>
           
-          <!-- <div class="footer"> -->
-          <!--   <strong>(Pág 2/4)</strong> -->
-          <!-- </div> -->
+          <div class="footer">
+            <strong>(Pág 2/4)</strong>
+          </div>
         </div>
 
-	<!-- Results Section - Page 3 -->
-	<div class="page-break">
+        <!-- Page 3 -->
+        <div class="page-break">
 	  <hr style="border-width: 2px;"/>
 	  <table class="tabela-header">
 	    <tr>
@@ -386,58 +386,20 @@
 	    <strong style="font-size: 9px;">Número do Certificado</strong>
           </div>
 	  
-	  <!-- Dynamic Results Tables -->
-	  <xsl:for-each select="//dcc:results/dcc:result">
-            <xsl:variable name="resultIndex" select="position()"/>
-            <xsl:variable name="resultName" select="dcc:name/dcc:content"/>
-            
-            <table class="tabela">
-              <tr>
-                <th colspan="100">
-                  TABELA <xsl:value-of select="$resultIndex + 1"/> - <xsl:value-of select="$resultName"/>
-                </th>
-              </tr>
-              
-              <!-- Generate table headers -->
-              <tr>
-                <xsl:for-each select="dcc:data/dcc:list/dcc:quantity">
-                  <xsl:variable name="quantityName" select="dcc:name/dcc:content"/>
-                  <xsl:variable name="unit" select="si:realListXMLList/si:unitXMLList"/>
-                  <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
-                  
-                  <th>
-                    <xsl:value-of select="$quantityName"/>
-                    <xsl:if test="$unit != ''">
-                      <br/>(<xsl:call-template name="format-unit">
-                      <xsl:with-param name="unit" select="$unit"/>
-                      </xsl:call-template>)
-                    </xsl:if>
-                  </th>
-                  
-                  <!-- Add uncertainty columns if this quantity has uncertainty data -->
-                  <xsl:if test="$hasUncertainty">
-                    <th>U</th>
-                    <th>k</th>
-                  </xsl:if>
-                </xsl:for-each>
-              </tr>
-              
-              <!-- Generate table rows -->
-              <xsl:call-template name="generate-result-rows">
-                <xsl:with-param name="quantities" select="dcc:data/dcc:list/dcc:quantity"/>
-                <xsl:with-param name="index" select="1"/>
-              </xsl:call-template>
-            </table>
-            
-            <xsl:if test="position() != last()">
-              <hr style="margin: 20px 0;"/>
-            </xsl:if>
-	  </xsl:for-each>
-	  
-	  <!-- <div class="footer"> -->
-          <!--   <strong>(Pág. 3/4)</strong> -->
-	  <!-- </div> -->
-	</div>
+          
+          <!-- Table 2 - DC Resistance -->
+          <xsl:call-template name="generate-dc-resistance-table"/>
+          
+          <!-- Table 3 - AC Resistance -->
+          <xsl:call-template name="generate-ac-resistance-table"/>
+          
+          <!-- Table 4 - Time Constant -->
+          <xsl:call-template name="generate-time-constant-table"/>
+          
+          <div class="footer">
+            <strong>(Pág. 3/4)</strong>
+          </div>
+        </div>
 
         <!-- Page 4 -->
         <div class="page-break">
@@ -480,114 +442,14 @@
             </div>
           </div>
           
-          <!-- <div class="footer"> -->
-          <!--   <strong>(Pág. 4/4)</strong> -->
-          <!-- </div> -->
+          <div class="footer">
+            <strong>(Pág. 4/4)</strong>
+          </div>
         </div>
       </body>
     </html>
   </xsl:template>
 
-  <!-- Template to generate rows for result tables -->
-  <xsl:template name="generate-result-rows">
-    <xsl:param name="quantities"/>
-    <xsl:param name="index"/>
-    
-    <xsl:variable name="firstQuantity" select="$quantities[1]"/>
-    <xsl:variable name="firstQuantityValues" select="normalize-space($firstQuantity/si:realListXMLList/si:valueXMLList)"/>
-    
-    <xsl:if test="$firstQuantityValues != ''">
-      <xsl:variable name="currentToken">
-        <xsl:call-template name="get-token-at-position">
-          <xsl:with-param name="text" select="$firstQuantityValues"/>
-          <xsl:with-param name="position" select="$index"/>
-        </xsl:call-template>
-      </xsl:variable>
-      
-      <xsl:if test="$currentToken != ''">
-        <tr>
-          <xsl:for-each select="$quantities">
-            <xsl:variable name="currentQuantity" select="."/>
-            <xsl:variable name="quantityValues" select="normalize-space(si:realListXMLList/si:valueXMLList)"/>
-            <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
-            <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
-            <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
-            
-            <!-- Value column -->
-            <td>
-              <xsl:call-template name="format-number-comma">
-                <xsl:with-param name="number">
-                  <xsl:call-template name="get-token-at-position">
-                    <xsl:with-param name="text" select="$quantityValues"/>
-                    <xsl:with-param name="position" select="$index"/>
-                  </xsl:call-template>
-                </xsl:with-param>
-              </xsl:call-template>
-            </td>
-            
-            <!-- Uncertainty columns -->
-            <xsl:if test="$hasUncertainty">
-              <td>
-                <xsl:call-template name="format-number-comma">
-                  <xsl:with-param name="number">
-                    <xsl:call-template name="get-token-at-position">
-                      <xsl:with-param name="text" select="$quantityUncertainties"/>
-                      <xsl:with-param name="position" select="$index"/>
-                    </xsl:call-template>
-                  </xsl:with-param>
-                </xsl:call-template>
-              </td>
-              <td>
-                <xsl:call-template name="format-number-comma">
-                  <xsl:with-param name="number">
-                    <xsl:call-template name="get-token-at-position">
-                      <xsl:with-param name="text" select="$quantityCoverageFactors"/>
-                      <xsl:with-param name="position" select="$index"/>
-                    </xsl:call-template>
-                  </xsl:with-param>
-                </xsl:call-template>
-              </td>
-            </xsl:if>
-          </xsl:for-each>
-        </tr>
-        
-        <!-- Process next row -->
-        <xsl:call-template name="generate-result-rows">
-          <xsl:with-param name="quantities" select="$quantities"/>
-          <xsl:with-param name="index" select="$index + 1"/>
-        </xsl:call-template>
-      </xsl:if>
-    </xsl:if>
-  </xsl:template>
-
-<!-- Template to get token at specific position from space-separated text -->
-<xsl:template name="get-token-at-position">
-    <xsl:param name="text"/>
-    <xsl:param name="position"/>
-    <xsl:param name="delimiter" select="' '"/>
-    
-    <xsl:choose>
-        <xsl:when test="$position = 1">
-            <xsl:choose>
-                <xsl:when test="contains($text, $delimiter)">
-                    <xsl:value-of select="substring-before($text, $delimiter)"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="$text"/>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:call-template name="get-token-at-position">
-                <xsl:with-param name="text" select="substring-after($text, $delimiter)"/>
-                <xsl:with-param name="position" select="$position - 1"/>
-                <xsl:with-param name="delimiter" select="$delimiter"/>
-            </xsl:call-template>
-        </xsl:otherwise>
-    </xsl:choose>
-</xsl:template>
-
-  
   <!-- Template to format numbers with comma as decimal separator -->
   <xsl:template name="format-number-comma">
     <xsl:param name="number"/>
@@ -640,18 +502,82 @@
       <xsl:when test="$unit = '\milli\ampere'">mA</xsl:when>
       <xsl:when test="$unit = '\kilo\ohm'">kΩ</xsl:when>
       <xsl:when test="$unit = '\hertz'">Hz</xsl:when>
-      <xsl:when test="$unit = '\kilo\hertz'">kHz</xsl:when>
       <xsl:when test="$unit = '\volt'">V</xsl:when>
       <xsl:when test="$unit = '\nano\second'">ns</xsl:when>
       <xsl:when test="$unit = '\second'">s</xsl:when>
       <xsl:when test="$unit = '\meter'">m</xsl:when>
-      <xsl:when test="$unit = '\micro\volt\volt\tothe{-1}'">&#xB5;V/V</xsl:when>
       <xsl:otherwise>
         <xsl:value-of select="$unit"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
   
+  <!-- Template for DC Resistance Table -->
+  <xsl:template name="generate-dc-resistance-table">
+    <xsl:variable name="dcResult" select="//dcc:result[dcc:name/dcc:content='Resistência em Corrente Contínua']"/>
+    <table class="tabela">
+      <tr><th colspan="5">TABELA 2 - Resultados de Resistência DC</th></tr>
+      <tr>
+        <th>Corrente Aplicada (mA)</th>
+        <th>V.m. (kΩ)</th>
+        <th>U (µΩ/Ω)</th>
+        <th>k</th>
+        <th>v<sub>eff</sub></th>
+      </tr>
+      <tr>
+        <td><xsl:value-of select="$dcResult/dcc:data/dcc:list/dcc:quantity[1]/si:realListXMLList/si:valueXMLList"/></td>
+        <td>
+          <xsl:call-template name="format-number">
+            <xsl:with-param name="number" select="$dcResult/dcc:data/dcc:list/dcc:quantity[2]/si:realListXMLList/si:valueXMLList"/>
+          </xsl:call-template>
+        </td>
+        <td><xsl:value-of select="$dcResult/dcc:data/dcc:list/dcc:quantity[2]/si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList"/></td>
+        <td><xsl:value-of select="$dcResult/dcc:data/dcc:list/dcc:quantity[2]/si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList"/></td>
+        <td>43,8</td>
+      </tr>
+    </table>
+  </xsl:template>
+
+  <!-- Template for AC Resistance Table -->
+  <xsl:template name="generate-ac-resistance-table">
+    <xsl:variable name="acResult" select="//dcc:result[dcc:name/dcc:content='Resistência em Corrente Alternada']"/>
+    <table class="tabela">
+      <tr><th colspan="6">TABELA 3 - Resultados de Resistência AC</th></tr>
+      <tr>
+        <th>Tensão Aplicada (V)</th>
+        <th>Frequência (Hz)</th>
+        <th>V.m. (kΩ)</th>
+        <th>U (µΩ/Ω)</th>
+        <th>k</th>
+        <th>v<sub>eff</sub></th>
+      </tr>
+      <xsl:call-template name="process-measurement-rows">
+        <xsl:with-param name="resultNode" select="$acResult"/>
+        <xsl:with-param name="valueIndex" select="3"/>
+      </xsl:call-template>
+    </table>
+  </xsl:template>
+
+  <!-- Template for Time Constant Table -->
+  <xsl:template name="generate-time-constant-table">
+    <xsl:variable name="timeResult" select="//dcc:result[dcc:name/dcc:content='Constante de Tempo']"/>
+    <table class="tabela">
+      <tr><th colspan="6">TABELA 4 - Resultados para Constante de Tempo</th></tr>
+      <tr>
+        <th>Tensão Aplicada (V)</th>
+        <th>Frequência (Hz)</th>
+        <th>V.m. (ns)</th>
+        <th>U (ns)</th>
+        <th>k</th>
+        <th>v<sub>eff</sub></th>
+      </tr>
+      <xsl:call-template name="process-measurement-rows">
+        <xsl:with-param name="resultNode" select="$timeResult"/>
+        <xsl:with-param name="valueIndex" select="3"/>
+      </xsl:call-template>
+    </table>
+  </xsl:template>
+
   <!-- Generic template to process measurement rows -->
   <xsl:template name="process-measurement-rows">
     <xsl:param name="resultNode"/>
