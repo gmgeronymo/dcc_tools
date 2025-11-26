@@ -104,6 +104,36 @@
           .underline {
           text-decoration: underline;
           }
+	  
+	  /* Print styles */
+	  
+	  @media print {
+          .page-break {
+          page-break-before: always;
+          margin-top: 0;
+          padding-top: 0;
+          }
+          
+          .page-header {
+          display: block;
+          }
+          
+          /* Ensure tables break properly across pages */
+          table {
+          page-break-inside: auto;
+          }
+          tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+          }
+          thead {
+          display: table-header-group;
+          }
+          tfoot {
+          display: table-footer-group;
+          }
+	  }
+	  
         </style>
 </head>
 <body>
@@ -184,15 +214,17 @@
 <strong>Inmetro – Av. Nossa Senhora das Graças, 50 – Xerém – Duque de Caxias – RJ – Brasil – CEP: 25250-020</strong><br><strong>Dimci – Tel: +55 21 2679 9077/9010 – e-mail: samci@inmetro.gov.br</strong><br>
 </div>
 <div class="page-break">
+<div class="page-header">
 <hr style="border-width: 2px;">
 <table class="tabela-header"><tr>
-<td style="border: 0px;"><img src="logo_inmetro.png" width="55"></td>
-<td style="border: 0px;"><div class="certificate-title-2">Certificado de Calibração</div></td>
-<td style="border: 0px;"></td>
+<td style="border: 0px; width: 60px;"><img src="logo_inmetro.png" width="55"></td>
+<td style="border: 0px; text-align: center;"><div class="certificate-title-2">Certificado de Calibração</div></td>
+<td style="border: 0px; width: 60px;"></td>
 </tr></table>
 <hr style="border-width: 2px;">
 <div class="certificate-number">
 <u>DIMCI 0856/2024</u><br><strong style="font-size: 9px;">Número do Certificado</strong>
+</div>
 </div>
 <div class="section">
 <div class="section-title">Características do Item</div>Função: Transferência Térmica de Tensão AC-DC</div>
@@ -226,8 +258,7 @@
 </div>
 <div class="section">
 <div class="section-title">Método de Medição</div>
-<p>As entradas de tensão do instrumento padrão e do instrumento sob calibração foram conectadas em paralelo através de um conector T cujo plano médio é o plano de referência para a calibração. Os resultados foram determinados a partir do valor médio de seis ciclos de medição para todos os pontos indicados. A calibração é realizada por comparação direta,  e o valor da diferença ac-dc do objeto é definido pela equação a seguir, onde U_dc é o valor absoluto médio de tensão contínua aplicada ao circuito, em regime de polarização direta e reversa, e U_ac  é o valor rms de tensão alternada que, quando aplicada ao circuito, produz uma leitura média de saída que corresponde à aplicação de U_dc.</p>
-<p>As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.</p>
+<p>As entradas de tensão do instrumento padrão e do instrumento sob calibração foram conectadas em paralelo através de um conector T cujo plano médio é o plano de referência para a calibração. Os resultados foram determinados a partir do valor médio de seis ciclos de medição para todos os pontos indicados. A calibração é realizada por comparação direta,  e o valor da diferença ac-dc do objeto é definido pela equação a seguir, onde Udc é o valor absoluto médio de tensão contínua aplicada ao circuito, em regime de polarização direta e reversa, e Uac  é o valor rms de tensão alternada que, quando aplicada ao circuito, produz uma leitura média de saída que corresponde à aplicação de Udc.</p>
 </div>
 <div class="section">
 <div class="section-title">Informações Pertinentes às Atividades Realizadas</div>
@@ -241,15 +272,17 @@
 <div class="section-title">Resultados e Declaração da Incerteza de Medição</div>As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k, que, para uma distribuição t, com um número efetivo de graus de liberdade ν eff , o qual corresponde a uma probabilidade de abrangência de 95,45 %. A incerteza de medição expandida foi relatada de acordo com a publicação Avaliação de Dados de Medição - Guia para a Expressão de Incerteza de medição - GUM 2008.</div>
 </div>
 <div class="page-break">
+<div class="page-header">
 <hr style="border-width: 2px;">
 <table class="tabela-header"><tr>
-<td style="border: 0px;"><img src="logo_inmetro.png" width="55"></td>
-<td style="border: 0px;"><div class="certificate-title-2">Certificado de Calibração</div></td>
-<td style="border: 0px;"></td>
+<td style="border: 0px; width: 60px;"><img src="logo_inmetro.png" width="55"></td>
+<td style="border: 0px; text-align: center;"><div class="certificate-title-2">Certificado de Calibração</div></td>
+<td style="border: 0px; width: 60px;"></td>
 </tr></table>
 <hr style="border-width: 2px;">
 <div class="certificate-number">
 <u>DIMCI 0856/2024</u><br><strong style="font-size: 9px;">Número do Certificado</strong>
+</div>
 </div>
 <table class="tabela">
 <tr><th colspan="100">
@@ -261,7 +294,7 @@
                     </th>
 <th>Frequência<br>(kHz)
                     </th>
-<th>\delta_u<br>(µV/V)
+<th>δu<br>(µV/V)
                     </th>
 <th>U</th>
 <th>k</th>
@@ -4011,34 +4044,6 @@
 <td>2,00</td>
 </tr>
 </table>
-</div>
-<div class="page-break">
-<hr style="border-width: 2px;">
-<table class="tabela-header"><tr>
-<td style="border: 0px;"><img src="logo_inmetro.png" width="55"></td>
-<td style="border: 0px;"><div class="certificate-title-2">Certificado de Calibração</div></td>
-<td style="border: 0px;"></td>
-</tr></table>
-<hr style="border-width: 2px;">
-<div class="certificate-number">
-<u>DIMCI 0856/2024</u><br><strong style="font-size: 9px;">Número do Certificado</strong>
-</div>
-<div class="section">
-<div class="section-title">Observações</div>
-<div class="obs">
-<strong>Obs. 1:</strong> As incertezas de medição expandidas de temperatura e umidade declaradas foram obtidas pelo mesmo
-              critério utilizado para cálculo da incerteza U, obtendo-se k = 2 e var = ∞.
-            </div>
-<div class="obs"><strong>Obs. 2:</strong></div>
-<div class="obs"><strong>Obs. 3:</strong></div>
-<div class="obs">
-<strong>Obs. 4:</strong> Este Certificado de Calibração é emitido em formato PDF/A-3b e inclui, em caráter experimental, um
-              arquivo XML embutido. Este arquivo XML é legível por máquina e contém os dados de calibração
-              estruturados, facilitando a integração automatizada em sistemas informatizados. A autenticidade do arquivo
-              XML pode ser verificada através da soma de verificação SHA-256 disponível no arquivo anexo
-              SHA256SUM.txt.
-            </div>
-</div>
 </div>
 </body>
 </html>

@@ -69,6 +69,34 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
 # funcoes auxiliares
 
+# gerar human readable a partir do xml
+def transform_xml_to_html(xml_content, xslt_path):
+    """Transform XML to HTML using XSLT"""
+    try:
+        # Use bytes input instead of decoded string
+        if isinstance(xml_content, str):
+            xml_content = xml_content.encode('utf-8')
+        
+        # Parse the XML content from bytes
+        xml_doc = etree.fromstring(xml_content)
+        
+        # Parse the XSLT stylesheet
+        xslt_doc = etree.parse(xslt_path)
+        transformer = etree.XSLT(xslt_doc)
+        
+        # Transform XML to HTML
+        result_html = transformer(xml_doc)
+        
+        return str(result_html), None
+    except etree.XMLSyntaxError as e:
+        return None, f"Erro de sintaxe XML: {e}"
+    except etree.XSLTParseError as e:
+        return None, f"Erro de análise XSLT: {e}"
+    except etree.XSLTApplyError as e:
+        return None, f"Erro de aplicação XSLT: {e}"
+    except Exception as e:
+        return None, f"Erro inesperado: {e}"
+
 def allowed_file(filename,allowed_extensions) :
     return '.' in filename and filename.rsplit('.',1)[1].lower() in allowed_extensions
 
@@ -851,6 +879,10 @@ def faq():
 def upload_xml():
     return render_template('upload_xml.html')
 
+@app.route('/dcc/upload_xml_hr')
+def upload_xml_hr():
+    return render_template('upload_xml_hr.html')
+
 @app.route('/dcc/validate_xml', methods=['GET', 'POST'])
 def validate_xml():
     if request.method == 'POST':
@@ -1092,6 +1124,41 @@ def generate_dcc():
         mimetype='text/xml',
         headers={'Content-Disposition': f'attachment; filename="{filename}"'}
     )
+
+# gerar human readable usando xslt
+@app.route('/dcc/visualizar_dcc', methods=['POST'])
+def visualizar_dcc():
+    """Handle file upload and transformation"""
+    # Check if a file was uploaded
+    if 'xml_file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    
+    file = request.files['xml_file']
+    
+    # Check if file is selected
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    # Check if file is allowed
+    if file and allowed_file(file.filename,{'xml'}):
+        try:
+            # Read XML content
+            xml_content = file.read().decode('utf-8')
+            
+            # Transform XML to HTML
+            html_result, error = transform_xml_to_html(xml_content, 'static/examples/xslt/hr_template.xsl')
+            
+            if error:
+                return jsonify({'error': f'Erro ao processar arquivo. {str(error)}'}), 500
+            
+            return html_result
+            
+        except Exception as e:
+            return jsonify({'error': f'Erro ao processar arquivo. {str(e)}'}), 500
+    
+    else:
+        return jsonify({'error': f'Somente arquivos XML são aceitos.: {str(e)}'}), 500
+
 
 # validacao do XML
 def validate_dcc_xml_upload(xml_path):

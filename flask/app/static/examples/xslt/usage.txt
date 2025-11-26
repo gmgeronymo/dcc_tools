@@ -1,0 +1,1 @@
+xsltproc  -o CC_DIMCI_0515_2025.html  hr_template.xsl ../CC_DIMCI_0515_2025.XML

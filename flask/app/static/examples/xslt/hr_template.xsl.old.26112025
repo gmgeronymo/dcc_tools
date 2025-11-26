@@ -113,36 +113,6 @@
           .underline {
           text-decoration: underline;
           }
-	  
-	  /* Print styles */
-	  
-	  @media print {
-          .page-break {
-          page-break-before: always;
-          margin-top: 0;
-          padding-top: 0;
-          }
-          
-          .page-header {
-          display: block;
-          }
-          
-          /* Ensure tables break properly across pages */
-          table {
-          page-break-inside: auto;
-          }
-          tr {
-          page-break-inside: avoid;
-          page-break-after: auto;
-          }
-          thead {
-          display: table-header-group;
-          }
-          tfoot {
-          display: table-footer-group;
-          }
-	  }
-	  
         </style>
       </head>
       <body>
@@ -151,14 +121,14 @@
 	  <hr style="border-width: 2px;"/>
 	  <table class="tabela-header">
 	    <tr>
-	      <td style="border: 0px;"><img src="static/examples/xslt/logo_inmetro.png" width="75"/> </td>
+	      <td style="border: 0px;"><img src="logo_inmetro.png" width="75"/> </td>
 	      <td style="border: 0px;">
 		<div class="texto-header">Serviço Público Federal</div>
 		<div class="texto-header">Ministério do Desenvolvimento, Indústria, Comércio e Serviços (MDIC)</div>
 		<div class="texto-header">Instituto Nacional de Metrologia, Qualidade e Tecnologia (Inmetro)</div>
 	      </td>
 	      <!-- logo MRA deve ser condicional a ter CMC! -->
-	      <td style="border: 0px;"><img src="static/examples/xslt/logo_mra.png" width="115"/> </td>
+	      <td style="border: 0px;"><img src="logo_mra.png" width="115"/> </td>
 	    </tr>
 	  </table>
 	  <hr style="border-width: 2px;"/>
@@ -272,11 +242,27 @@
         <div class="footer">
           <strong>Inmetro – Av. Nossa Senhora das Graças, 50 – Xerém – Duque de Caxias – RJ – Brasil – CEP: 25250-020</strong><br/>
           <strong>Dimci – Tel: <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:phone"/> – e-mail: <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:eMail"/></strong><br/>
+          <!-- <strong>(Pág 1/4)</strong> -->
         </div>
 
         <!-- Page 2 -->
         <div class="page-break">
-	  <xsl:call-template name="page-header"/>
+	  <hr style="border-width: 2px;"/>
+	  <table class="tabela-header">
+	    <tr>
+	      <td style="border: 0px;"><img src="logo_inmetro.png" width="55"/> </td>
+	      <td style="border: 0px;">
+		<div class="certificate-title-2">Certificado de Calibração</div>
+	      </td>
+	      <td style="border: 0px;"> </td>
+	    </tr>
+	  </table>
+	  <hr style="border-width: 2px;"/>
+	  
+          <div class="certificate-number">
+            <u> <xsl:value-of select="//dcc:uniqueIdentifier"/> </u> <br/>
+	    <strong style="font-size: 9px;">Número do Certificado</strong>
+          </div>
           
           <div class="section">
             <div class="section-title">Características do Item</div>
@@ -312,14 +298,14 @@
               </xsl:for-each>
             </table>
           </div>
-
-	  <div class="section">
-	    <div class="section-title">Método de Medição</div>
-	    <xsl:for-each select="//dcc:usedMethods/dcc:usedMethod[dcc:name/dcc:content != 'Declaração da Incerteza de Medição']">
+          
+          <div class="section">
+            <div class="section-title">Método de Medição</div>
+            <xsl:for-each select="//dcc:usedMethods/dcc:usedMethod[position() &lt; 3]">
               <p><xsl:value-of select="dcc:description/dcc:content"/></p>
-	    </xsl:for-each>
-	  </div>
-	  
+            </xsl:for-each>
+          </div>
+
 	  <div class="section">
 	    <div class="section-title">Informações Pertinentes às Atividades Realizadas</div>
 	    <strong><u>Condições Ambientais:</u></strong><br/>
@@ -376,12 +362,30 @@
             <xsl:value-of select="//dcc:usedMethods/dcc:usedMethod[dcc:name/dcc:content='Declaração da Incerteza de Medição']/dcc:description/dcc:content"/>
           </div>
           
+          <!-- <div class="footer"> -->
+          <!--   <strong>(Pág 2/4)</strong> -->
+          <!-- </div> -->
         </div>
 
 	<!-- Results Section - Page 3 -->
 	<div class="page-break">
-	  <xsl:call-template name="page-header"/>
-
+	  <hr style="border-width: 2px;"/>
+	  <table class="tabela-header">
+	    <tr>
+	      <td style="border: 0px;"><img src="logo_inmetro.png" width="55"/> </td>
+	      <td style="border: 0px;">
+		<div class="certificate-title-2">Certificado de Calibração</div>
+	      </td>
+	      <td style="border: 0px;"> </td>
+	    </tr>
+	  </table>
+	  <hr style="border-width: 2px;"/>
+	  
+          <div class="certificate-number">
+            <u> <xsl:value-of select="//dcc:uniqueIdentifier"/> </u> <br/>
+	    <strong style="font-size: 9px;">Número do Certificado</strong>
+          </div>
+	  
 	  <!-- Dynamic Results Tables -->
 	  <xsl:for-each select="//dcc:results/dcc:result">
             <xsl:variable name="resultIndex" select="position()"/>
@@ -430,56 +434,60 @@
             </xsl:if>
 	  </xsl:for-each>
 	  
+	  <!-- <div class="footer"> -->
+          <!--   <strong>(Pág. 3/4)</strong> -->
+	  <!-- </div> -->
 	</div>
 
-
-	  <xsl:if test="//dcc:statements/dcc:statement[contains(dcc:name/dcc:content, 'Observação')]">
-	    <div class="section">
-	      <div class="section-title">Observações</div>
-	      
-	      <xsl:for-each select="//dcc:statements/dcc:statement[contains(dcc:name/dcc:content, 'Observação')]">
-		<div class="obs">
-		  <strong>Obs. <xsl:value-of select="position()"/>:</strong> 
-		  <xsl:choose>
-                    <xsl:when test="dcc:description">
-                      <xsl:value-of select="dcc:description/dcc:content"/>
-                    </xsl:when>
-                    <xsl:when test="dcc:declaration">
-                      <xsl:value-of select="dcc:declaration/dcc:content"/>
-                    </xsl:when>
-		  </xsl:choose>
-		</div>
-	      </xsl:for-each>
+        <!-- Page 4 -->
+        <div class="page-break">
+	  <hr style="border-width: 2px;"/>
+	  <table class="tabela-header">
+	    <tr>
+	      <td style="border: 0px;"><img src="logo_inmetro.png" width="55"/> </td>
+	      <td style="border: 0px;">
+		<div class="certificate-title-2">Certificado de Calibração</div>
+	      </td>
+	      <td style="border: 0px;"> </td>
+	    </tr>
+	  </table>
+	  <hr style="border-width: 2px;"/>
+	  
+          <div class="certificate-number">
+            <u> <xsl:value-of select="//dcc:uniqueIdentifier"/> </u> <br/>
+	    <strong style="font-size: 9px;">Número do Certificado</strong>
+          </div>
+	  
+          
+          <div class="section">
+            <div class="section-title">Observações</div>
+            <div class="obs">
+              <strong>Obs. 1:</strong> As incertezas de medição expandidas de temperatura e umidade declaradas foram obtidas pelo mesmo
+              critério utilizado para cálculo da incerteza U, obtendo-se k = 2 e var = ∞.
             </div>
-	  </xsl:if>
+            <div class="obs">
+              <strong>Obs. 2:</strong> <xsl:value-of select="//dcc:statements/dcc:statement[dcc:name/dcc:content='Observação 1']/dcc:description/dcc:content"/>
+            </div>
+            <div class="obs">
+              <strong>Obs. 3:</strong> <xsl:value-of select="//dcc:statements/dcc:statement[dcc:name/dcc:content='Observação 2']/dcc:description/dcc:content"/>
+            </div>
+            <div class="obs">
+              <strong>Obs. 4:</strong> Este Certificado de Calibração é emitido em formato PDF/A-3b e inclui, em caráter experimental, um
+              arquivo XML embutido. Este arquivo XML é legível por máquina e contém os dados de calibração
+              estruturados, facilitando a integração automatizada em sistemas informatizados. A autenticidade do arquivo
+              XML pode ser verificada através da soma de verificação SHA-256 disponível no arquivo anexo
+              SHA256SUM.txt.
+            </div>
+          </div>
+          
+          <!-- <div class="footer"> -->
+          <!--   <strong>(Pág. 4/4)</strong> -->
+          <!-- </div> -->
+        </div>
       </body>
     </html>
   </xsl:template>
 
-  <!-- Template for page header (used on pages 2, 3, 4, etc.) -->
-  <xsl:template name="page-header">
-    <div class="page-header">
-      <hr style="border-width: 2px;"/>
-      <table class="tabela-header">
-        <tr>
-          <td style="border: 0px; width: 60px;">
-            <img src="static/examples/xslt/logo_inmetro.png" width="55"/> 
-          </td>
-          <td style="border: 0px; text-align: center;">
-            <div class="certificate-title-2">Certificado de Calibração</div>
-          </td>
-          <td style="border: 0px; width: 60px;"> </td>
-        </tr>
-      </table>
-      <hr style="border-width: 2px;"/>
-      
-      <div class="certificate-number">
-        <u><xsl:value-of select="//dcc:uniqueIdentifier"/></u><br/>
-        <strong style="font-size: 9px;">Número do Certificado</strong>
-      </div>
-    </div>
-  </xsl:template>
-  
   <!-- Template to generate rows for result tables -->
   <xsl:template name="generate-result-rows">
     <xsl:param name="quantities"/>
