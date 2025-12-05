@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" 
+		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+		xmlns:dcc="https://ptb.de/dcc"
+		xmlns:si="https://ptb.de/si"
+		exclude-result-prefixes="dcc si">
+  
+  <xsl:output method="html" encoding="utf-8" indent="yes"/>
+  
+  <xsl:template match="/">
+    <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Certificado de Calibração - <xsl:value-of select="//dcc:uniqueIdentifier"/></title>
+        <style>
+          body { 
+          font-family: Times, sans-serif;
+          margin: 0;
+          padding: 20px;
+          line-height: 1.3;
+          font-size: 11px;
+	  }
+	  .texto-header {
+	  font-family: Arial, sans-serif;
+	  font-size: 10px;
+	  }
+          .header { 
+          text-align: center; 
+          margin-bottom: 15px;
+          line-height: 1.2;
+          }
+          .certificate-title {
+	  font-family: Times, sans-serif;
+          font-size: 42px;
+	  font-style: italic;
+          margin: 15px 0;
+          text-align: center;
+	  }
+	  .certificate-title-2 {
+	  font-family: Times, sans-serif;
+          font-size: 24px;
+	  font-style: italic;
+          margin: 15px 0;
+          text-align: center;
+          }
+          .section { 
+          margin: 12px 0; 
+          }
+          .section-title {
+	  font-family: Times, sans-serif;
+	  font-size: 13px;
+          font-weight: bold; 
+          margin-bottom: 5px;
+          }
+          .tabela { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin: 10px 0;
+          font-size: 10px;
+	  }
+	  .tabela-adm { 
+          width: 100%; 
+	  border: 0 !important;
+	  border-spacing: 0 !important;
+	  font-size: 11px;
+	  }
+	  .tabela-header { 
+          width: 100%; 
+	  border: 0 !important;
+	  border-spacing: 0 !important;
+	  }
+          th, td {
+	  border: 1px solid #000; 
+          padding: 4px; 
+          text-align: center;
+          }
+          th { 
+          background-color: #f0f0f0; 
+          font-weight: bold;
+          }
+          .page-break {
+          page-break-before: always;
+          margin-top: 30px;
+          padding-top: 20px;
+          }
+          .footer {
+          margin-top: 20px;
+          font-size: 9px;
+          text-align: center;
+          }
+          .signature {
+          margin-top: 30px;
+          text-align: center;
+          }
+          .obs {
+          margin: 8px 0;
+          font-size: 10px;
+          line-height: 1.2;
+          }
+          .certificate-number {
+	  font-family: Times, sans-serif;
+          text-align: right;
+	  font-size: 14px;
+          font-weight: bold;
+          margin: 10px 0;
+          }
+          .center {
+          text-align: center;
+          }
+          .bold {
+          font-weight: bold;
+          }
+          .underline {
+          text-decoration: underline;
+          }
+
+	  /* A4 page simulation */
+	  .a4-page {
+	  width: 210mm;
+	  min-height: 297mm;
+	  margin: 20px auto;
+	  background: white;
+	  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+	  position: relative;
+	  page-break-after: always;
+	  }
+
+	  .a4-content {
+	  padding: 15mm;
+	  height: calc(297mm - 30mm); /* Account for padding */
+	  box-sizing: border-box;
+	  overflow: hidden;
+	  }
+	  
+	  /* Print styles */
+
+	  @media print {
+	  body {
+          margin: 0;
+          padding: 0;
+          background: white;
+	  }
+	  
+	  .a4-page {
+          width: 100%;
+          height: auto;
+          min-height: 297mm;
+          margin: 0;
+          padding: 0;
+          box-shadow: none;
+          page-break-after: always;
+	  }
+	  
+	  .a4-content {
+          padding: 15mm;
+          height: auto;
+          min-height: calc(297mm - 30mm);
+	  }
+	  
+	  /* Ensure proper page breaks */
+	  .page-break {
+          page-break-before: always;
+	  }
+	  }
+	  
+	  /* Screen-specific styles */
+	  @media screen {
+	  body {
+          background: #f0f0f0;
+          padding: 20px 0;
+	  }
+	  }
+	  
+        </style>
+      </head>
+      <body>
+        <!-- Page 1 -->
+	<div class="a4-page">
+	  <div class="a4-content">
+            <div class="header">
+	      <hr style="border-width: 2px;"/>
+	      <table class="tabela-header">
+		<tr>
+		  <td style="border: 0px;"><img src="static/examples/xslt/logo_inmetro.png" width="75"/> </td>
+		  <td style="border: 0px;">
+		    <div class="texto-header">Serviço Público Federal</div>
+		    <div class="texto-header">Ministério do Desenvolvimento, Indústria, Comércio e Serviços (MDIC)</div>
+		    <div class="texto-header">Instituto Nacional de Metrologia, Qualidade e Tecnologia (Inmetro)</div>
+		  </td>
+		  <!-- logo MRA deve ser condicional a ter CMC! -->
+		  <td style="border: 0px;"><img src="static/examples/xslt/logo_mra.png" width="115"/> </td>
+		</tr>
+	      </table>
+	      <hr style="border-width: 2px;"/>
+            </div>
+            
+            <div class="certificate-title">Certificado de Calibração</div>
+
+	    
+            <div class="certificate-number">
+	      <u> <xsl:value-of select="//dcc:uniqueIdentifier"/> </u><br/>
+	      <strong style="font-size: 9px;">Número do Certificado</strong>
+            </div>
+            
+            <div class="section">
+              <div class="section-title"><i>Cliente</i></div>
+	      <table class="tabela-adm">
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Nome: </strong><xsl:value-of select="//dcc:customer/dcc:name/dcc:content"/>
+		  </td>
+		</tr>
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Endereço: </strong>
+		    <xsl:value-of select="//dcc:customer/dcc:location/dcc:street"/>, 
+		    <xsl:value-of select="//dcc:customer/dcc:location/dcc:streetNo"/> – 
+		    <xsl:value-of select="//dcc:customer/dcc:location/dcc:city"/> – 
+		    <xsl:value-of select="//dcc:customer/dcc:location/dcc:state"/> – 
+		    CEP: <xsl:value-of select="//dcc:customer/dcc:location/dcc:postCode"/>
+		  </td>
+		</tr>
+	      </table>
+            </div>
+            
+            <div class="section">
+              <div class="section-title"><i>Identificação do Item</i></div>
+	      <table class="tabela-adm">
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Item: </strong> <xsl:value-of select="//dcc:item/dcc:name/dcc:content"/>
+		  </td>
+		</tr>
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Fabricante: </strong> <xsl:value-of select="//dcc:item/dcc:manufacturer/dcc:name/dcc:content"/>
+		  </td>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Modelo/Tipo: </strong> <xsl:value-of select="//dcc:item/dcc:model"/>
+		  </td>
+		</tr>
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Número de Série: </strong> <xsl:value-of select="//dcc:item/dcc:identifications/dcc:identification[dcc:issuer='manufacturer']/dcc:value"/>
+		  </td>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Código de Identificação: </strong> <xsl:value-of select="//dcc:item/dcc:identifications/dcc:identification[dcc:issuer='customer']/dcc:value"/>
+		  </td>
+		</tr>
+	      </table>
+            </div>
+            
+            <div class="section">
+              <div class="section-title"><i>Laboratório Executor</i></div>
+	      <table class="tabela-adm">
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Laboratório Responsável: </strong> <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:name/dcc:content"/>
+		  </td>
+		</tr>
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Responsável Técnico: </strong> <xsl:value-of select="//dcc:respPersons/dcc:respPerson[dcc:role='Chefe do Laboratório de Metrologia em Padronização Elétrica']/dcc:person/dcc:name/dcc:content"/> / Chefe do Lampe
+		    <!-- TODO -> buscar o nome do laboratorio no arquivo XML -->
+		  </td>
+		</tr>
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Data da Calibração: </strong> <xsl:value-of select="substring(//dcc:beginPerformanceDate,9,2)"/>/<xsl:value-of select="substring(//dcc:beginPerformanceDate,6,2)"/>/<xsl:value-of select="substring(//dcc:beginPerformanceDate,1,4)"/>
+		  </td>
+		</tr>
+	      </table>
+            </div>
+
+            <div class="section">
+              <div class="section-title"><i>Informações Administrativas</i></div>
+	      <table class="tabela-adm">
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Processo Inmetro: </strong><xsl:value-of select="//dcc:identifications/dcc:identification/dcc:value"/>
+		  </td>
+		</tr>
+		<tr>
+		  <td style="border: 0px; text-align: left;">
+		    <strong>Data de Emissão: </strong><xsl:value-of select="//dcc:statements/dcc:statement[dcc:name/dcc:content='Data de Emissão']/dcc:description/dcc:content"/>
+		  </td>
+		</tr>
+	      </table>
+            </div>
+            
+            <div class="signature">
+              <strong><xsl:value-of select="//dcc:respPersons/dcc:respPerson[dcc:mainSigner='true']/dcc:person/dcc:name/dcc:content"/></strong><br/>
+              <xsl:value-of select="//dcc:respPersons/dcc:respPerson[dcc:mainSigner='true']/dcc:role"/>
+            </div>
+            
+            <div class="section">
+	      <!-- TODO: nao mostrar no caso de certificado sem CMC -->
+              <xsl:value-of select="//dcc:statements/dcc:statement[dcc:declaration][1]/dcc:declaration/dcc:content"/><br/><br/>
+              <xsl:value-of select="//dcc:statements/dcc:statement[dcc:norm]/dcc:declaration/dcc:content"/>
+            </div>
+            
+            <div class="footer">
+              <strong>Inmetro – Av. Nossa Senhora das Graças, 50 – Xerém – Duque de Caxias – RJ – Brasil – CEP: 25250-020</strong><br/>
+              <strong>Dimci – Tel: <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:phone"/> – e-mail: <xsl:value-of select="//dcc:calibrationLaboratory/dcc:contact/dcc:eMail"/></strong><br/>
+            </div>
+	  </div>
+	</div>
+
+        <!-- Page 2 -->
+        <div class="page-break">
+	  <div class="a4-page">
+	    <div class="a4-content">
+	      
+	      <xsl:call-template name="page-header"/>
+              
+              <div class="section">
+		<div class="section-title">Características do Item</div>
+		<xsl:value-of select="//dcc:statements/dcc:statement[dcc:name/dcc:content='Características do Item']/dcc:description/dcc:content"/>
+              </div>
+              
+              <div class="section">
+		<div class="section-title">Rastreabilidade</div>
+		<xsl:value-of select="//dcc:measuringEquipments/dcc:name/dcc:content"/>
+		
+		<table class="tabela">
+		  <tr>
+                    <th colspan="4">TABELA 1 - Padrões Utilizados</th>
+		  </tr>
+		  <tr>
+                    <th>Descrição</th>
+                    <th>Identificação</th>
+                    <th colspan="2">Certificado</th>
+		  </tr>
+		  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Nº/Ano</th>
+                    <th>Origem</th>
+		  </tr>
+		  <xsl:for-each select="//dcc:measuringEquipments/dcc:measuringEquipment">
+                    <tr>
+                      <td><xsl:value-of select="dcc:name/dcc:content"/></td>
+                      <td><xsl:value-of select="dcc:identifications/dcc:identification/dcc:value"/></td>
+                      <td><xsl:value-of select="dcc:certificate/dcc:referralID"/></td>
+                      <td><xsl:value-of select="dcc:certificate/dcc:referral/dcc:content"/></td>
+                    </tr>
+		  </xsl:for-each>
+		</table>
+              </div>
+
+	      <div class="section">
+		<div class="section-title">Método de Medição</div>
+		<xsl:for-each select="//dcc:usedMethods/dcc:usedMethod[dcc:name/dcc:content != 'Declaração da Incerteza de Medição']">
+		  <p><xsl:value-of select="dcc:description/dcc:content"/></p>
+		</xsl:for-each>
+	      </div>
+	      
+	      <div class="section">
+		<div class="section-title">Informações Pertinentes às Atividades Realizadas</div>
+		<strong><u>Condições Ambientais:</u></strong><br/>
+		
+		<xsl:for-each select="//dcc:influenceConditions/dcc:influenceCondition">
+		  <xsl:variable name="conditionName" select="dcc:name/dcc:content"/>
+		  <xsl:variable name="value" select="dcc:data/dcc:quantity/si:real/si:value"/>
+		  <xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/>
+		  <xsl:variable name="unit" select="dcc:data/dcc:quantity/si:real/si:unit"/>
+		  
+		  <strong><xsl:value-of select="$conditionName"/>:</strong>
+		  <xsl:choose>
+		    <xsl:when test="contains($conditionName, 'Temperatura')">
+                      (<xsl:call-template name="format-number-comma">
+                      <xsl:with-param name="number" select="$value"/>
+                      </xsl:call-template> ± <xsl:call-template name="format-number-comma">
+                      <xsl:with-param name="number" select="$uncertainty"/>
+                      </xsl:call-template>) 
+                      <xsl:call-template name="format-unit">
+			<xsl:with-param name="unit" select="$unit"/>
+                      </xsl:call-template>
+		    </xsl:when>
+		    <xsl:when test="contains($conditionName, 'Umidade')">
+                      (<xsl:call-template name="format-number-comma">
+                      <xsl:with-param name="number" select="$value"/>
+                      </xsl:call-template> ± <xsl:call-template name="format-number-comma">
+                      <xsl:with-param name="number" select="$uncertainty"/>
+                      </xsl:call-template>) 
+                      <xsl:call-template name="format-unit">
+			<xsl:with-param name="unit" select="$unit"/>
+                      </xsl:call-template>
+                      <xsl:text> ur</xsl:text>
+		    </xsl:when>
+		    <xsl:otherwise>
+                      <xsl:call-template name="format-number-comma">
+			<xsl:with-param name="number" select="$value"/>
+                      </xsl:call-template> 
+                      <xsl:call-template name="format-unit">
+			<xsl:with-param name="unit" select="$unit"/>
+                      </xsl:call-template>
+                      <xsl:if test="$uncertainty">
+			± <xsl:call-template name="format-number-comma">
+			<xsl:with-param name="number" select="$uncertainty"/>
+                      </xsl:call-template>
+                      </xsl:if>
+		    </xsl:otherwise>
+		  </xsl:choose>
+		  <br/>
+		</xsl:for-each>
+	      </div>
+	      
+              <div class="section">
+		<div class="section-title">Resultados e Declaração da Incerteza de Medição</div>
+		<xsl:value-of select="//dcc:usedMethods/dcc:usedMethod[dcc:name/dcc:content='Declaração da Incerteza de Medição']/dcc:description/dcc:content"/>
+              </div>
+              
+            </div>
+	  </div>
+	</div>
+
+	<!-- Results Section - Page 3 -->
+	<div class="page-break">
+	  <div class="a4-page">
+	    <div class="a4-content">
+	      <xsl:call-template name="page-header"/>
+
+	      <!-- Dynamic Results Tables -->
+	      <xsl:for-each select="//dcc:results/dcc:result">
+		<xsl:variable name="resultIndex" select="position()"/>
+		<xsl:variable name="resultName" select="dcc:name/dcc:content"/>
+		
+		<table class="tabela">
+		  <tr>
+                    <th colspan="100">
+                      TABELA <xsl:value-of select="$resultIndex + 1"/> - <xsl:value-of select="$resultName"/>
+                    </th>
+		  </tr>
+		  
+		  <!-- Generate table headers -->
+		  <tr>
+                    <xsl:for-each select="dcc:data/dcc:list/dcc:quantity">
+                      <xsl:variable name="quantityName" select="dcc:name/dcc:content"/>
+                      <xsl:variable name="unit" select="si:realListXMLList/si:unitXMLList"/>
+                      <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
+                      
+                      <th>
+			<xsl:value-of select="$quantityName"/>
+			<xsl:if test="$unit != ''">
+			  <br/>(<xsl:call-template name="format-unit">
+			  <xsl:with-param name="unit" select="$unit"/>
+			  </xsl:call-template>)
+			</xsl:if>
+                      </th>
+                      
+                      <!-- Add uncertainty columns if this quantity has uncertainty data -->
+                      <xsl:if test="$hasUncertainty">
+			<th>U</th>
+			<th>k</th>
+                      </xsl:if>
+                    </xsl:for-each>
+		  </tr>
+		  
+		  <!-- Generate table rows -->
+		  <xsl:call-template name="generate-result-rows">
+                    <xsl:with-param name="quantities" select="dcc:data/dcc:list/dcc:quantity"/>
+                    <xsl:with-param name="index" select="1"/>
+		  </xsl:call-template>
+		</table>
+		
+		<xsl:if test="position() != last()">
+		  <hr style="margin: 20px 0;"/>
+		</xsl:if>
+	      </xsl:for-each>
+	      
+
+
+
+	      <xsl:if test="//dcc:statements/dcc:statement[contains(dcc:name/dcc:content, 'Observação')]">
+		<div class="section">
+		  <div class="section-title">Observações</div>
+		  
+		  <xsl:for-each select="//dcc:statements/dcc:statement[contains(dcc:name/dcc:content, 'Observação')]">
+		    <div class="obs">
+		      <strong>Obs. <xsl:value-of select="position()"/>: </strong> 
+		      <xsl:choose>
+			<xsl:when test="dcc:description">
+			  <xsl:value-of select="dcc:description/dcc:content"/>
+			</xsl:when>
+			<xsl:when test="dcc:declaration">
+			  <xsl:value-of select="dcc:declaration/dcc:content"/>
+			</xsl:when>
+		      </xsl:choose>
+		    </div>
+		  </xsl:for-each>
+		</div>
+	      </xsl:if>
+	    </div>
+	  </div>
+	</div>
+      </body>
+    </html>
+  </xsl:template>
+
+  <!-- Template for page header (used on pages 2, 3, 4, etc.) -->
+  <xsl:template name="page-header">
+    <div class="page-header">
+      <hr style="border-width: 2px;"/>
+      <table class="tabela-header">
+        <tr>
+          <td style="border: 0px; width: 60px;">
+            <img src="static/examples/xslt/logo_inmetro.png" width="55"/> 
+          </td>
+          <td style="border: 0px; text-align: center;">
+            <div class="certificate-title-2">Certificado de Calibração</div>
+          </td>
+          <td style="border: 0px; width: 60px;"> </td>
+        </tr>
+      </table>
+      <hr style="border-width: 2px;"/>
+      
+      <div class="certificate-number">
+        <u><xsl:value-of select="//dcc:uniqueIdentifier"/></u><br/>
+        <strong style="font-size: 9px;">Número do Certificado</strong>
+      </div>
+    </div>
+  </xsl:template>
+  
+  <!-- Template to generate rows for result tables -->
+  <xsl:template name="generate-result-rows">
+    <xsl:param name="quantities"/>
+    <xsl:param name="index"/>
+    
+    <xsl:variable name="firstQuantity" select="$quantities[1]"/>
+    <xsl:variable name="firstQuantityValues" select="normalize-space($firstQuantity/si:realListXMLList/si:valueXMLList)"/>
+    
+    <xsl:if test="$firstQuantityValues != ''">
+      <xsl:variable name="currentToken">
+        <xsl:call-template name="get-token-at-position">
+          <xsl:with-param name="text" select="$firstQuantityValues"/>
+          <xsl:with-param name="position" select="$index"/>
+        </xsl:call-template>
+      </xsl:variable>
+      
+      <xsl:if test="$currentToken != ''">
+        <tr>
+          <xsl:for-each select="$quantities">
+            <xsl:variable name="currentQuantity" select="."/>
+            <xsl:variable name="quantityValues" select="normalize-space(si:realListXMLList/si:valueXMLList)"/>
+            <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
+            <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
+            <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
+            
+            <!-- Value column -->
+            <td>
+              <xsl:call-template name="format-number-comma">
+                <xsl:with-param name="number">
+                  <xsl:call-template name="get-token-at-position">
+                    <xsl:with-param name="text" select="$quantityValues"/>
+                    <xsl:with-param name="position" select="$index"/>
+                  </xsl:call-template>
+                </xsl:with-param>
+              </xsl:call-template>
+            </td>
+            
+            <!-- Uncertainty columns -->
+            <xsl:if test="$hasUncertainty">
+              <td>
+                <xsl:call-template name="format-number-comma">
+                  <xsl:with-param name="number">
+                    <xsl:call-template name="get-token-at-position">
+                      <xsl:with-param name="text" select="$quantityUncertainties"/>
+                      <xsl:with-param name="position" select="$index"/>
+                    </xsl:call-template>
+                  </xsl:with-param>
+                </xsl:call-template>
+              </td>
+              <td>
+                <xsl:call-template name="format-number-comma">
+                  <xsl:with-param name="number">
+                    <xsl:call-template name="get-token-at-position">
+                      <xsl:with-param name="text" select="$quantityCoverageFactors"/>
+                      <xsl:with-param name="position" select="$index"/>
+                    </xsl:call-template>
+                  </xsl:with-param>
+                </xsl:call-template>
+              </td>
+            </xsl:if>
+          </xsl:for-each>
+        </tr>
+        
+        <!-- Process next row -->
+        <xsl:call-template name="generate-result-rows">
+          <xsl:with-param name="quantities" select="$quantities"/>
+          <xsl:with-param name="index" select="$index + 1"/>
+        </xsl:call-template>
+      </xsl:if>
+    </xsl:if>
+  </xsl:template>
+
+<!-- Template to get token at specific position from space-separated text -->
+<xsl:template name="get-token-at-position">
+    <xsl:param name="text"/>
+    <xsl:param name="position"/>
+    <xsl:param name="delimiter" select="' '"/>
+    
+    <xsl:choose>
+        <xsl:when test="$position = 1">
+            <xsl:choose>
+                <xsl:when test="contains($text, $delimiter)">
+                    <xsl:value-of select="substring-before($text, $delimiter)"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$text"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:call-template name="get-token-at-position">
+                <xsl:with-param name="text" select="substring-after($text, $delimiter)"/>
+                <xsl:with-param name="position" select="$position - 1"/>
+                <xsl:with-param name="delimiter" select="$delimiter"/>
+            </xsl:call-template>
+        </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+  
+  <!-- Template to format numbers with comma as decimal separator -->
+  <xsl:template name="format-number-comma">
+    <xsl:param name="number"/>
+    <xsl:variable name="normalizedNumber" select="normalize-space($number)"/>
+    
+    <xsl:choose>
+      <!-- Handle scientific notation -->
+      <xsl:when test="contains($normalizedNumber, 'E') or contains($normalizedNumber, 'e')">
+        <xsl:variable name="mantissa" select="substring-before(concat($normalizedNumber, 'E'), 'E')"/>
+        <xsl:variable name="exponent" select="substring-after($normalizedNumber, 'E')"/>
+        <xsl:if test="not($exponent)">
+          <xsl:variable name="exponent" select="substring-after($normalizedNumber, 'e')"/>
+        </xsl:if>
+        <xsl:call-template name="format-decimal-comma">
+          <xsl:with-param name="number" select="$mantissa"/>
+          </xsl:call-template>E<xsl:value-of select="$exponent"/>
+      </xsl:when>
+      <!-- Handle regular decimal numbers -->
+      <xsl:when test="contains($normalizedNumber, '.')">
+        <xsl:call-template name="format-decimal-comma">
+          <xsl:with-param name="number" select="$normalizedNumber"/>
+        </xsl:call-template>
+      </xsl:when>
+      <!-- Handle integers -->
+      <xsl:otherwise>
+        <xsl:value-of select="$normalizedNumber"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+<!-- Template to replace decimal point with comma -->
+<xsl:template name="format-decimal-comma">
+    <xsl:param name="number"/>
+    <xsl:variable name="integerPart" select="substring-before(concat($number, '.'), '.')"/>
+    <xsl:variable name="decimalPart" select="substring-after($number, '.')"/>
+    
+    <xsl:value-of select="$integerPart"/>
+    <xsl:if test="$decimalPart != ''">
+        <xsl:text>,</xsl:text>
+        <xsl:value-of select="$decimalPart"/>
+    </xsl:if>
+</xsl:template>
+
+  <!-- Template to format SI units to human-readable format -->
+  <xsl:template name="format-unit">
+    <xsl:param name="unit"/>
+    <xsl:choose>
+      <xsl:when test="$unit = '\degreecelsius'">ºC</xsl:when>
+      <xsl:when test="$unit = '\percent'">%</xsl:when>
+      <xsl:when test="$unit = '\milli\ampere'">mA</xsl:when>
+      <xsl:when test="$unit = '\kilo\ohm'">kΩ</xsl:when>
+      <xsl:when test="$unit = '\hertz'">Hz</xsl:when>
+      <xsl:when test="$unit = '\kilo\hertz'">kHz</xsl:when>
+      <xsl:when test="$unit = '\volt'">V</xsl:when>
+      <xsl:when test="$unit = '\nano\second'">ns</xsl:when>
+      <xsl:when test="$unit = '\second'">s</xsl:when>
+      <xsl:when test="$unit = '\meter'">m</xsl:when>
+      <xsl:when test="$unit = '\micro\volt\volt\tothe{-1}'">&#xB5;V/V</xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$unit"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <!-- Generic template to process measurement rows -->
+  <xsl:template name="process-measurement-rows">
+    <xsl:param name="resultNode"/>
+    <xsl:param name="valueIndex"/>
+    
+    <xsl:variable name="frequencies" select="$resultNode/dcc:data/dcc:list/dcc:quantity[1]/si:realListXMLList/si:valueXMLList"/>
+    <xsl:variable name="voltages" select="$resultNode/dcc:data/dcc:list/dcc:quantity[2]/si:realListXMLList/si:valueXMLList"/>
+    <xsl:variable name="values" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:valueXMLList"/>
+    <xsl:variable name="uncertainties" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList"/>
+    <xsl:variable name="coverageFactors" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList"/>
+    
+    <xsl:call-template name="generate-table-rows">
+      <xsl:with-param name="frequencies" select="$frequencies"/>
+      <xsl:with-param name="voltages" select="$voltages"/>
+      <xsl:with-param name="values" select="$values"/>
+      <xsl:with-param name="uncertainties" select="$uncertainties"/>
+      <xsl:with-param name="coverageFactors" select="$coverageFactors"/>
+      <xsl:with-param name="index" select="1"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <!-- Template to generate table rows from tokenized data -->
+  <xsl:template name="generate-table-rows">
+    <xsl:param name="frequencies"/>
+    <xsl:param name="voltages"/>
+    <xsl:param name="values"/>
+    <xsl:param name="uncertainties"/>
+    <xsl:param name="coverageFactors"/>
+    <xsl:param name="index"/>
+    
+    <xsl:variable name="freqTokens" select="normalize-space($frequencies)"/>
+    <xsl:variable name="voltTokens" select="normalize-space($voltages)"/>
+    <xsl:variable name="valueTokens" select="normalize-space($values)"/>
+    <xsl:variable name="uncertTokens" select="normalize-space($uncertainties)"/>
+    <xsl:variable name="coverageTokens" select="normalize-space($coverageFactors)"/>
+    
+    <xsl:if test="$freqTokens != ''">
+      <xsl:variable name="currentFreq" select="substring-before(concat($freqTokens, ' '), ' ')"/>
+      <xsl:variable name="currentVolt" select="substring-before(concat($voltTokens, ' '), ' ')"/>
+      <xsl:variable name="currentValue" select="substring-before(concat($valueTokens, ' '), ' ')"/>
+      <xsl:variable name="currentUncert" select="substring-before(concat($uncertTokens, ' '), ' ')"/>
+      <xsl:variable name="currentCoverage" select="substring-before(concat($coverageTokens, ' '), ' ')"/>
+      
+      <xsl:if test="$currentFreq != ''">
+        <tr>
+          <td><xsl:value-of select="$currentVolt"/></td>
+          <td><xsl:value-of select="$currentFreq"/></td>
+          <td>
+            <xsl:choose>
+              <xsl:when test="contains($currentValue, '.')">
+                <xsl:call-template name="format-number">
+                  <xsl:with-param name="number" select="$currentValue"/>
+                </xsl:call-template>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="$currentValue"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </td>
+          <td><xsl:value-of select="$currentUncert"/></td>
+          <td><xsl:value-of select="$currentCoverage"/></td>
+          <td>∞</td>
+        </tr>
+        
+        <!-- Recursive call for next token -->
+        <xsl:call-template name="generate-table-rows">
+          <xsl:with-param name="frequencies" select="substring-after($freqTokens, ' ')"/>
+          <xsl:with-param name="voltages" select="substring-after($voltTokens, ' ')"/>
+          <xsl:with-param name="values" select="substring-after($valueTokens, ' ')"/>
+          <xsl:with-param name="uncertainties" select="substring-after($uncertTokens, ' ')"/>
+          <xsl:with-param name="coverageFactors" select="substring-after($coverageTokens, ' ')"/>
+          <xsl:with-param name="index" select="$index + 1"/>
+        </xsl:call-template>
+      </xsl:if>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- Template to format numbers with spaces for thousands and comma for decimal -->
+  <xsl:template name="format-number">
+    <xsl:param name="number"/>
+    <xsl:variable name="integerPart" select="substring-before(concat($number, '.'), '.')"/>
+    <xsl:variable name="decimalPart" select="substring-after($number, '.')"/>
+    
+    <xsl:value-of select="$integerPart"/>
+    <xsl:if test="$decimalPart != ''">
+      <xsl:text>,</xsl:text>
+      <xsl:value-of select="$decimalPart"/>
+    </xsl:if>
+  </xsl:template>
+  
+</xsl:stylesheet>
