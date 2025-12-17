@@ -56,6 +56,8 @@ import tempfile
 # excel2json
 import pandas as pd
 
+import math
+
 # namespaces
 nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb.de/dcc', 'si': 'https://ptb.de/si'}
 # schema
@@ -68,6 +70,24 @@ app.debug = True
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
 # funcoes auxiliares
+
+def format_two_sig_scientific(number):
+    if number == 0:
+        return "0.0e0"
+    
+    # Calculate exponent
+    exponent = math.floor(math.log10(abs(number)))
+    
+    # Calculate mantissa with 2 significant digits
+    mantissa = number / (10 ** exponent)
+    mantissa = round(mantissa, 1)  # Round to 1 decimal for 2 sig figs
+    
+    # Adjust if rounding makes mantissa >= 10
+    if mantissa >= 10:
+        mantissa /= 10
+        exponent += 1
+    
+    return f"{mantissa:.1f}e{exponent}"
 
 # gerar human readable a partir do xml
 def transform_xml_to_html(xml_content, xslt_path):
@@ -508,7 +528,8 @@ def dccGen(dcc_version, dados, declaracao) :
                 if (mensurando_data[mensurando]['unc_relativa']) :
                     ##  17/12/2025
                     # alterado para dois algarismos significativos
-                    unc[mensurando].append("{:.2g}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
+                    unc[mensurando].append(format_two_sig_scientific(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
+                    #unc[mensurando].append("{:.2g}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
                 else :
                     unc[mensurando].append(resultados['unc'])
                 
