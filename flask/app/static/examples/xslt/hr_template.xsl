@@ -357,46 +357,132 @@
 		<xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/>
 		<xsl:variable name="unit" select="dcc:data/dcc:quantity/si:real/si:unit"/>
 		
-		<strong><xsl:value-of select="$conditionName"/>:</strong>
+		<!-- Check if this is a text-based condition (no quantity data) -->
 		<xsl:choose>
-		  <xsl:when test="contains($conditionName, 'Temperatura')">
-                    (<xsl:call-template name="format-number-comma">
-                    <xsl:with-param name="number" select="$value"/>
-                    </xsl:call-template> ± <xsl:call-template name="format-number-comma">
-                    <xsl:with-param name="number" select="$uncertainty"/>
-                    </xsl:call-template>) 
-                    <xsl:call-template name="format-unit">
-                      <xsl:with-param name="unit" select="$unit"/>
-                    </xsl:call-template>
+		  <xsl:when test="dcc:data/dcc:text">
+		    <!-- Text-based condition -->
+		    <strong><xsl:value-of select="$conditionName"/>:</strong>
+		    <xsl:text> </xsl:text>
+		    <xsl:value-of select="dcc:data/dcc:text/dcc:content"/>
+		    <br/>
 		  </xsl:when>
-		  <xsl:when test="contains($conditionName, 'Umidade')">
-                    (<xsl:call-template name="format-number-comma">
-                    <xsl:with-param name="number" select="$value"/>
-                    </xsl:call-template> ± <xsl:call-template name="format-number-comma">
-                    <xsl:with-param name="number" select="$uncertainty"/>
-                    </xsl:call-template>) 
-                    <xsl:call-template name="format-unit">
-                      <xsl:with-param name="unit" select="$unit"/>
-                    </xsl:call-template>
-                    <xsl:text> ur</xsl:text>
+		  <xsl:when test="$value">
+		    <!-- Numeric condition -->
+		    <strong><xsl:value-of select="$conditionName"/>:</strong>
+		    <xsl:text> </xsl:text>
+		    
+		    <xsl:choose>
+		      <xsl:when test="contains($conditionName, 'Temperatura')">
+			<!-- Temperature format -->
+			<xsl:call-template name="format-number-comma">
+			  <xsl:with-param name="number" select="$value"/>
+			</xsl:call-template>
+			<xsl:if test="$uncertainty">
+			  ± <xsl:call-template name="format-number-comma">
+			  <xsl:with-param name="number" select="$uncertainty"/>
+			</xsl:call-template>
+			</xsl:if>
+			<xsl:text> </xsl:text>
+			<xsl:call-template name="format-unit">
+			  <xsl:with-param name="unit" select="$unit"/>
+			</xsl:call-template>
+		      </xsl:when>
+		      <xsl:when test="contains($conditionName, 'Umidade')">
+			<!-- Humidity format -->
+			<xsl:call-template name="format-number-comma">
+			  <xsl:with-param name="number" select="$value"/>
+			</xsl:call-template>
+			<xsl:if test="$uncertainty">
+			  ± <xsl:call-template name="format-number-comma">
+			  <xsl:with-param name="number" select="$uncertainty"/>
+			</xsl:call-template>
+			</xsl:if>
+			<xsl:text> </xsl:text>
+			<xsl:call-template name="format-unit">
+			  <xsl:with-param name="unit" select="$unit"/>
+			</xsl:call-template>
+			<xsl:text> ur</xsl:text>
+		      </xsl:when>
+		      <xsl:otherwise>
+			<!-- Other numeric conditions -->
+			<xsl:call-template name="format-number-comma">
+			  <xsl:with-param name="number" select="$value"/>
+			</xsl:call-template>
+			<xsl:text> </xsl:text>
+			<xsl:call-template name="format-unit">
+			  <xsl:with-param name="unit" select="$unit"/>
+			</xsl:call-template>
+			<xsl:if test="$uncertainty">
+			  <xsl:text> ± </xsl:text>
+			  <xsl:call-template name="format-number-comma">
+			    <xsl:with-param name="number" select="$uncertainty"/>
+			  </xsl:call-template>
+			</xsl:if>
+		      </xsl:otherwise>
+		    </xsl:choose>
+		    <br/>
 		  </xsl:when>
 		  <xsl:otherwise>
-                    <xsl:call-template name="format-number-comma">
-                      <xsl:with-param name="number" select="$value"/>
-                    </xsl:call-template> 
-                    <xsl:call-template name="format-unit">
-                      <xsl:with-param name="unit" select="$unit"/>
-                    </xsl:call-template>
-                    <xsl:if test="$uncertainty">
-                      ± <xsl:call-template name="format-number-comma">
-                      <xsl:with-param name="number" select="$uncertainty"/>
-                    </xsl:call-template>
-                    </xsl:if>
+		    <!-- Fallback for other types -->
+		    <strong><xsl:value-of select="$conditionName"/>:</strong>
+		    <xsl:text> [Dados não disponíveis]</xsl:text>
+		    <br/>
 		  </xsl:otherwise>
 		</xsl:choose>
-		<br/>
 	      </xsl:for-each>
 	    </div>
+
+	    
+	    <!-- <div class="section"> -->
+	    <!--   <div class="section-title">Informações Pertinentes às Atividades Realizadas</div> -->
+	    <!--   <strong><u>Condições Ambientais:</u></strong><br/> -->
+	      
+	    <!--   <xsl:for-each select="//dcc:influenceConditions/dcc:influenceCondition"> -->
+	    <!-- 	<xsl:variable name="conditionName" select="dcc:name/dcc:content"/> -->
+	    <!-- 	<xsl:variable name="value" select="dcc:data/dcc:quantity/si:real/si:value"/> -->
+	    <!-- 	<xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/> -->
+	    <!-- 	<xsl:variable name="unit" select="dcc:data/dcc:quantity/si:real/si:unit"/> -->
+		
+	    <!-- 	<strong><xsl:value-of select="$conditionName"/>:</strong> -->
+	    <!-- 	<xsl:choose> -->
+	    <!-- 	  <xsl:when test="contains($conditionName, 'Temperatura')"> -->
+            <!--         (<xsl:call-template name="format-number-comma"> -->
+            <!--         <xsl:with-param name="number" select="$value"/> -->
+            <!--         </xsl:call-template> ± <xsl:call-template name="format-number-comma"> -->
+            <!--         <xsl:with-param name="number" select="$uncertainty"/> -->
+            <!--         </xsl:call-template>)  -->
+            <!--         <xsl:call-template name="format-unit"> -->
+            <!--           <xsl:with-param name="unit" select="$unit"/> -->
+            <!--         </xsl:call-template> -->
+	    <!-- 	  </xsl:when> -->
+	    <!-- 	  <xsl:when test="contains($conditionName, 'Umidade')"> -->
+            <!--         (<xsl:call-template name="format-number-comma"> -->
+            <!--         <xsl:with-param name="number" select="$value"/> -->
+            <!--         </xsl:call-template> ± <xsl:call-template name="format-number-comma"> -->
+            <!--         <xsl:with-param name="number" select="$uncertainty"/> -->
+            <!--         </xsl:call-template>)  -->
+            <!--         <xsl:call-template name="format-unit"> -->
+            <!--           <xsl:with-param name="unit" select="$unit"/> -->
+            <!--         </xsl:call-template> -->
+            <!--         <xsl:text> ur</xsl:text> -->
+	    <!-- 	  </xsl:when> -->
+	    <!-- 	  <xsl:otherwise> -->
+            <!--         <xsl:call-template name="format-number-comma"> -->
+            <!--           <xsl:with-param name="number" select="$value"/> -->
+            <!--         </xsl:call-template>  -->
+            <!--         <xsl:call-template name="format-unit"> -->
+            <!--           <xsl:with-param name="unit" select="$unit"/> -->
+            <!--         </xsl:call-template> -->
+            <!--         <xsl:if test="$uncertainty"> -->
+            <!--           ± <xsl:call-template name="format-number-comma"> -->
+            <!--           <xsl:with-param name="number" select="$uncertainty"/> -->
+            <!--         </xsl:call-template> -->
+            <!--         </xsl:if> -->
+	    <!-- 	  </xsl:otherwise> -->
+	    <!-- 	</xsl:choose> -->
+	    <!-- 	<br/> -->
+	    <!--   </xsl:for-each> -->
+	    <!-- </div> -->
 	    
             <div class="section">
               <div class="section-title">Resultados e Declaração da Incerteza de Medição</div>
