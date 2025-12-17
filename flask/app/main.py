@@ -454,6 +454,7 @@ def dccGen(dcc_version, dados, declaracao) :
         campo_name(influenceCondition,informacoes_pertinentes['name'])
         data = etree.SubElement(influenceCondition, etree.QName(nsmap['dcc'], 'data'))
         # checar se tem unidade
+        # incerteza nao deve ser obrigatorio!
         if 'unit' in informacoes_pertinentes :
             quantity = etree.SubElement(data, etree.QName(nsmap['dcc'], 'quantity'))
             si_real = etree.SubElement(quantity, etree.QName(nsmap['si'], 'real'))
@@ -461,17 +462,19 @@ def dccGen(dcc_version, dados, declaracao) :
             si_value.text = informacoes_pertinentes['value']
             si_unit = etree.SubElement(si_real, etree.QName(nsmap['si'], 'unit'))
             si_unit.text = informacoes_pertinentes['unit']
-            si_expandedUnc = etree.SubElement(si_real, etree.QName(nsmap['si'], 'expandedUnc'))
-            si_uncertainty = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'uncertainty'))
-            si_uncertainty.text = informacoes_pertinentes['unc']
-            si_coveragefactor = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageFactor'))
-            if 'k' in informacoes_pertinentes :
-                si_coveragefactor.text = informacoes_pertinentes['k']
-            else :
-                si_coveragefactor.text = '2'
+
+            if 'unc' in informacoes_pertinentes :
+                si_expandedUnc = etree.SubElement(si_real, etree.QName(nsmap['si'], 'expandedUnc'))
+                si_uncertainty = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'uncertainty'))
+                si_uncertainty.text = informacoes_pertinentes['unc']
+                si_coveragefactor = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageFactor'))
+                if 'k' in informacoes_pertinentes :
+                    si_coveragefactor.text = informacoes_pertinentes['k']
+                else :
+                    si_coveragefactor.text = '2'
             
-            si_coverageprob = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageProbability'))
-            si_coverageprob.text = '0.9545'
+                si_coverageprob = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageProbability'))
+                si_coverageprob.text = '0.9545'
         else : # caso contrario, texto
             text = etree.SubElement(data, etree.QName(nsmap['dcc'], 'text'))
             campo_texto(text, 'content', informacoes_pertinentes['text'])
