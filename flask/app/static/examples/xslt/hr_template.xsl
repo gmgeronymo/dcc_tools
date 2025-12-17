@@ -605,19 +605,34 @@
     <xsl:param name="mantissa"/>
     <xsl:param name="exponent"/>
     
-    <xsl:variable name="mantissaNum" select="translate($mantissa, '.', ',')"/>
+    <!-- Check if mantissa is negative -->
+    <xsl:variable name="isNegative" select="starts-with($mantissa, '-')"/>
+    <xsl:variable name="absMantissa">
+      <xsl:choose>
+	<xsl:when test="$isNegative">
+          <xsl:value-of select="substring($mantissa, 2)"/>
+	</xsl:when>
+	<xsl:otherwise>
+          <xsl:value-of select="$mantissa"/>
+	</xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
+    <xsl:variable name="mantissaNum" select="translate($absMantissa, '.', ',')"/>
     <xsl:variable name="expNum" select="number($exponent)"/>
+    
+    <xsl:if test="$isNegative">-</xsl:if>
     
     <xsl:choose>
       <!-- Positive exponent: move decimal point to the right -->
       <xsl:when test="$expNum &gt; 0">
-        <xsl:variable name="intPart" select="substring-before(concat($mantissa, '.'), '.')"/>
-        <xsl:variable name="decPart" select="substring-after($mantissa, '.')"/>
-        <xsl:variable name="fullNumber" select="concat($intPart, $decPart)"/>
-        <xsl:variable name="fullLength" select="string-length($fullNumber)"/>
-        <xsl:variable name="decLength" select="string-length($decPart)"/>
-        
-        <xsl:choose>
+	<xsl:variable name="intPart" select="substring-before(concat($absMantissa, '.'), '.')"/>
+	<xsl:variable name="decPart" select="substring-after($absMantissa, '.')"/>
+	<xsl:variable name="fullNumber" select="concat($intPart, $decPart)"/>
+	<xsl:variable name="fullLength" select="string-length($fullNumber)"/>
+	<xsl:variable name="decLength" select="string-length($decPart)"/>
+	
+	<xsl:choose>
           <xsl:when test="$expNum &gt;= $decLength">
             <!-- No decimal places left -->
             <xsl:value-of select="$fullNumber"/>
@@ -631,30 +646,31 @@
             <xsl:text>,</xsl:text>
             <xsl:value-of select="substring($fullNumber, $expNum + string-length($intPart) + 1)"/>
           </xsl:otherwise>
-        </xsl:choose>
+	</xsl:choose>
       </xsl:when>
       
       <!-- Negative exponent: move decimal point to the left -->
       <xsl:when test="$expNum &lt; 0">
-        <xsl:variable name="absExp" select="-1 * $expNum"/>
-        <xsl:variable name="intPart" select="substring-before(concat($mantissa, '.'), '.')"/>
-        <xsl:variable name="decPart" select="substring-after($mantissa, '.')"/>
-        
-        <xsl:text>0,</xsl:text>
-        <xsl:call-template name="add-zeros">
+	<xsl:variable name="absExp" select="-1 * $expNum"/>
+	<xsl:variable name="intPart" select="substring-before(concat($absMantissa, '.'), '.')"/>
+	<xsl:variable name="decPart" select="substring-after($absMantissa, '.')"/>
+	
+	<xsl:text>0,</xsl:text>
+	<xsl:call-template name="add-zeros">
           <xsl:with-param name="count" select="$absExp - 1"/>
-        </xsl:call-template>
-        <xsl:value-of select="$intPart"/>
-        <xsl:value-of select="$decPart"/>
+	</xsl:call-template>
+	<xsl:value-of select="$intPart"/>
+	<xsl:value-of select="$decPart"/>
       </xsl:when>
       
       <!-- Exponent is 0: number stays the same -->
       <xsl:otherwise>
-        <xsl:value-of select="translate($mantissa, '.', ',')"/>
+	<xsl:value-of select="translate($absMantissa, '.', ',')"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
+  
   <!-- Template to add zeros -->
   <xsl:template name="add-zeros">
     <xsl:param name="count"/>
@@ -666,16 +682,15 @@
     </xsl:if>
   </xsl:template>
 
-  
   <!-- Template to convert scientific notation to decimal format -->
   <xsl:template name="scientific-to-decimal">
     <xsl:param name="number"/>
     <xsl:variable name="normalizedNumber" select="normalize-space($number)"/>
     
     <xsl:choose>
-      <!-- Check if it's scientific notation (contains E or e with optional +) -->
+      <!-- Check if it's scientific notation (contains E or e) -->
       <xsl:when test="contains($normalizedNumber, 'E') or contains($normalizedNumber, 'e')">
-        <xsl:variable name="mantissa">
+	<xsl:variable name="mantissa">
           <xsl:choose>
             <xsl:when test="contains($normalizedNumber, 'E')">
               <xsl:value-of select="substring-before($normalizedNumber, 'E')"/>
@@ -684,9 +699,9 @@
               <xsl:value-of select="substring-before($normalizedNumber, 'e')"/>
             </xsl:otherwise>
           </xsl:choose>
-        </xsl:variable>
-        
-        <xsl:variable name="exponentWithSign">
+	</xsl:variable>
+	
+	<xsl:variable name="exponentPart">
           <xsl:choose>
             <xsl:when test="contains($normalizedNumber, 'E')">
               <xsl:value-of select="substring-after($normalizedNumber, 'E')"/>
@@ -695,31 +710,34 @@
               <xsl:value-of select="substring-after($normalizedNumber, 'e')"/>
             </xsl:otherwise>
           </xsl:choose>
-        </xsl:variable>
-        
-        <!-- Remove + sign if present -->
-        <xsl:variable name="exponent">
+	</xsl:variable>
+	
+	<!-- Handle exponent sign properly -->
+	<xsl:variable name="exponent">
           <xsl:choose>
-            <xsl:when test="starts-with($exponentWithSign, '+')">
-              <xsl:value-of select="substring($exponentWithSign, 2)"/>
+            <xsl:when test="starts-with($exponentPart, '+')">
+              <xsl:value-of select="substring($exponentPart, 2)"/>
+            </xsl:when>
+            <xsl:when test="starts-with($exponentPart, '-')">
+              <xsl:value-of select="$exponentPart"/> <!-- Already negative -->
             </xsl:when>
             <xsl:otherwise>
-              <xsl:value-of select="$exponentWithSign"/>
+              <xsl:value-of select="$exponentPart"/>
             </xsl:otherwise>
           </xsl:choose>
-        </xsl:variable>
-        
-        <!-- Convert scientific to decimal -->
-        <xsl:call-template name="convert-scientific">
+	</xsl:variable>
+	
+	<!-- Convert scientific to decimal -->
+	<xsl:call-template name="convert-scientific">
           <xsl:with-param name="mantissa" select="$mantissa"/>
           <xsl:with-param name="exponent" select="$exponent"/>
-        </xsl:call-template>
+	</xsl:call-template>
       </xsl:when>
       <!-- If not scientific notation, just format with comma -->
       <xsl:otherwise>
-        <xsl:call-template name="format-number-comma">
+	<xsl:call-template name="format-number-comma">
           <xsl:with-param name="number" select="$normalizedNumber"/>
-        </xsl:call-template>
+	</xsl:call-template>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
