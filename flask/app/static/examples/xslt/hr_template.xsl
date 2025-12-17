@@ -791,13 +791,20 @@
     <xsl:choose>
       <xsl:when test="$unit = '\degreecelsius'">ºC</xsl:when>
       <xsl:when test="$unit = '\percent'">%</xsl:when>
+      <xsl:when test="$unit = '\micro\ampere'">&#xB5;A</xsl:when>
       <xsl:when test="$unit = '\milli\ampere'">mA</xsl:when>
       <xsl:when test="$unit = '\ampere'">A</xsl:when>
       <xsl:when test="$unit = '\kilo\ohm'">kΩ</xsl:when>
       <xsl:when test="$unit = '\ohm'">Ω</xsl:when>
+      <xsl:when test="$unit = '\farad'">F</xsl:when>
+      <xsl:when test="$unit = '\pico\farad'">pF</xsl:when>
+      <xsl:when test="$unit = '\nano\farad'">nF</xsl:when>
+      <xsl:when test="$unit = '\micro\farad'">&#xB5;F</xsl:when>
       <xsl:when test="$unit = '\hertz'">Hz</xsl:when>
       <xsl:when test="$unit = '\kilo\hertz'">kHz</xsl:when>
       <xsl:when test="$unit = '\volt'">V</xsl:when>
+      <xsl:when test="$unit = '\milli\volt'">mV</xsl:when>
+      <xsl:when test="$unit = '\micro\volt'">&#xB5;V</xsl:when>
       <xsl:when test="$unit = '\nano\second'">ns</xsl:when>
       <xsl:when test="$unit = '\second'">s</xsl:when>
       <xsl:when test="$unit = '\meter'">m</xsl:when>
