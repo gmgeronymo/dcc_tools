@@ -506,7 +506,9 @@ def dccGen(dcc_version, dados, declaracao) :
 
                 # se incerteza esta em ppm, converter para valor absoluto
                 if (mensurando_data[mensurando]['unc_relativa']) :
-                    unc[mensurando].append("{:.2E}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
+                    ##  17/12/2025
+                    # alterado para dois algarismos significativos
+                    unc[mensurando].append("{:.2g}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
                 else :
                     unc[mensurando].append(resultados['unc'])
                 
