@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia da Planilha de Calibração - DCC Tools</title>
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/all.min.css') }}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.7;
+        }
+        .doc-header {
+            background: linear-gradient(135deg, #1e5799 0%, #207cca 100%);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+        .card-header {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .card-body {
+            padding: 1.25rem;
+        }
+        .section-title {
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #0d6efd;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .toc {
+            position: sticky;
+            top: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .toc ul {
+            padding-left: 1.5rem;
+        }
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        .tip-box {
+            background-color: #e7f5ff;
+            border-left: 4px solid #0d6efd;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .warn-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .example-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-left: 4px solid #198754;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
+        .sheet-name {
+            background-color: #f1f3f5;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .field-required {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .field-optional {
+            color: #198754;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        table th {
+            background-color: #f1f3f5;
+            text-align: left;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+        }
+        table td {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            vertical-align: top;
+        }
+        table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .page-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .step-number {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            line-height: 2rem;
+            text-align: center;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="doc-header">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">Guia da Planilha de Calibração</h1>
+            <p class="lead mb-4">Aprenda a preencher a planilha Excel para gerar certificados de calibração digitais (DCC)</p>
+            <a href="{{ url_for('static',filename='examples/dcc_excel.xlsx') }}" class="btn btn-light btn-lg" download>
+                <i class="fas fa-download"></i> Baixar Planilha Modelo
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="toc">
+                    <h5 class="mb-3">Sumário</h5>
+                    <ul>
+                        <li><a href="#intro">O que é esta planilha?</a></li>
+                        <li><a href="#como-usar">Como usar</a></li>
+                        <li><a href="#metadados">Metadados Principais</a></li>
+                        <li><a href="#software">Software</a></li>
+                        <li><a href="#cliente">Cliente</a></li>
+                        <li><a href="#informacoes">Informações Pertinentes</a></li>
+                        <li><a href="#declaracoes">Declarações</a></li>
+                        <li><a href="#rastreabilidade">Rastreabilidade</a></li>
+                        <li><a href="#metodo">Método de Medição</a></li>
+                        <li><a href="#mensurando">Mensurando</a></li>
+                        <li><a href="#indices">Índices</a></li>
+                        <li><a href="#resultados">Resultados</a></li>
+                        <li><a href="#observacoes">Observações</a></li>
+                        <li><a href="#resumo">Resumo Rápido</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+
+                <!-- O que é esta planilha? -->
+                <div class="page-section" id="intro">
+                    <h2 class="section-title">O que é esta planilha?</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Esta planilha é um <strong>formulário em formato Excel</strong> que permite preencher todos os dados necessários para gerar um <strong>Certificado de Calibração Digital (DCC)</strong>.</p>
+                            <p>Em vez de digitar código JSON (uma linguagem técnica de programação), você simplesmente <strong>preenche as células do Excel</strong> como faria em qualquer planilha. O sistema converte automaticamente os dados para o formato digital.</p>
+
+                            <div class="tip-box">
+                                <strong>Pré-requisito:</strong> Ter o Microsoft Excel, LibreOffice Calc ou Google Sheets instalado. O formato <code>.xlsx</code> é o padrão — não use <code>.xls</code> (formato antigo).
+                            </div>
+
+                            <h5 class="mt-4">A planilha tem 11 abas:</h5>
+                            <div class="example-box" style="font-family: inherit; font-size: 0.95em;">
+  1. Metadados Principais    → Dados gerais do certificado
+  2. Software                → Programas utilizados na calibração
+  3. Cliente                 → Dados do cliente
+  4. Informações Pertinentes → Condições ambientais (temperatura, umidade)
+  5. Declarações             → Declarações fixas de rastreabilidade e incerteza
+  6. Rastreabilidade         → Tabela de padrões utilizados
+  7. Método de Medição       → Descrição do método e equação (se houver)
+  8. Mensurando              → Definição do que está sendo medido
+  9. Índices                 → Parâmetros adicionais (faixa, tensão, frequência)
+ 10. Resultados              → Valores medidos com suas incertezas
+ 11. Observações             → Notas e observações adicionais
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Como usar -->
+                <div class="page-section" id="como-usar">
+                    <h2 class="section-title">Como usar</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Passo a passo:</h5>
+
+                            <div style="margin: 1rem 0;">
+                                <span class="step-number">1</span>
+                                <strong>Baixe a planilha modelo</strong>
+                                <p style="margin-left: 2.5rem; margin-top: 0.5rem;">Clique no botão de download no topo desta página. Use sempre a <em>planilha modelo</em> — não altere a estrutura das abas, linhas de cabeçalho ou nomes de colunas.</p>
+                            </div>
+
+                            <div style="margin: 1rem 0;">
+                                <span class="step-number">2</span>
+                                <strong>Preencha cada aba</strong>
+                                <p style="margin-left: 2.5rem; margin-top: 0.5rem;">Cada aba é descrita em detalhes nas seções a seguir. Campos em <span class="field-required">vermelho</span> são obrigatórios; campos em <span class="field-optional">verde</span> são opcionais.</p>
+                            </div>
+
+                            <div style="margin: 1rem 0;">
+                                <span class="step-number">3</span>
+                                <strong>Não mude o formato dos dados</strong>
+                                <p style="margin-left: 2.5rem; margin-top: 0.5rem;">Não insira linhas ou colunas novas. Não altere os nomes das colunas. Não exclua linhas de exemplo — substitua os valores pelos seus dados.</p>
+                            </div>
+
+                            <div style="margin: 1rem 0;">
+                                <span class="step-number">4</span>
+                                <strong>Salve e envie</strong>
+                                <p style="margin-left: 2.5rem; margin-top: 0.5rem;">Salve o arquivo em formato <code>.xlsx</code>. Na página inicial da aplicação DCC Tools, use a seção <strong>"Gerar DCC a partir de arquivo Excel"</strong> para enviar a planilha.</p>
+                            </div>
+
+                            <div class="warn-box">
+                                <strong>Atenção:</strong> A planilha contém linhas de exemplo com dados fictícios. <strong>Substitua todos os valores</strong> pelos dados reais antes de gerar o certificado. Não apague a linha de cabeçalho (primeira linha de cada aba).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadados Principais -->
+                <div class="page-section" id="metadados">
+                    <h2 class="section-title">1. Metadados Principais</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Metadados Principais</span> contém os dados gerais do certificado de calibração. Todos os campos desta aba são obrigatórios, exceto quando indicado.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Campo</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Nome Laboratório</strong></td>
+                                        <td>Nome completo do laboratório que realizou a calibração</td>
+                                        <td>Laboratório de Metrologia em Padronização Elétrica</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sigla Laboratório</strong></td>
+                                        <td>Sigla ou abreviação do laboratório</td>
+                                        <td>Lampe</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Nome Divisão</strong></td>
+                                        <td>Nome da divisão à qual o laboratório pertence</td>
+                                        <td>Divisão de Metrologia Elétrica</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sigla Divisão</strong></td>
+                                        <td>Sigla da divisão</td>
+                                        <td>Diele</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Número Certificado</strong></td>
+                                        <td>Número do certificado (sem o prefixo DIMCI — o sistema adiciona automaticamente)</td>
+                                        <td>0856/2024</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Número Processo</strong></td>
+                                        <td>Número do processo Inmetro</td>
+                                        <td>0052600.003988/2023-06</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tipo Item</strong></td>
+                                        <td>Descrição do tipo de item calibrado</td>
+                                        <td>Padrão de Transferência AC-DC</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Fabricante</strong></td>
+                                        <td>Nome do fabricante do equipamento</td>
+                                        <td>Fluke</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Modelo</strong></td>
+                                        <td>Modelo do equipamento</td>
+                                        <td>792A</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Número Série</strong></td>
+                                        <td>Número de série do equipamento</td>
+                                        <td>6515002</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Código Identificação</strong></td>
+                                        <td>Código de identificação interno do laboratório</td>
+                                        <td>PT-030</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Características Item</strong></td>
+                                        <td>Descrição adicional das características do item</td>
+                                        <td>Função: Transferência Térmica de Tensão AC-DC</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Data Calibração</strong></td>
+                                        <td>Data em que a calibração foi realizada (formato: AAAA-MM-DD)</td>
+                                        <td>2024-08-07</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Data Emissão</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>Data de emissão do certificado. Se em branco, o sistema incluirá: "Ver data da assinatura eletrônica presente no certificado"</td>
+                                        <td>2024-08-15</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CMC</strong></td>
+                                        <td>Indica se o certificado possui CMC (Capacidades de Medição e Calibração). Digite <strong>Sim</strong> ou <strong>Não</strong></td>
+                                        <td>Sim</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Chefe Divisão</strong></td>
+                                        <td>Nome do chefe da divisão</td>
+                                        <td>Edson Afonso</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Descrição Chefe Divisão</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>Cargo do chefe da divisão</td>
+                                        <td>Chefe Substituto</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Chefe Laboratório</strong></td>
+                                        <td>Nome do chefe do laboratório</td>
+                                        <td>Gean Marcos Geronymo</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Descrição Chefe Laboratório</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>Cargo do chefe do laboratório</td>
+                                        <td>Chefe Substituto</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Técnico Executor</strong></td>
+                                        <td>Nome do técnico que executou a calibração</td>
+                                        <td>Gean Marcos Geronymo</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Descrição Técnico</strong></td>
+                                        <td>Cargo/descrição do técnico executor</td>
+                                        <td>Técnico Executor</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="tip-box">
+                                <strong>Dica:</strong> A data deve seguir o formato <strong>AAAA-MM-DD</strong> (Ano com 4 dígitos, mês com 2 dígitos, dia com 2 dígitos, separados por hífen). Exemplo: <code>2024-08-07</code>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Software -->
+                <div class="page-section" id="software">
+                    <h2 class="section-title">2. Software</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Software</span> registra os programas de computador utilizados durante o processo de calibração.</p>
+                            <p><span class="field-optional">Esta aba é opcional</span> — se não houver software relevante a registrar, deixe a linha de exemplo em branco ou apague-a.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>name</strong></td>
+                                        <td>Nome do software utilizado</td>
+                                        <td>SYS-LAMPE</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>version</strong></td>
+                                        <td>Versão do software</td>
+                                        <td>V2.3-69</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+# Exemplo (pode ter mais de uma linha):
+name         | version
+SYS-LAMPE    | V2.3-69
+MeuSoftware  | v1.2.3
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cliente -->
+                <div class="page-section" id="cliente">
+                    <h2 class="section-title">3. Cliente</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Cliente</span> contém os dados do cliente ou organização que solicitou a calibração. Todos os campos são obrigatórios.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>nome</strong></td>
+                                        <td>Nome completo do cliente/organização</td>
+                                        <td>Inmetro/Dimci/Diele/Lacel</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>email</strong></td>
+                                        <td>E-mail para contato</td>
+                                        <td>lampe@inmetro.gov.br</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>cidade</strong></td>
+                                        <td>Cidade do endereço</td>
+                                        <td>Duque de Caxias</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>pais</strong></td>
+                                        <td>Código do país (ISO 3166-1, 2 letras)</td>
+                                        <td>BR</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>cep</strong></td>
+                                        <td>CEP do endereço</td>
+                                        <td>25250-020</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>uf</strong></td>
+                                        <td>Estado/UF (sigla)</td>
+                                        <td>RJ</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>endereco</strong></td>
+                                        <td>Logradouro</td>
+                                        <td>Av. Nossa Senhora das Graças</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>numero</strong></td>
+                                        <td>Número do endereço</td>
+                                        <td>50</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="tip-box">
+                                <strong>Nota:</strong> Esta aba possui apenas uma linha de dados (além do cabeçalho). Preencha os dados do cliente na primeira linha, abaixo do cabeçalho.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Pertinentes -->
+                <div class="page-section" id="informacoes">
+                    <h2 class="section-title">4. Informações Pertinentes</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Informações Pertinentes</span> registra as <strong>condições ambientais</strong> durante a calibração, como temperatura e umidade relativa do ar. Cada linha representa uma condição.</p>
+                            <p>Você pode usar dois formatos para temperatura e umidade:</p>
+
+                            <h5 class="mt-3">Formato 1: Valor único</h5>
+                            <p>Quando a temperatura ou umidade foi medida e registrada como um valor único:</p>
+                            <div class="example-box">
+name          | value | unc | k | unit             | text | refType
+Temperatura   | 23.2  | 1.0 | 2 | \degreecelsius |      |
+Umidade rel.  | 49    | 10  | 2 | \percent        |      |
+                            </div>
+
+                            <h5 class="mt-3">Formato 2: Intervalo (mínimo e máximo)</h5>
+                            <p>Quando a temperatura ou umidade variou dentro de um intervalo durante a calibração:</p>
+                            <div class="example-box">
+name                    | value | value_min | value_max | unc | k | unit             | refType
+Temperatura (intervalo) |       | 20        | 25        | 1.0 | 2 | \degreecelsius | basic_temperature
+Umidade rel. (intervalo)|       | 30        | 70        | 5   | 2 | \percent       | basic_humidityRelative
+                            </div>
+
+                            <h5 class="mt-3">Formato 3: Texto livre</h5>
+                            <p>Para informações que não são valores numéricos:</p>
+                            <div class="example-box">
+name               | value | text                              | refType
+Informação textual |       | Texto descritivo da condição...    |
+                            </div>
+
+                            <h5 class="mt-3">Descrição das colunas:</h5>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                        <th>Tipo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>name</strong></td>
+                                        <td>Nome descritivo da condição</td>
+                                        <td>Temperatura</td>
+                                        <td><span class="field-required">Obrigatório</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>value</strong></td>
+                                        <td>Valor numérico único (não use se usar value_min/value_max)</td>
+                                        <td>23.2</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>value_min</strong></td>
+                                        <td>Valor mínimo do intervalo (não use se usar value)</td>
+                                        <td>20</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>value_max</strong></td>
+                                        <td>Valor máximo do intervalo (não use se usar value)</td>
+                                        <td>25</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>unc</strong></td>
+                                        <td>Incerteza expandida da medição</td>
+                                        <td>1.0</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>k</strong></td>
+                                        <td>Fator de abrangência (padrão: 2)</td>
+                                        <td>2</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>unit</strong></td>
+                                        <td>Unidade de medida (formato D-SI)</td>
+                                        <td>\degreecelsius ou \percent</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>text</strong></td>
+                                        <td>Texto descritivo (não use se usar value, unit ou interval)</td>
+                                        <td>Condição observada...</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>refType</strong></td>
+                                        <td>Identificador padronizado (opcional, mas recomendado)</td>
+                                        <td>basic_temperature</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>refType_min</strong></td>
+                                        <td>RefType para o valor mínimo (formato intervalo)</td>
+                                        <td>math_minimum</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>refType_max</strong></td>
+                                        <td>RefType para o valor máximo (formato intervalo)</td>
+                                        <td>math_maximum</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="tip-box">
+                                <strong>Unidades comuns:</strong>
+                                <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                                    <li>Temperatura em graus Celsius: <code>\degreecelsius</code></li>
+                                    <li>Umidade relativa em percentual: <code>\percent</code></li>
+                                    <li>Pressão atmosférica em Pascal: <code>\pascal</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Declarações -->
+                <div class="page-section" id="declaracoes">
+                    <h2 class="section-title">5. Declarações</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Declarações</span> contém dois campos textuais obrigatórios que são exibidos no certificado.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Campo</th>
+                                        <th>O que preencher</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Declaração de Rastreabilidade</strong></td>
+                                        <td>Texto que descreve a rastreabilidade metrológica dos resultados. Deve informar a qual padrão ou sistema (ex: SI, BIPM) os resultados são rastreados.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Declaração de Incerteza</strong></td>
+                                        <td>Texto padronizado que descreve como a incerteza de medição foi calculada. Deve mencionar o GUM e o fator de abrangência utilizado.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+Tipo                              | Conteúdo
+Declaração de Rastreabilidade     | Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI)...
+Declaração de Incerteza            | As incertezas expandidas de medição (U) relatadas são declaradas como a incerteza padrão combinada multiplicada pelo fator de abrangência k...
+                            </div>
+
+                            <div class="tip-box">
+                                <strong>Textos padronizados:</strong> A DIMCI possui textos modelos para estas declarações. Consulte o modelo de certificado vigente para usar os textos corretos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rastreabilidade -->
+                <div class="page-section" id="rastreabilidade">
+                    <h2 class="section-title">6. Rastreabilidade</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Rastreabilidade</span> lista os <strong>padrões de referência</strong> utilizados na calibração. Cada linha representa um padrão.</p>
+                            <p><span class="field-optional">Esta aba é opcional</span> — se não houver padrões a listar, deixe as linhas em branco.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>name</strong></td>
+                                        <td>Nome do padrão utilizado</td>
+                                        <td>Conversor Térmico PMJTC</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>origem</strong></td>
+                                        <td>Instituição de origem do padrão</td>
+                                        <td>PTB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>certificado</strong></td>
+                                        <td>Número do certificado de calibração do padrão</td>
+                                        <td>PTB 27812/2020</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>cod_id</strong></td>
+                                        <td>Código de identificação interno do padrão</td>
+                                        <td>PR 394</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+name                        | origem | certificado    | cod_id
+Conversor Térmico PMJTC    | PTB    | PTB 27812/2020 | PR 394
+Resistor Padrão            | Inmetro| DIMCI 1263/2024 | Lampe PR 465
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Método de Medição -->
+                <div class="page-section" id="metodo">
+                    <h2 class="section-title">7. Método de Medição</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Método de Medição</span> descreve o procedimento utilizado na calibração. Cada linha representa uma etapa ou descrição do método.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>text</strong></td>
+                                        <td>Descrição textual do método de medição (pode ter mais de uma linha)</td>
+                                        <td>As entradas de tensão do instrumento padrão...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>equation</strong></td>
+                                        <td>Equação matemática do método (formato LaTeX). <span class="field-optional">Opcional.</span></td>
+                                        <td>\delta_u = \dfrac{U_ac}{U_dc}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+text                                          | equation
+Descrição do método de medição...             |
+Segunda descrição do método (se necessário)... |
+                            </div>
+
+                            <div class="tip-box">
+                                <strong>Formato de equações:</strong> Use notação LaTeX. Exemplos:
+                                <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                                    <li> fração: <code>\dfrac{numerador}{denominador}</code></li>
+                                    <li> subescrito: <code>x_{indice}</code></li>
+                                    <li> sobrescrito: <code>x^{expoente}</code></li>
+                                    <li> raiz quadrada: <code>\sqrt{x}</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensurando -->
+                <div class="page-section" id="mensurando">
+                    <h2 class="section-title">8. Mensurando</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Mensurando</span> define <strong>o que está sendo medido</strong> — o mensurando. Cada linha representa um tipo de grandeza medida. Pelo menos um mensurando é necessário.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                        <th>Tipo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>label</strong></td>
+                                        <td>Identificador único (sem espaços, em minúsculas)</td>
+                                        <td>acdc</td>
+                                        <td><span class="field-required">Obrigatório</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>name</strong></td>
+                                        <td>Nome completo descritivo do mensurando</td>
+                                        <td>Diferença AC-DC em tensão</td>
+                                        <td><span class="field-required">Obrigatório</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>col_name</strong></td>
+                                        <td>Nome da coluna na aba Resultados que contém os valores deste mensurando</td>
+                                        <td>\delta_u</td>
+                                        <td><span class="field-required">Obrigatório</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>unit</strong></td>
+                                        <td>Unidade de medida do mensurando (formato D-SI)</td>
+                                        <td>\micro\volt\volt\tothe{-1}</td>
+                                        <td><span class="field-required">Obrigatório</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>unc_relativa</strong></td>
+                                        <td>Digite <strong>Sim</strong> se a incerteza é relativa (adimensional), ou <strong>Não</strong> se é absoluta</td>
+                                        <td>Não</td>
+                                        <td><span class="field-required">Obrigatório</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>refType</strong></td>
+                                        <td>Identificador padronizado (opcional)</td>
+                                        <td>basic_measuredValue</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+label | name                             | col_name | unit                            | unc_relativa | refType
+acdc  | Diferença AC-DC em tensão       | \delta_u | \micro\volt\volt\tothe{-1}   | Não         |
+rstdc | Resistência em Corrente Contínua | \m       | \ohm                            | Sim          |
+                            </div>
+
+                            <div class="tip-box">
+                                <strong>Unidades comuns:</strong>
+                                <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                                    <li> Ohm (resistência): <code>\ohm</code></li>
+                                    <li> Volt (tensão): <code>\volt</code></li>
+                                    <li> Ampere (corrente): <code>\ampere</code></li>
+                                    <li> Hz (frequência): <code>\hertz</code></li>
+                                    <li> Watt (potência): <code>\watt</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Índices -->
+                <div class="page-section" id="indices">
+                    <h2 class="section-title">9. Índices</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Índices</span> define <strong>parâmetros adicionais</strong> que categorizam os resultados, como faixa de medição, tensão de teste ou frequência. Cada índice vira uma coluna na tabela de resultados.</p>
+                            <p><span class="field-optional">Esta aba é opcional</span> — se não precisar de índices, deixe em branco. Mas se houver um mensurando com índice na aba Resultados, o índice correspondente deve estar definido aqui.</p>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>mensurando</strong></td>
+                                        <td>Identificador do mensurando ao qual este índice pertence (deve existir na aba Mensurando)</td>
+                                        <td>acdc</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>label</strong></td>
+                                        <td>Identificador único do índice (minúsculas, sem espaços)</td>
+                                        <td>faixa</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>name</strong></td>
+                                        <td>Nome descritivo do índice</td>
+                                        <td>Faixa</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>unit</strong></td>
+                                        <td>Unidade do índice (formato D-SI)</td>
+                                        <td>\volt</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>refType</strong></td>
+                                        <td>Identificador padronizado (opcional)</td>
+                                        <td>teste_range</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+mensurando | label     | name        | unit    | refType
+acdc       | faixa     | Faixa       | \volt   |
+acdc       | voltage   | Tensão      | \volt   |
+acdc       | frequency | Frequência  | \kilo\hertz |
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div class="page-section" id="resultados">
+                    <h2 class="section-title">10. Resultados</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Resultados</span> é onde você insere os <strong>dados de medição</strong> propriamente ditos. Cada linha representa uma medição individual.</p>
+                            <p>As colunas são geradas automaticamente a partir dos <strong>mensurandos</strong> e <strong>índices</strong> definidos nas abas anteriores:</p>
+
+                            <ul>
+                                <li><strong>Colunas fixas:</strong> <code>mensurando</code>, <code>value</code>, <code>unc</code>, <code>k</code></li>
+                                <li><strong>Colunas dinâmicas:</strong> Uma coluna para cada índice definido na aba "Índices" (ex: <code>faixa</code>, <code>voltage</code>, <code>frequency</code>)</li>
+                            </ul>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Coluna</th>
+                                        <th>O que preencher</th>
+                                        <th>Exemplo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>mensurando</strong></td>
+                                        <td>Identificador do mensurando (deve existir na aba Mensurando)</td>
+                                        <td>acdc</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Índices</strong></td>
+                                        <td>Uma coluna para cada índice definido. Use o <code>label</code> do índice como nome da coluna</td>
+                                        <td>faixa: 0.022, voltage: 0.002, frequency: 0.01</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>value</strong></td>
+                                        <td>Valor numérico do resultado</td>
+                                        <td>-280</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>unc</strong></td>
+                                        <td>Incerteza expandida</td>
+                                        <td>44</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>k</strong></td>
+                                        <td>Fator de abrangência</td>
+                                        <td>2.13</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="example-box">
+mensurando | faixa | voltage | frequency | value | unc  | k
+acdc       | 0.022 | 0.002   | 0.01      | -280  | 44   | 2.13
+acdc       | 0.022 | 0.002   | 0.02      | 3     | 37   | 2.28
+rstdc      |       |         |           | 1.23  | 0.01 | 2
+                            </div>
+
+                            <div class="warn-box">
+                                <strong>Importante:</strong> O nome da coluna <code>value</code> na aba Resultados é fixo. Não use o <code>col_name</code> do mensurando aqui — isso é apenas para identificar a coluna de valores numéricos no certificado impresso.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="page-section" id="observacoes">
+                    <h2 class="section-title">11. Observações</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>A aba <span class="sheet-name">Observações</span> permite adicionar <strong>notas e observações adicionais</strong> que serão incluídas no certificado.</p>
+                            <p><span class="field-optional">Esta aba é opcional</span> — se não houver observações, deixe em branco.</p>
+                            <p>Cada linha abaixo do cabeçalho representa uma observação. As observações são numeradas automaticamente (Obs. 1, Obs. 2, etc.).</p>
+
+                            <div class="example-box">
+Observações
+Observação sobre a condição do equipamento
+Nota sobre procedimento específico
+                            </div>
+
+                            <div class="tip-box">
+                                <strong>Dica:</strong> Use observações para informações que não cabem em outras seções, como condições especiais de armazenamento, recomendações de recalibração, ou notas sobre limitações do método.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Rápido -->
+                <div class="page-section" id="resumo">
+                    <h2 class="section-title">Resumo Rápido</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Aba</th>
+                                        <th>Obrigatório?</th>
+                                        <th>Formato</th>
+                                        <th>Descrição</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Metadados Principais</td>
+                                        <td><span class="field-required">Sim</span></td>
+                                        <td>Formulário (coluna A: campo, coluna B: valor)</td>
+                                        <td>Dados gerais do certificado</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Software</td>
+                                        <td><span class="field-optional">Não</span></td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Programas utilizados</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cliente</td>
+                                        <td><span class="field-required">Sim</span></td>
+                                        <td>Tabela (1 linha)</td>
+                                        <td>Dados do cliente</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Informações Pertinentes</td>
+                                        <td><span class="field-required">Sim</span> (conteúdo opcional)</td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Condições ambientais</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Declarações</td>
+                                        <td><span class="field-required">Sim</span></td>
+                                        <td>Tabela (2 linhas)</td>
+                                        <td>Textos de rastreabilidade e incerteza</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Rastreabilidade</td>
+                                        <td><span class="field-optional">Não</span></td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Padrões de referência</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Método de Medição</td>
+                                        <td><span class="field-required">Sim</span> (conteúdo opcional)</td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Descrição do método e equação</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mensurando</td>
+                                        <td><span class="field-required">Sim</span> (pelo menos um)</td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Definição do que foi medido</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Índices</td>
+                                        <td><span class="field-optional">Não</span></td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Parâmetros adicionais</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Resultados</td>
+                                        <td><span class="field-required">Sim</span></td>
+                                        <td>Tabela (linhas)</td>
+                                        <td>Dados de medição</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Observações</td>
+                                        <td><span class="field-optional">Não</span></td>
+                                        <td>Lista (coluna única)</td>
+                                        <td>Notas adicionais</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="tip-box">
+                                <strong>Precisa de ajuda?</strong> Entre em contato com a equipe de desenvolvimento do DCC Tools ou consulte a <a href="{{ url_for('api_doc') }}">documentação completa da API</a>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="text-center">
+                <p>&copy; 2026 DCC Tools — DIMCI/Inmetro. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,40 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Gerar DCC a partir de Planilha Excel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar DCC a partir de Planilha Excel - DCC Tools</title>
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/all.min.css') }}" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="file"] { padding: 10px; border: 1px solid #ddd; width: 100%; }
-        button { 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 16px; 
-            width: 100%;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
         }
-        button:hover { background-color: #45a049; }
-        .container { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
-        h1 { text-align: center; color: #333; }
+        .upload-container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .upload-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .upload-header h1 {
+            color: #1e5799;
+            font-weight: bold;
+        }
+        .download-box {
+            background-color: #e7f5ff;
+            border: 1px solid #b6d9f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .download-box h5 {
+            margin-bottom: 0.5rem;
+            color: #0d6efd;
+        }
+        .download-links a {
+            margin-right: 1rem;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Gerar DCC a partir de planilha Excel</h1>
-	<a href="{{ url_for('static', filename='examples/dcc_excel.xlsx') }}" download target="_blank">Exemplo de planilha Excel</a>
-	<br/>
-	<br/>
-        <form action="{{ url_for('upload_xls') }}" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="xls_file">Planilha Excel:</label>
-                <input type="file" name="xls_file" accept=".xlsx" required>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1e5799;">
+        <div class="container">
+            <a class="navbar-brand" href="/dcc">DCC Tools</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dcc">Início</a>
+                <a class="nav-link" href="/dcc/api_doc">Documentação da API</a>
+                <a class="nav-link active" href="/dcc/upload_xls">Excel</a>
+                <a class="nav-link" href="/dcc/exemplos">Exemplos</a>
             </div>
-            
-            <button type="submit">Enviar</button>
-        </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-container">
+            <div class="upload-header">
+                <h1>Gerar DCC a partir de Planilha Excel</h1>
+                <p class="text-muted">Envie uma planilha Excel preenchida para gerar o certificado de calibração digital (DCC)</p>
+            </div>
+
+            <div class="download-box">
+                <h5><i class="fas fa-file-excel"></i> Downloads</h5>
+                <div class="download-links mt-2">
+                    <a href="{{ url_for('static', filename='examples/dcc_excel.xlsx') }}" class="btn btn-outline-primary btn-sm" download>
+                        <i class="fas fa-download"></i> Baixar Planilha Modelo
+                    </a>
+                    <a href="{{ url_for('excel_guide') }}" class="btn btn-outline-info btn-sm" target="_blank">
+                        <i class="fas fa-book"></i> Guia de Preenchimento
+                    </a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('upload_xls') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="xls_file" class="form-label fw-bold">Selecione a Planilha Excel (.xlsx)</label>
+                    <input type="file" class="form-control" name="xls_file" accept=".xlsx" required>
+                    <div class="form-text">O arquivo deve estar no formato .xlsx (Excel 2007 ou superior)</div>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-paper-plane"></i> Gerar DCC
+                </button>
+            </form>
+        </div>
     </div>
+
+    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

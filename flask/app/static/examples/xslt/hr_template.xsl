@@ -350,32 +350,92 @@
 	    <div class="section">
 	      <div class="section-title">Informações Pertinentes às Atividades Realizadas</div>
 	      <strong><u>Condições Ambientais:</u></strong><br/>
-	      
+
 	      <xsl:for-each select="//dcc:influenceConditions/dcc:influenceCondition">
 		<xsl:variable name="conditionName" select="dcc:name/dcc:content"/>
-		<xsl:variable name="value" select="dcc:data/dcc:quantity/si:real/si:value"/>
-		<xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/>
 		<xsl:variable name="unit" select="dcc:data/dcc:quantity/si:real/si:unit"/>
-		
-		<!-- Check if this is a text-based condition (no quantity data) -->
+		<xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/>
+		<xsl:variable name="quantityCount" select="count(dcc:data/dcc:quantity)"/>
+		<xsl:variable name="hasRefTypeMin" select="boolean(dcc:data/dcc:quantity[@refType='math_minimum'])"/>
+		<xsl:variable name="hasRefTypeMax" select="boolean(dcc:data/dcc:quantity[@refType='math_maximum'])"/>
+		<xsl:variable name="hasRange" select="boolean($hasRefTypeMin or $hasRefTypeMax or $quantityCount &gt; 1)"/>
+		<xsl:variable name="minValue">
+		  <xsl:choose>
+		    <xsl:when test="$hasRefTypeMin"><xsl:value-of select="dcc:data/dcc:quantity[@refType='math_minimum']/si:real/si:value"/></xsl:when>
+		    <xsl:when test="$quantityCount &gt; 1">
+		      <xsl:variable name="v1" select="dcc:data/dcc:quantity[1]/si:real/si:value"/>
+		      <xsl:variable name="v2" select="dcc:data/dcc:quantity[2]/si:real/si:value"/>
+		      <xsl:choose>
+			<xsl:when test="$v1 &lt;= $v2"><xsl:value-of select="$v1"/></xsl:when>
+			<xsl:otherwise><xsl:value-of select="$v2"/></xsl:otherwise>
+		      </xsl:choose>
+		    </xsl:when>
+		  </xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="maxValue">
+		  <xsl:choose>
+		    <xsl:when test="$hasRefTypeMax"><xsl:value-of select="dcc:data/dcc:quantity[@refType='math_maximum']/si:real/si:value"/></xsl:when>
+		    <xsl:when test="$quantityCount &gt; 1">
+		      <xsl:variable name="v1" select="dcc:data/dcc:quantity[1]/si:real/si:value"/>
+		      <xsl:variable name="v2" select="dcc:data/dcc:quantity[2]/si:real/si:value"/>
+		      <xsl:choose>
+			<xsl:when test="$v1 &gt;= $v2"><xsl:value-of select="$v1"/></xsl:when>
+			<xsl:otherwise><xsl:value-of select="$v2"/></xsl:otherwise>
+		      </xsl:choose>
+		    </xsl:when>
+		  </xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="singleValue" select="dcc:data/dcc:quantity[1]/si:real/si:value[not(../@refType)]"/>
+
 		<xsl:choose>
 		  <xsl:when test="dcc:data/dcc:text">
-		    <!-- Text-based condition -->
 		    <strong><xsl:value-of select="$conditionName"/>:</strong>
 		    <xsl:text> </xsl:text>
 		    <xsl:value-of select="dcc:data/dcc:text/dcc:content"/>
 		    <br/>
 		  </xsl:when>
-		  <xsl:when test="$value">
-		    <!-- Numeric condition -->
+		  <xsl:when test="$hasRange and $minValue and $maxValue">
 		    <strong><xsl:value-of select="$conditionName"/>:</strong>
 		    <xsl:text> </xsl:text>
-		    
+		    <xsl:call-template name="format-number-comma">
+		      <xsl:with-param name="number" select="$minValue"/>
+		    </xsl:call-template>
+		    <xsl:if test="$uncertainty">
+		      <xsl:text> ± </xsl:text>
+		      <xsl:call-template name="format-number-comma">
+			<xsl:with-param name="number" select="$uncertainty"/>
+		      </xsl:call-template>
+		    </xsl:if>
+		    <xsl:text> </xsl:text>
+		    <xsl:call-template name="format-unit">
+		      <xsl:with-param name="unit" select="$unit"/>
+		    </xsl:call-template>
+		    <xsl:text> a </xsl:text>
+		    <xsl:call-template name="format-number-comma">
+		      <xsl:with-param name="number" select="$maxValue"/>
+		    </xsl:call-template>
+		    <xsl:if test="$uncertainty">
+		      <xsl:text> ± </xsl:text>
+		      <xsl:call-template name="format-number-comma">
+			<xsl:with-param name="number" select="$uncertainty"/>
+		      </xsl:call-template>
+		    </xsl:if>
+		    <xsl:text> </xsl:text>
+		    <xsl:call-template name="format-unit">
+		      <xsl:with-param name="unit" select="$unit"/>
+		    </xsl:call-template>
+		    <xsl:if test="contains($conditionName, 'Umidade') or contains($conditionName, 'umidade')">
+		      <xsl:text> ur</xsl:text>
+		    </xsl:if>
+		    <br/>
+		  </xsl:when>
+		  <xsl:when test="$singleValue">
+		    <strong><xsl:value-of select="$conditionName"/>:</strong>
+		    <xsl:text> </xsl:text>
 		    <xsl:choose>
 		      <xsl:when test="contains($conditionName, 'Temperatura')">
-			<!-- Temperature format -->
 			<xsl:call-template name="format-number-comma">
-			  <xsl:with-param name="number" select="$value"/>
+			  <xsl:with-param name="number" select="$singleValue"/>
 			</xsl:call-template>
 			<xsl:if test="$uncertainty">
 			  ± <xsl:call-template name="format-number-comma">
@@ -388,9 +448,8 @@
 			</xsl:call-template>
 		      </xsl:when>
 		      <xsl:when test="contains($conditionName, 'Umidade')">
-			<!-- Humidity format -->
 			<xsl:call-template name="format-number-comma">
-			  <xsl:with-param name="number" select="$value"/>
+			  <xsl:with-param name="number" select="$singleValue"/>
 			</xsl:call-template>
 			<xsl:if test="$uncertainty">
 			  ± <xsl:call-template name="format-number-comma">
@@ -404,9 +463,8 @@
 			<xsl:text> ur</xsl:text>
 		      </xsl:when>
 		      <xsl:otherwise>
-			<!-- Other numeric conditions -->
 			<xsl:call-template name="format-number-comma">
-			  <xsl:with-param name="number" select="$value"/>
+			  <xsl:with-param name="number" select="$singleValue"/>
 			</xsl:call-template>
 			<xsl:text> </xsl:text>
 			<xsl:call-template name="format-unit">
@@ -423,7 +481,6 @@
 		    <br/>
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <!-- Fallback for other types -->
 		    <strong><xsl:value-of select="$conditionName"/>:</strong>
 		    <xsl:text> [Dados não disponíveis]</xsl:text>
 		    <br/>
@@ -552,7 +609,6 @@
 		<!-- Generate table rows -->
 		<xsl:call-template name="generate-result-rows">
                   <xsl:with-param name="quantities" select="dcc:data/dcc:list/dcc:quantity"/>
-                  <xsl:with-param name="index" select="1"/>
 		</xsl:call-template>
               </table>
               
@@ -587,76 +643,59 @@
     </html>
   </xsl:template>
 
-  <!-- Template to generate rows for result tables -->
+  <!-- Template to generate rows for result tables (iterative using position node-set trick) -->
   <xsl:template name="generate-result-rows">
     <xsl:param name="quantities"/>
-    <xsl:param name="index"/>
-    
+
     <xsl:variable name="firstQuantity" select="$quantities[1]"/>
     <xsl:variable name="firstQuantityValues" select="normalize-space($firstQuantity/si:realListXMLList/si:valueXMLList)"/>
-    
-    <xsl:if test="$firstQuantityValues != ''">
-      <xsl:variable name="currentToken">
-        <xsl:call-template name="get-token-at-position">
-          <xsl:with-param name="text" select="$firstQuantityValues"/>
-          <xsl:with-param name="position" select="$index"/>
-        </xsl:call-template>
-      </xsl:variable>
-      
-      <xsl:if test="$currentToken != ''">
-        <tr>
-          <xsl:for-each select="$quantities">
-            <xsl:variable name="currentQuantity" select="."/>
-            <xsl:variable name="quantityValues" select="normalize-space(si:realListXMLList/si:valueXMLList)"/>
-            <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
-            <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
-            <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
-            
-            <!-- Value column -->
+    <xsl:variable name="totalTokens" select="string-length($firstQuantityValues) - string-length(translate($firstQuantityValues, ' ', '')) + 1"/>
+
+    <xsl:for-each select="(//node())[position() &lt;= $totalTokens]">
+      <xsl:variable name="currentIndex" select="position()"/>
+      <tr>
+        <xsl:for-each select="$quantities">
+          <xsl:variable name="quantityValues" select="normalize-space(si:realListXMLList/si:valueXMLList)"/>
+          <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
+          <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
+          <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
+
+          <td>
+            <xsl:call-template name="format-number-comma">
+              <xsl:with-param name="number">
+                <xsl:call-template name="get-token-at-position">
+                  <xsl:with-param name="text" select="$quantityValues"/>
+                  <xsl:with-param name="position" select="$currentIndex"/>
+                </xsl:call-template>
+              </xsl:with-param>
+            </xsl:call-template>
+          </td>
+
+          <xsl:if test="$hasUncertainty">
             <td>
               <xsl:call-template name="format-number-comma">
                 <xsl:with-param name="number">
                   <xsl:call-template name="get-token-at-position">
-                    <xsl:with-param name="text" select="$quantityValues"/>
-                    <xsl:with-param name="position" select="$index"/>
+                    <xsl:with-param name="text" select="$quantityUncertainties"/>
+                    <xsl:with-param name="position" select="$currentIndex"/>
                   </xsl:call-template>
                 </xsl:with-param>
               </xsl:call-template>
             </td>
-            
-            <!-- Uncertainty columns -->
-            <xsl:if test="$hasUncertainty">
-              <td>
-                <xsl:call-template name="format-number-comma">
-                  <xsl:with-param name="number">
-                    <xsl:call-template name="get-token-at-position">
-                      <xsl:with-param name="text" select="$quantityUncertainties"/>
-                      <xsl:with-param name="position" select="$index"/>
-                    </xsl:call-template>
-                  </xsl:with-param>
-                </xsl:call-template>
-              </td>
-              <td>
-                <xsl:call-template name="format-number-comma">
-                  <xsl:with-param name="number">
-                    <xsl:call-template name="get-token-at-position">
-                      <xsl:with-param name="text" select="$quantityCoverageFactors"/>
-                      <xsl:with-param name="position" select="$index"/>
-                    </xsl:call-template>
-                  </xsl:with-param>
-                </xsl:call-template>
-              </td>
-            </xsl:if>
-          </xsl:for-each>
-        </tr>
-        
-        <!-- Process next row -->
-        <xsl:call-template name="generate-result-rows">
-          <xsl:with-param name="quantities" select="$quantities"/>
-          <xsl:with-param name="index" select="$index + 1"/>
-        </xsl:call-template>
-      </xsl:if>
-    </xsl:if>
+            <td>
+              <xsl:call-template name="format-number-comma">
+                <xsl:with-param name="number">
+                  <xsl:call-template name="get-token-at-position">
+                    <xsl:with-param name="text" select="$quantityCoverageFactors"/>
+                    <xsl:with-param name="position" select="$currentIndex"/>
+                  </xsl:call-template>
+                </xsl:with-param>
+              </xsl:call-template>
+            </td>
+          </xsl:if>
+        </xsl:for-each>
+      </tr>
+    </xsl:for-each>
   </xsl:template>
 
   <!-- Template to get token at specific position from space-separated text -->

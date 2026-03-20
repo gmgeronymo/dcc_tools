@@ -453,9 +453,39 @@ def dccGen(dcc_version, dados, declaracao) :
             influenceCondition = etree.SubElement(influenceConditions, etree.QName(nsmap['dcc'], 'influenceCondition'))
         campo_name(influenceCondition,informacoes_pertinentes['name'])
         data = etree.SubElement(influenceCondition, etree.QName(nsmap['dcc'], 'data'))
-        # checar se tem unidade
-        # incerteza nao deve ser obrigatorio!
-        if 'unit' in informacoes_pertinentes :
+
+        # interval format: value_min + value_max (opcional - nao quebra API)
+        if 'value_min' in informacoes_pertinentes and 'value_max' in informacoes_pertinentes :
+            for bound_value_key, bound_refType_key, bound_name_suffix in [
+                ('value_min', 'refType_min', 'mínima'),
+                ('value_max', 'refType_max', 'máxima')
+            ]:
+                bound_refType = informacoes_pertinentes.get(bound_refType_key)
+                quantity_attribs = {'refType': bound_refType} if bound_refType else {}
+                quantity = etree.SubElement(data, etree.QName(nsmap['dcc'], 'quantity'), **quantity_attribs)
+                quantity_name_text = 'Temperatura ' + bound_name_suffix if 'Temperatura' in informacoes_pertinentes['name'] else 'Umidade ' + bound_name_suffix
+                campo_name(quantity, quantity_name_text)
+                si_real = etree.SubElement(quantity, etree.QName(nsmap['si'], 'real'))
+                si_value = etree.SubElement(si_real, etree.QName(nsmap['si'], 'value'))
+                si_value.text = str(informacoes_pertinentes[bound_value_key])
+                if 'unit' in informacoes_pertinentes :
+                    si_unit = etree.SubElement(si_real, etree.QName(nsmap['si'], 'unit'))
+                    si_unit.text = informacoes_pertinentes['unit']
+
+                if 'unc' in informacoes_pertinentes :
+                    si_expandedUnc = etree.SubElement(si_real, etree.QName(nsmap['si'], 'expandedUnc'))
+                    si_uncertainty = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'uncertainty'))
+                    si_uncertainty.text = informacoes_pertinentes['unc']
+                    si_coveragefactor = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageFactor'))
+                    if 'k' in informacoes_pertinentes :
+                        si_coveragefactor.text = informacoes_pertinentes['k']
+                    else :
+                        si_coveragefactor.text = '2'
+                    si_coverageprob = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageProbability'))
+                    si_coverageprob.text = '0.9545'
+
+        # checar se tem unidade (formato valor unico - existente)
+        elif 'unit' in informacoes_pertinentes :
             quantity = etree.SubElement(data, etree.QName(nsmap['dcc'], 'quantity'))
             si_real = etree.SubElement(quantity, etree.QName(nsmap['si'], 'real'))
             si_value = etree.SubElement(si_real, etree.QName(nsmap['si'], 'value'))
@@ -892,6 +922,10 @@ def publications():
 @app.route('/dcc/api_doc')
 def api_doc():
     return render_template('api_documentation.html')
+
+@app.route('/dcc/excel_guide')
+def excel_guide():
+    return render_template('excel_guide.html')
 
 @app.route('/dcc/exemplos')
 def exemplos():
