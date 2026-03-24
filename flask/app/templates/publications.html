@@ -73,18 +73,30 @@
             
             <div class="list-group">
                 {% for paper in papers %}
+                {% set is_external = paper.external_url is defined and paper.external_url %}
+                {% set is_pdf = paper.file is defined and paper.file.endswith('.pdf') %}
                 <div class="publication-item">
-                    <div class="file-icon {{ 'pdf-icon' if paper.file.endswith('.pdf') else 'video-icon' }}">
-                        <i class="fas {{ 'fa-file-pdf' if paper.file.endswith('.pdf') else 'fa-file-video' }}"></i>
+                    <div class="file-icon {{ 'pdf-icon' if is_pdf else 'video-icon' }}">
+                        <i class="fas {{ 'fa-file-pdf' if is_pdf else ('fa-link' if is_external else 'fa-file-video') }}"></i>
                     </div>
                     <div>
                         <h5 class="mb-1">{{ paper.title }}</h5>
+                        {% if is_external %}
+                        <small class="text-muted">{{ paper.source_label if paper.source_label is defined else 'Link externo' }}</small>
+                        {% else %}
                         <small class="text-muted">{{ paper.file }}</small>
+                        {% endif %}
                     </div>
+                    {% if is_external %}
+                    <a href="{{ paper.external_url }}" class="btn btn-outline-danger btn-download" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-external-link-alt me-1"></i> Abrir link
+                    </a>
+                    {% else %}
                     <a href="{{ url_for('static', filename='papers/' + paper.file) }}" 
                        class="btn btn-outline-primary btn-download" download>
                         <i class="fas fa-download me-1"></i> Download
                     </a>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

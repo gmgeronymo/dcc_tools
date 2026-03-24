@@ -951,6 +951,27 @@ def landing_page():
 def publications():
     papers = [
         {
+            'title': 'DCC 2026 Conference - YouTube Presentation',
+            'external_url': 'https://www.youtube.com/watch?v=tSz8SGsDny4&t=2111s',
+            'source_label': 'YouTube'
+        },
+        {
+            'title': 'FORUM-MD (BIPM) 2026 - Presentation',
+            'file': 'apresentacao_bipm_2026.pdf'
+        },
+        {
+            'title': 'DCC 2026 Conference - Slides',
+            'file': 'P26_Gean-Geronymo_slides.pdf'
+        },
+        {
+            'title': 'DCC 2026 Conference - Abstract',
+            'file': 'P26_Gean-Geronymo_abstract.pdf'
+        },
+        {
+            'title': 'Metrologia 2025 Paper',
+            'file': 'paper_metrologia2025.pdf'
+        },
+        {
             'title': 'DCC Tools Abstract',
             'file': 'P04_Gean-Geronymo_abstract.pdf'
         },
@@ -965,12 +986,9 @@ def publications():
         {
             'title': 'Metrologia 2023 Paper',
             'file': 'paper_metrologia2023.pdf'
-        },
-        {
-            'title': 'Metrologia 2025 Paper',
-            'file': 'paper_metrologia2025.pdf'
         }
     ]
+
     return render_template('publications.html', papers=papers)
 
 @app.route('/dcc/api_doc')
