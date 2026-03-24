@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publicações - DCC</title>
     <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/all.min.css') }}" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -62,6 +63,7 @@
     </style>
 </head>
 <body>
+    {% include 'nav_fragment.html' %}
     <div class="container">
         <div class="publications-container">
             <div class="page-header">
@@ -90,9 +92,9 @@
     </div>
 
     <footer class="text-center py-4 mt-4 text-muted">
-        <p>&copy; 2025 Inmetro DCC</p>
+        <p>&copy; 2026 Inmetro DCC</p>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

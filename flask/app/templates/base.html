@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR" class="h-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}DCC Tools - Inmetro{% endblock %}</title>
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/all.min.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #1e5799 0%, #2980b9 100%);
+            color: white;
+            padding: 5rem 0;
+        }
+        .feature-card {
+            transition: transform .2s, box-shadow .2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.15);
+            color: inherit;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="d-flex flex-column h-100">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1e5799;">
+            <div class="container">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/dcc">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path d="M2 2.5A1.5 1.5 0 0 1 3.5 1h6A1.5 1.5 0 0 1 11 2.5V4h1.5A1.5 1.5 0 0 1 14 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zM3.5 2a.5.5 0 0 0-.5.5V4h7V2.5a.5.5 0 0 0-.5-.5zM3 5v8.5a.5.5 0 0 0 .5.5H4V11h8v3h.5a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5zM8 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4"/>
+                    </svg>
+                    <span>DCC Tools</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('landing_page') }}">Início</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Gerar DCC
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('form_dcc') }}">Formulário Interativo</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('upload_xls') }}">via Planilha Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('upload_json') }}">via JSON</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('upload_xml_hr') }}">Visualizar DCC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('validate_xml') }}">Validar XML</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('upload_xml') }}">Embutir no PDF</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarHelpDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ajuda
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarHelpDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('api_doc') }}">Documentação da API</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('excel_guide') }}">Guia da Planilha</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('exemplos') }}">Exemplos de DCC</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('faq') }}">Perguntas Frequentes</a></li>
+                            </ul>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('publications') }}">Publicações</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-shrink-0">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container text-center">
+            <span class="text-light">&copy; 2026 — Instituto Nacional de Metrologia, Qualidade e Tecnologia (Inmetro)</span>
+            <a href="mailto:gmgeronymo@inmetro.gov.br" class="ms-3 text-light">Contato</a>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

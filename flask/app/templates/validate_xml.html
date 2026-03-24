@@ -1,37 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Validar DCC</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="file"] { padding: 10px; border: 1px solid #ddd; width: 100%; }
-        button { 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 16px; 
-            width: 100%;
-        }
-        button:hover { background-color: #45a049; }
-        .container { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
-        h1 { text-align: center; color: #333; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Validar DCC com o schema XSD</h1>
-        <form action="{{ url_for('validate_xml') }}" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="xml_file">Arquivo XML:</label>
-                <input type="file" name="xml_file" accept=".xml" required>
-            </div>
+{% extends "base.html" %}
 
-            <button type="submit">Enviar</button>
-        </form>
+{% block title %}Validar XML DCC{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 760px;">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-2">Validar DCC com o schema XSD</h1>
+            <p class="text-muted">Envie um arquivo XML para validar conformidade com o padrão DCC.</p>
+
+            <form action="{{ url_for('validate_xml') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Arquivo XML</label>
+                    <input type="file" class="form-control" name="xml_file" accept=".xml" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Validar XML</button>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

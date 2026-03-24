@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Formulario Interativo DCC{% endblock %}
+
+{% block extra_head %}
+<style>
+    .page-wrap { max-width: 1200px; }
+    .section-card { border: 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+    .section-title { font-weight: 700; color: #1e5799; margin-bottom: 1rem; }
+    .muted-help { font-size: .9rem; color: #6c757d; }
+    .table th { white-space: nowrap; }
+    .required::after { content: " *"; color: #dc3545; }
+    .sticky-actions {
+        position: sticky;
+        bottom: 0;
+        background: rgba(248,249,250,.95);
+        border-top: 1px solid #dee2e6;
+        padding: .9rem;
+        z-index: 5;
+        backdrop-filter: blur(6px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 page-wrap">
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Formulario Interativo para Geracao de DCC</h1>
+        <p class="text-muted mb-0">Preencha os campos abaixo e gere o XML diretamente pela API JSON.</p>
+    </div>
+
+    <form id="dccForm">
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <h2 class="h5 section-title">1) Metadados Principais</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label required">nome_lab</label><input class="form-control" name="nome_lab" required></div>
+                    <div class="col-md-3"><label class="form-label required">sigla_lab</label><input class="form-control" name="sigla_lab" required></div>
+                    <div class="col-md-6"><label class="form-label required">nome_div</label><input class="form-control" name="nome_div" required></div>
+                    <div class="col-md-3"><label class="form-label required">sigla_div</label><input class="form-control" name="sigla_div" required></div>
+                    <div class="col-md-3"><label class="form-label required">num_certif</label><input class="form-control" name="num_certif" placeholder="0856/2024" required></div>
+                    <div class="col-md-6"><label class="form-label required">num_processo</label><input class="form-control" name="num_processo" required></div>
+                    <div class="col-md-6"><label class="form-label required">tipo_item</label><input class="form-control" name="tipo_item" required></div>
+                    <div class="col-md-4"><label class="form-label required">fabricante</label><input class="form-control" name="fabricante" required></div>
+                    <div class="col-md-4"><label class="form-label required">modelo</label><input class="form-control" name="modelo" required></div>
+                    <div class="col-md-4"><label class="form-label required">num_serie</label><input class="form-control" name="num_serie" required></div>
+                    <div class="col-md-4"><label class="form-label required">cod_identificacao</label><input class="form-control" name="cod_identificacao" required></div>
+                    <div class="col-md-8"><label class="form-label required">caracteristicas_item</label><input class="form-control" name="caracteristicas_item" required></div>
+                    <div class="col-md-3"><label class="form-label required">data_calibracao</label><input type="date" class="form-control" name="data_calibracao" required></div>
+                    <div class="col-md-3"><label class="form-label">data_emissao</label><input type="date" class="form-control" name="data_emissao"></div>
+                    <div class="col-md-2"><label class="form-label required">cmc</label><select class="form-select" name="cmc" required><option value="true">true</option><option value="false">false</option></select></div>
+                    <div class="col-md-4"><label class="form-label required">chefe_div</label><input class="form-control" name="chefe_div" required></div>
+                    <div class="col-md-4"><label class="form-label">desc_chefe_div</label><input class="form-control" name="desc_chefe_div"></div>
+                    <div class="col-md-4"><label class="form-label required">chefe_lab</label><input class="form-control" name="chefe_lab" required></div>
+                    <div class="col-md-4"><label class="form-label">desc_chefe_lab</label><input class="form-control" name="desc_chefe_lab"></div>
+                    <div class="col-md-4"><label class="form-label required">tecnico_executor</label><input class="form-control" name="tecnico_executor" required></div>
+                    <div class="col-md-4"><label class="form-label required">desc_tecnico_executor</label><input class="form-control" name="desc_tecnico_executor" value="Técnico Executor" required></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <h2 class="h5 section-title">2) Cliente</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label required">nome</label><input class="form-control" name="cliente_nome" required></div>
+                    <div class="col-md-6"><label class="form-label required">email</label><input type="email" class="form-control" name="cliente_email" required></div>
+                    <div class="col-md-4"><label class="form-label required">cidade</label><input class="form-control" name="cliente_cidade" required></div>
+                    <div class="col-md-2"><label class="form-label required">pais</label><input class="form-control" name="cliente_pais" value="BR" required></div>
+                    <div class="col-md-3"><label class="form-label required">cep</label><input class="form-control" name="cliente_cep" required></div>
+                    <div class="col-md-1"><label class="form-label required">uf</label><input class="form-control" name="cliente_uf" required></div>
+                    <div class="col-md-6"><label class="form-label required">endereco</label><input class="form-control" name="cliente_endereco" required></div>
+                    <div class="col-md-2"><label class="form-label required">numero</label><input class="form-control" name="cliente_numero" required></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <h2 class="h5 section-title">3) Declaracoes e Metodo</h2>
+                <div class="mb-3">
+                    <label class="form-label required">declaracao_rastreabilidade</label>
+                    <textarea class="form-control" name="declaracao_rastreabilidade" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required">declaracao_incerteza</label>
+                    <textarea class="form-control" name="declaracao_incerteza" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required">metodo_medicao (um por linha)</label>
+                    <textarea class="form-control" name="metodo_medicao" rows="3" placeholder="Texto do metodo 1\nTexto do metodo 2" required></textarea>
+                </div>
+                <div>
+                    <label class="form-label">metodo_medicao_equation (uma por linha, opcional)</label>
+                    <textarea class="form-control" name="metodo_medicao_equation" rows="2" placeholder="\\delta_u = ..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h5 section-title mb-0">4) Informacoes Pertinentes</h2>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addInfoBtn">Adicionar linha</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" id="infoTable">
+                        <thead>
+                            <tr>
+                                <th>name</th><th>tipo</th><th>value</th><th>value_min</th><th>value_max</th><th>unc</th><th>k</th><th>unit</th><th>text</th><th>refType</th><th>refType_min</th><th>refType_max</th><th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <p class="muted-help">Tipo controla o preenchimento: <code>single</code>, <code>range</code> ou <code>text</code>.</p>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h5 section-title mb-0">5) Mensurando</h2>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addMensurandoBtn">Adicionar linha</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" id="mensurandoTable">
+                        <thead><tr><th>label</th><th>name</th><th>col_name</th><th>unit</th><th>unc_relativa</th><th>refType</th><th></th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h5 section-title mb-0">6) Indices (opcional)</h2>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addIndiceBtn">Adicionar linha</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" id="indiceTable">
+                        <thead><tr><th>mensurando</th><th>label</th><th>name</th><th>unit</th><th>refType</th><th></th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h5 section-title mb-0">7) Resultados</h2>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addResultadoBtn">Adicionar linha</button>
+                </div>
+                <p class="muted-help">Campo <code>indices_json</code> deve conter JSON de pares label/valor (ex.: <code>{"faixa":"0.022","frequency":"50"}</code>).</p>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" id="resultadoTable">
+                        <thead><tr><th>mensurando</th><th>value</th><th>unc</th><th>k</th><th>indices_json</th><th></th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card section-card mb-3">
+            <div class="card-body">
+                <h2 class="h5 section-title">8) Rastreabilidade e Observacoes (opcional)</h2>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">tabela_rastreabilidade (um item por linha: name|origem|certificado|cod_id)</label>
+                        <textarea class="form-control" name="tabela_rastreabilidade" rows="3" placeholder="Conversor Térmico|PTB|PTB 27812/2020|PR 394"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">observacoes (uma por linha)</label>
+                        <textarea class="form-control" name="observacoes" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sticky-actions rounded">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <div id="formStatus" class="text-muted"></div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary" id="loadSampleBtn">Carregar exemplo</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Gerar DCC (XML)</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function createCellInput(type = 'text', cls = 'form-control form-control-sm') {
+    const input = document.createElement('input');
+    input.type = type;
+    input.className = cls;
+    return input;
+}
+
+function addRemoveBtn(row) {
+    const td = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-sm btn-outline-danger';
+    btn.textContent = 'Remover';
+    btn.onclick = () => row.remove();
+    td.appendChild(btn);
+    return td;
+}
+
+function addInfoRow(values = {}) {
+    const tbody = document.querySelector('#infoTable tbody');
+    const row = document.createElement('tr');
+    const fields = ['name','tipo','value','value_min','value_max','unc','k','unit','text','refType','refType_min','refType_max'];
+    fields.forEach((f) => {
+        const td = document.createElement('td');
+        let el;
+        if (f === 'tipo') {
+            el = document.createElement('select');
+            el.className = 'form-select form-select-sm';
+            ['single','range','text'].forEach((opt) => {
+                const o = document.createElement('option');
+                o.value = opt;
+                o.textContent = opt;
+                el.appendChild(o);
+            });
+        } else {
+            el = createCellInput();
+        }
+        el.dataset.field = f;
+        if (values[f] !== undefined) el.value = values[f];
+        td.appendChild(el);
+        row.appendChild(td);
+    });
+    row.appendChild(addRemoveBtn(row));
+    tbody.appendChild(row);
+}
+
+function addMensurandoRow(values = {}) {
+    const tbody = document.querySelector('#mensurandoTable tbody');
+    const row = document.createElement('tr');
+    ['label','name','col_name','unit'].forEach((f) => {
+        const td = document.createElement('td');
+        const el = createCellInput();
+        el.dataset.field = f;
+        if (values[f] !== undefined) el.value = values[f];
+        td.appendChild(el); row.appendChild(td);
+    });
+    const tdRel = document.createElement('td');
+    const rel = document.createElement('select');
+    rel.className = 'form-select form-select-sm';
+    rel.dataset.field = 'unc_relativa';
+    ['false','true'].forEach((v) => {
+        const o = document.createElement('option'); o.value = v; o.textContent = v; rel.appendChild(o);
+    });
+    if (values.unc_relativa !== undefined) rel.value = String(values.unc_relativa);
+    tdRel.appendChild(rel); row.appendChild(tdRel);
+    const tdRef = document.createElement('td');
+    const ref = createCellInput(); ref.dataset.field = 'refType'; if (values.refType) ref.value = values.refType;
+    tdRef.appendChild(ref); row.appendChild(tdRef);
+    row.appendChild(addRemoveBtn(row));
+    tbody.appendChild(row);
+}
+
+function addIndiceRow(values = {}) {
+    const tbody = document.querySelector('#indiceTable tbody');
+    const row = document.createElement('tr');
+    ['mensurando','label','name','unit','refType'].forEach((f) => {
+        const td = document.createElement('td');
+        const el = createCellInput();
+        el.dataset.field = f;
+        if (values[f] !== undefined) el.value = values[f];
+        td.appendChild(el); row.appendChild(td);
+    });
+    row.appendChild(addRemoveBtn(row));
+    tbody.appendChild(row);
+}
+
+function addResultadoRow(values = {}) {
+    const tbody = document.querySelector('#resultadoTable tbody');
+    const row = document.createElement('tr');
+    ['mensurando','value','unc','k','indices_json'].forEach((f) => {
+        const td = document.createElement('td');
+        const el = createCellInput();
+        el.dataset.field = f;
+        if (values[f] !== undefined) el.value = values[f];
+        td.appendChild(el); row.appendChild(td);
+    });
+    row.appendChild(addRemoveBtn(row));
+    tbody.appendChild(row);
+}
+
+function rowToObject(row) {
+    const obj = {};
+    row.querySelectorAll('[data-field]').forEach((el) => {
+        if (el.value !== '') obj[el.dataset.field] = el.value;
+    });
+    return obj;
+}
+
+function parseLines(text) {
+    return text.split('\n').map((x) => x.trim()).filter(Boolean);
+}
+
+function buildPayload() {
+    const f = document.getElementById('dccForm');
+    const data = {
+        nome_lab: f.nome_lab.value,
+        sigla_lab: f.sigla_lab.value,
+        nome_div: f.nome_div.value,
+        sigla_div: f.sigla_div.value,
+        num_certif: f.num_certif.value,
+        num_processo: f.num_processo.value,
+        tipo_item: f.tipo_item.value,
+        fabricante: f.fabricante.value,
+        modelo: f.modelo.value,
+        num_serie: f.num_serie.value,
+        cod_identificacao: f.cod_identificacao.value,
+        caracteristicas_item: f.caracteristicas_item.value,
+        data_calibracao: f.data_calibracao.value,
+        cmc: f.cmc.value === 'true',
+        chefe_div: f.chefe_div.value,
+        chefe_lab: f.chefe_lab.value,
+        tecnico_executor: f.tecnico_executor.value,
+        desc_tecnico_executor: f.desc_tecnico_executor.value,
+        cliente: {
+            nome: f.cliente_nome.value,
+            email: f.cliente_email.value,
+            cidade: f.cliente_cidade.value,
+            pais: f.cliente_pais.value,
+            cep: f.cliente_cep.value,
+            uf: f.cliente_uf.value,
+            endereco: f.cliente_endereco.value,
+            numero: f.cliente_numero.value,
+        },
+        declaracao_rastreabilidade: f.declaracao_rastreabilidade.value,
+        declaracao_incerteza: f.declaracao_incerteza.value,
+        metodo_medicao: parseLines(f.metodo_medicao.value),
+        informacoes_pertinentes: [],
+        mensurando: [],
+        indices: [],
+        resultados: [],
+    };
+
+    if (f.data_emissao.value) data.data_emissao = f.data_emissao.value;
+    if (f.desc_chefe_div.value) data.desc_chefe_div = f.desc_chefe_div.value;
+    if (f.desc_chefe_lab.value) data.desc_chefe_lab = f.desc_chefe_lab.value;
+
+    const eqs = parseLines(f.metodo_medicao_equation.value);
+    if (eqs.length) data.metodo_medicao_equation = eqs;
+
+    const rast = parseLines(f.tabela_rastreabilidade.value).map((line) => {
+        const [name, origem, certificado, cod_id] = line.split('|').map((x) => (x || '').trim());
+        if (!name || !origem || !certificado || !cod_id) return null;
+        return { name, origem, certificado, cod_id };
+    }).filter(Boolean);
+    if (rast.length) data.tabela_rastreabilidade = rast;
+
+    const obs = parseLines(f.observacoes.value);
+    if (obs.length) data.observacoes = obs;
+
+    document.querySelectorAll('#infoTable tbody tr').forEach((row) => {
+        const item = rowToObject(row);
+        if (!item.name) return;
+        const tipo = item.tipo || 'single';
+        delete item.tipo;
+        if (tipo === 'single') {
+            delete item.value_min; delete item.value_max; delete item.text;
+        } else if (tipo === 'range') {
+            delete item.value; delete item.text;
+        } else {
+            delete item.value; delete item.value_min; delete item.value_max; delete item.unit; delete item.unc; delete item.k;
+        }
+        data.informacoes_pertinentes.push(item);
+    });
+
+    document.querySelectorAll('#mensurandoTable tbody tr').forEach((row) => {
+        const item = rowToObject(row);
+        if (!item.label || !item.name || !item.col_name || !item.unit) return;
+        item.unc_relativa = String(item.unc_relativa) === 'true';
+        data.mensurando.push(item);
+    });
+
+    document.querySelectorAll('#indiceTable tbody tr').forEach((row) => {
+        const item = rowToObject(row);
+        if (!item.mensurando || !item.label || !item.name) return;
+        data.indices.push(item);
+    });
+    if (!data.indices.length) delete data.indices;
+
+    document.querySelectorAll('#resultadoTable tbody tr').forEach((row) => {
+        const item = rowToObject(row);
+        if (!item.mensurando || !item.value || !item.unc || !item.k) return;
+        const idxJson = item.indices_json;
+        delete item.indices_json;
+        if (idxJson) {
+            try {
+                const idxObj = JSON.parse(idxJson);
+                Object.assign(item, idxObj);
+            } catch (_e) {
+                throw new Error('indices_json invalido em uma linha de resultados.');
+            }
+        }
+        data.resultados.push(item);
+    });
+
+    if (!data.metodo_medicao.length) throw new Error('Informe ao menos um metodo de medicao.');
+    if (!data.mensurando.length) throw new Error('Informe ao menos um mensurando.');
+    if (!data.resultados.length) throw new Error('Informe ao menos um resultado.');
+    return data;
+}
+
+async function submitForm(event) {
+    event.preventDefault();
+    const status = document.getElementById('formStatus');
+    const submitBtn = document.getElementById('submitBtn');
+    try {
+        submitBtn.disabled = true;
+        status.textContent = 'Montando JSON...';
+        const payload = buildPayload();
+        status.textContent = 'Enviando para /dcc/generate...';
+
+        const response = await fetch('/dcc/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || `Erro HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const cert = payload.num_certif.replaceAll('/', '_');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CC_DIMCI_${cert}.xml`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = 'XML gerado com sucesso.';
+    } catch (err) {
+        status.textContent = `Erro: ${err.message}`;
+    } finally {
+        submitBtn.disabled = false;
+    }
+}
+
+function loadSample() {
+    const f = document.getElementById('dccForm');
+    f.nome_lab.value = 'Laboratório de Metrologia em Padronização Elétrica';
+    f.sigla_lab.value = 'Lampe';
+    f.nome_div.value = 'Divisão de Metrologia Elétrica';
+    f.sigla_div.value = 'Diele';
+    f.num_certif.value = '0856/2024';
+    f.num_processo.value = '0052600.003988/2023-06';
+    f.tipo_item.value = 'Padrão de Transferência AC-DC';
+    f.fabricante.value = 'Fluke';
+    f.modelo.value = '792A';
+    f.num_serie.value = '6515002';
+    f.cod_identificacao.value = 'PT-030';
+    f.caracteristicas_item.value = 'Função: Transferência Térmica de Tensão AC-DC';
+    f.data_calibracao.value = '2024-08-07';
+    f.cmc.value = 'true';
+    f.chefe_div.value = 'Edson Afonso';
+    f.chefe_lab.value = 'Gean Marcos Geronymo';
+    f.tecnico_executor.value = 'Gean Marcos Geronymo';
+    f.desc_tecnico_executor.value = 'Técnico Executor';
+    f.cliente_nome.value = 'Inmetro/Dimci/Diele/Lacel';
+    f.cliente_email.value = 'test@example.com';
+    f.cliente_cidade.value = 'Duque de Caxias';
+    f.cliente_pais.value = 'BR';
+    f.cliente_cep.value = '25250-020';
+    f.cliente_uf.value = 'RJ';
+    f.cliente_endereco.value = 'Av. Nossa Senhora das Graças';
+    f.cliente_numero.value = '50';
+    f.declaracao_rastreabilidade.value = 'Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI).';
+    f.declaracao_incerteza.value = 'As incertezas expandidas de medição (U) são declaradas para p=95,45%.';
+    f.metodo_medicao.value = 'As entradas de tensão foram conectadas em paralelo.';
+
+    document.querySelector('#infoTable tbody').innerHTML = '';
+    addInfoRow({ name: 'Temperatura', tipo: 'single', value: '23.2', unc: '1.0', k: '2', unit: '\\degreecelsius', refType: 'basic_temperature' });
+    addInfoRow({ name: 'Umidade relativa', tipo: 'range', value_min: '30', value_max: '70', unc: '5', k: '2', unit: '\\percent' });
+
+    document.querySelector('#mensurandoTable tbody').innerHTML = '';
+    addMensurandoRow({ label: 'acdc', name: 'Diferença AC-DC em tensão', col_name: '\\delta_u', unit: '\\micro\\volt\\volt\\tothe{-1}', unc_relativa: false });
+
+    document.querySelector('#indiceTable tbody').innerHTML = '';
+    addIndiceRow({ mensurando: 'acdc', label: 'faixa', name: 'Faixa', unit: '\\volt' });
+    addIndiceRow({ mensurando: 'acdc', label: 'frequency', name: 'Frequência', unit: '\\kilo\\hertz' });
+
+    document.querySelector('#resultadoTable tbody').innerHTML = '';
+    addResultadoRow({ mensurando: 'acdc', value: '-280', unc: '44', k: '2.13', indices_json: '{"faixa":"0.022","frequency":"0.01"}' });
+}
+
+document.getElementById('addInfoBtn').addEventListener('click', () => addInfoRow());
+document.getElementById('addMensurandoBtn').addEventListener('click', () => addMensurandoRow());
+document.getElementById('addIndiceBtn').addEventListener('click', () => addIndiceRow());
+document.getElementById('addResultadoBtn').addEventListener('click', () => addResultadoRow());
+document.getElementById('loadSampleBtn').addEventListener('click', loadSample);
+document.getElementById('dccForm').addEventListener('submit', submitForm);
+
+addInfoRow({ name: 'Temperatura', tipo: 'single', value: '23.2', unc: '1.0', k: '2', unit: '\\degreecelsius' });
+addMensurandoRow({ label: 'acdc', name: 'Diferença AC-DC em tensão', col_name: '\\delta_u', unit: '\\micro\\volt\\volt\\tothe{-1}', unc_relativa: false });
+addResultadoRow({ mensurando: 'acdc', value: '-280', unc: '44', k: '2.13', indices_json: '{}' });
+</script>
+{% endblock %}

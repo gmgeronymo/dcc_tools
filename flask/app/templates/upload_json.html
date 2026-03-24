@@ -1,40 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Gerar DCC a partir de JSON</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="file"] { padding: 10px; border: 1px solid #ddd; width: 100%; }
-        button { 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 16px; 
-            width: 100%;
-        }
-        button:hover { background-color: #45a049; }
-        .container { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
-        h1 { text-align: center; color: #333; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Gerar DCC a partir de arquivo JSON</h1>
-	<a href="{{ url_for('static', filename='examples/dcc_json.json') }}" download target="_blank">Exemplo de arquivo JSON</a>
-	<br/>
-	<br/>
-        <form action="{{ url_for('upload_json') }}" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="json_file">Arquivo JSON:</label>
-                <input type="file" name="json_file" accept=".json" required>
+{% extends "base.html" %}
+
+{% block title %}Gerar DCC via JSON{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 760px;">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-2">Gerar DCC a partir de arquivo JSON</h1>
+            <p class="text-muted">Envie um arquivo JSON no formato da API para gerar o XML do DCC.</p>
+
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <a href="{{ url_for('static', filename='examples/dcc_json.json') }}" class="btn btn-outline-primary btn-sm" download target="_blank">Baixar exemplo JSON</a>
+                <a href="{{ url_for('api_doc') }}" class="btn btn-outline-secondary btn-sm">Abrir documentação da API</a>
+                <a href="{{ url_for('form_dcc') }}" class="btn btn-outline-info btn-sm">Usar formulário interativo</a>
             </div>
-            
-            <button type="submit">Enviar</button>
-        </form>
+
+            <form action="{{ url_for('upload_json') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="json_file">Arquivo JSON</label>
+                    <input type="file" class="form-control" name="json_file" accept=".json" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Gerar DCC (XML)</button>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

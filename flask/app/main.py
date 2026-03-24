@@ -923,6 +923,10 @@ def publications():
 def api_doc():
     return render_template('api_documentation.html')
 
+@app.route('/dcc/form_dcc')
+def form_dcc():
+    return render_template('form_dcc.html')
+
 @app.route('/dcc/excel_guide')
 def excel_guide():
     return render_template('excel_guide.html')

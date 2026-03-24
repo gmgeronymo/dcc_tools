@@ -1,130 +1,179 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="">
-    <meta name="keywords" content="DCC, Certificado de Calibração Digital, Inmetro">
-    <meta name="author" content="PTB DCC Team">
-    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+{% extends "base.html" %}
 
-    <title>Inmetro/Dimci - DCC</title>
+{% block title %}DCC Tools - Início{% endblock %}
 
-    <style>
-		body {
-			margin-bottom: 120px;
-		}
+{% block extra_head %}
+<style>
+    .landing-hero {
+        background: radial-gradient(circle at 20% 20%, rgba(255,255,255,.2), transparent 35%),
+                    linear-gradient(135deg, #1e5799 0%, #207cca 55%, #2a9bd8 100%);
+        color: #fff;
+        padding: 5rem 0 4rem;
+        margin-bottom: 2rem;
+    }
+    .landing-hero .subtitle {
+        max-width: 780px;
+        margin: 1rem auto 0;
+        opacity: .95;
+    }
+    .service-card {
+        border: 0;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: transform .18s ease, box-shadow .18s ease;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+    }
+    .service-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,.12);
+        color: inherit;
+    }
+    .service-card .card-body {
+        padding: 1.4rem;
+    }
+    .service-card .icon-wrap {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: .75rem;
+        font-size: 1.4rem;
+        background: #e9f2ff;
+        color: #1e5799;
+    }
+    .service-card .card-title {
+        font-weight: 700;
+        margin-bottom: .4rem;
+    }
+    .service-card .card-text {
+        color: #5b6572;
+        font-size: .95rem;
+    }
+</style>
+{% endblock %}
 
-		footer {
-			background-color: white;
-		}
+{% block content %}
+<section class="landing-hero text-center">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-2">Certificado de Calibracao Digital (DCC)</h1>
+        <p class="subtitle lead">Gere, valide, visualize e publique DCCs em XML com um fluxo completo para laboratorio: JSON, Excel, PDF/A-3 e documentacao integrada.</p>
+    </div>
+</section>
 
-        .text-dcc {
-            color: #009CD1;
-        }
-
-        .bg-dcc {
-            background-color: #009CD1;
-        }
-
-        a.card {
-            text-decoration: none;
-            height: 100%;
-        }
-
-		a.card span {
-		    margin-top: auto;
-			margin-bottom: auto;
-		}
-
-		.card.disabled {
-			pointer-events: none;
-			background-color: #6c757d;
-			border-color: #6c757d;
-		}
-    </style>
-</head>
-<body class="d-flex flex-column h-100">
-<main class="flex-shrink-0">
-    <div class="container text-center">
-        <h1 class="mt-2">Certificado de Calibração Digital (DCC)</h1>
-        <hr/>
-
-        <div class="row row-cols-1 row-cols-md-3 justify-content-center mt-5 g-2">
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('publications') }}">
-                    <span>Publicações</span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('faq') }}">
-		    <span>FAQ (perguntas frequentes)</span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('exemplos') }}">
-					<span>Exemplos</span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_xls') }}">
-					<span>Excel para DCC</span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_json') }}">
-					<span>JSON para DCC</span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_xml') }}">
-					<span>Embutir DCC no PDF</span>
-                </a>
-            </div>
-	    <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('validate_xml') }}">
-					<span> Validar XML </span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('api_doc') }}">
-					<span>Documentação da API</span>
-                </a>
-            </div>
-	    <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('upload_xml_hr') }}">
-					<span> Visualizar DCC </span>
-                </a>
-            </div>
-            <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="https://gemimeg-tool.ptb.de/v1">
-					<span> GEMMIMEG Tool (V1)</span>
-                </a>
-            </div>
-	    <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="https://github.com/gmgeronymo/dcc_tools">
-		    <span>Código-Fonte (GitHub)</span>
-                </a>
-            </div>
-	    <div class="col">
-                <a class="card fs-2 p-5 bg-dcc text-white" href="{{ url_for('excel_guide') }}">
-		    <span>Guia da Planilha Excel</span>
-                </a>
-            </div>
+<section class="container pb-5">
+    <div class="row g-3 g-lg-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('form_dcc') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-magic"></i></span>
+                    <h5 class="card-title">Formulario Interativo</h5>
+                    <p class="card-text">Preencha os campos no navegador e gere o XML do DCC sem precisar escrever JSON manualmente.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('upload_xls') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-file-excel"></i></span>
+                    <h5 class="card-title">Excel para DCC</h5>
+                    <p class="card-text">Use a planilha modelo para converter dados em JSON e gerar o certificado automaticamente.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('upload_json') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-code"></i></span>
+                    <h5 class="card-title">JSON para DCC</h5>
+                    <p class="card-text">Envie um arquivo JSON pronto para gerar o XML via API de forma rapida.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('upload_xml_hr') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-eye"></i></span>
+                    <h5 class="card-title">Visualizar DCC</h5>
+                    <p class="card-text">Transforme o XML em uma visualizacao human-readable para conferencia tecnica.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('validate_xml') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-check-double"></i></span>
+                    <h5 class="card-title">Validar XML</h5>
+                    <p class="card-text">Valide o XML DCC com o schema para evitar erros de interoperabilidade.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('upload_xml') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-file-pdf"></i></span>
+                    <h5 class="card-title">Embutir DCC no PDF</h5>
+                    <p class="card-text">Anexe o XML no certificado PDF em conformidade com o padrao PDF/A-3.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('api_doc') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-book"></i></span>
+                    <h5 class="card-title">Documentacao da API</h5>
+                    <p class="card-text">Especificacao completa das chaves JSON, formatos e exemplos de integracao.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('excel_guide') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-file-alt"></i></span>
+                    <h5 class="card-title">Guia da Planilha</h5>
+                    <p class="card-text">Passo a passo para usuarios nao tecnicos preencherem a planilha sem erro.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('exemplos') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-flask"></i></span>
+                    <h5 class="card-title">Exemplos de DCC</h5>
+                    <p class="card-text">Colecao de exemplos para validar fluxo, estrutura e casos de uso comuns.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('faq') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-question-circle"></i></span>
+                    <h5 class="card-title">FAQ</h5>
+                    <p class="card-text">Perguntas frequentes sobre API, planilha, validacao, anexacao e publicacao.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('publications') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-newspaper"></i></span>
+                    <h5 class="card-title">Publicacoes</h5>
+                    <p class="card-text">Artigos e materiais tecnicos relacionados ao desenvolvimento do DCC Tools.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="https://github.com/gmgeronymo/dcc_tools" target="_blank">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fab fa-github"></i></span>
+                    <h5 class="card-title">Codigo-Fonte</h5>
+                    <p class="card-text">Repositorio no GitHub com codigo, historico de mudancas e contribuicoes.</p>
+                </div>
+            </a>
         </div>
     </div>
-</main>
-<footer class="footer fixed-bottom">
-    <div class="container mb-2">
-        <hr/>
-        <a href="https://inmetro.gov.br" class="btn btn-outline-secondary">&copy; 2026 — Instituto Nacional de Metrologia, Qualidade e Tecnologia (Inmetro)</a>
-	<a href="mailto:gmgeronymo@inmetro.gov.br" class="btn btn-outline-secondary">E-Mail</a>
-    </div>
-</footer>
-
-
-
-<script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}"></script>
-</body>
-</html>
-
+</section>
+{% endblock %}
