@@ -783,6 +783,18 @@ Segunda descrição do método (se necessário)... |
                                         <td><span class="field-required">Obrigatório</span></td>
                                     </tr>
                                     <tr>
+                                        <td><strong>relative_uncertainty_in_dcc</strong></td>
+                                        <td>Digite <strong>Sim</strong> para incluir a incerteza relativa também no bloco <code>dcc:relativeUncertainty</code> (schema 3.3.0)</td>
+                                        <td>Sim</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>relative_unc_unit</strong></td>
+                                        <td>Unidade da incerteza relativa no DCC. Se vazio, usa <code>\micro\one</code></td>
+                                        <td>\micro\one</td>
+                                        <td><span class="field-optional">Opcional</span></td>
+                                    </tr>
+                                    <tr>
                                         <td><strong>refType</strong></td>
                                         <td>Identificador padronizado (opcional)</td>
                                         <td>basic_measuredValue</td>
@@ -792,10 +804,11 @@ Segunda descrição do método (se necessário)... |
                             </table>
 
                             <div class="example-box">
-label | name                             | col_name | unit                            | unc_relativa | refType
-acdc  | Diferença AC-DC em tensão       | \delta_u | \micro\volt\volt\tothe{-1}   | Não         |
-rstdc | Resistência em Corrente Contínua | \m       | \ohm                            | Sim          |
+label | name                             | col_name | unit                            | unc_relativa | relative_uncertainty_in_dcc | relative_unc_unit | refType
+acdc  | Diferença AC-DC em tensão       | \delta_u | \micro\volt\volt\tothe{-1}   | Não         | Não                         |                   |
+rstdc | Resistência em Corrente Contínua | \m       | \ohm                            | Sim          | Sim                         | \micro\ohm\ohm\tothe{-1} |
                             </div>
+                            <p class="muted-help">Quando <code>relative_uncertainty_in_dcc=Sim</code>, a incerteza é estruturada no bloco <code>dcc:relativeUncertaintyXmlList</code>. Se for <code>Não</code>, o sistema segue a lógica legada de incerteza absoluta.</p>
 
                             <div class="tip-box">
                                 <strong>Unidades comuns:</strong>

@@ -146,7 +146,8 @@
                             <h3>API DCC Tools</h3>
                             <h4>DCC Generator</h4>
                             <p>A API recebe como entrada uma string em formato JSON, que deve ser enviada via uma requisição POST</p>
-			    <p>Endpoint da API: <a href="https://sig-dimci.inmetro.gov.br/dcc/generate">https://sig-dimci.inmetro.gov.br/dcc/generate</a></p>
+		    <p>Endpoint da API: <a href="https://sig-dimci.inmetro.gov.br/dcc/generate">https://sig-dimci.inmetro.gov.br/dcc/generate</a></p>
+                            <p><strong>Versão de schema padrão:</strong> 3.3.0. Para compatibilidade durante transição, é possível enviar opcionalmente <code>dcc_version</code> com valor <code>3.2.0</code> ou <code>3.3.0</code>.</p>
                             
                             <h5 class="mt-4">Exemplo de arquivo JSON:</h5>
                             <div class="example-box">{
@@ -216,6 +217,13 @@
                                         <td><span class="required">Obrigatória</span></td>
                                         <td>"num_certif": "0856/2024"</td>
                                         <td>A API adiciona o prefixo DIMCI. Inserir apenas o número do certificado de calibração.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>dcc_version</td>
+                                        <td>Versão do schema DCC para geração do XML</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"dcc_version": "3.3.0"</td>
+                                        <td>Se omitido, usa 3.3.0. Compatível com 3.2.0 para transição.</td>
                                     </tr>
                                     <tr>
                                         <td>num_processo</td>
@@ -825,9 +833,12 @@
         "col_name": "\m",
         "unit": "\ohm",
         "unc_relativa": true,
+        "relative_uncertainty_in_dcc": true,
+        "relative_unc_unit": "\micro\ohm\ohm\tothe{-1}",
         "refType": "basic_measuredValue"
     }
 ]</div>
+                            <p class="mt-3"><strong>Comportamento:</strong> a API sempre mantém o resultado completo no bloco SI legado (<code>si:realListXMLList</code> com incerteza absoluta). Quando <code>relative_uncertainty_in_dcc = true</code>, ela adiciona também <code>dcc:relativeUncertaintyXmlList</code> com os valores de incerteza relativa em <code>valueXMLList</code> e a unidade relativa em <code>unitXMLList</code>, sem repetir resultado, k e probabilidade nesse bloco.</p>
                             
                             <h5 class="mt-4">Descrição do array:</h5>
                             <table class="key-table mt-3">
@@ -866,9 +877,21 @@
                                     </tr>
                                     <tr>
                                         <td>unc_relativa</td>
-                                        <td>Indica se a incerteza é relativa</td>
+                                        <td>Indica se a incerteza de entrada é relativa (ppm)</td>
                                         <td><span class="required">Obrigatória</span></td>
                                         <td>"unc_relativa": false</td>
+                                    </tr>
+                                    <tr>
+                                        <td>relative_uncertainty_in_dcc</td>
+                                        <td>Se true, inclui dcc:relativeUncertainty no XML (schema 3.3.0)</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"relative_uncertainty_in_dcc": true</td>
+                                    </tr>
+                                    <tr>
+                                        <td>relative_unc_unit</td>
+                                        <td>Unidade da incerteza relativa no DCC (padrão: \micro\one)</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"relative_unc_unit": "\micro\ohm\ohm\tothe{-1}"</td>
                                     </tr>
                                     <tr>
                                         <td>refType</td>
@@ -1182,6 +1205,8 @@
             "col_name": "\m",
             "unit": "\ohm",
             "unc_relativa": true,
+            "relative_uncertainty_in_dcc": true,
+            "relative_unc_unit": "\micro\ohm\ohm\tothe{-1}",
             "refType": "basic_measuredValue"
         }
     ],

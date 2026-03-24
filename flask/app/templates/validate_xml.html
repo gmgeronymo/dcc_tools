@@ -16,6 +16,42 @@
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Validar XML</button>
             </form>
+
+            {% if validation_result %}
+            <hr class="my-4">
+            {% if validation_result.status == 'success' %}
+            <div class="alert alert-success mb-3" role="alert">
+                <h2 class="h5 mb-2">{{ validation_result.title }}</h2>
+                <p class="mb-2">{{ validation_result.message }}</p>
+                {% if validation_result.file_name %}
+                <div><strong>Arquivo:</strong> <code>{{ validation_result.file_name }}</code></div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-danger mb-3" role="alert">
+                <h2 class="h5 mb-2">{{ validation_result.title }}</h2>
+                <p class="mb-2">{{ validation_result.message }}</p>
+                {% if validation_result.file_name %}
+                <div><strong>Arquivo:</strong> <code>{{ validation_result.file_name }}</code></div>
+                {% endif %}
+            </div>
+
+            {% if validation_result.errors %}
+            <div class="card border-danger-subtle">
+                <div class="card-header bg-danger-subtle">
+                    <strong>Detalhes dos erros ({{ validation_result.errors|length }})</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0 ps-3">
+                        {% for error in validation_result.errors %}
+                        <li class="mb-1"><code>{{ error }}</code></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+            {% endif %}
         </div>
     </div>
 </div>

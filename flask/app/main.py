@@ -21,7 +21,7 @@
 
 # dados do programa
 # parametros do programa
-__version__ = '1.1'
+__version__ = '2.0'
 __date__="16/10/2025"
 __appname__="dccGenerator"
 __author__="Gean Marcos Geronymo"
@@ -62,6 +62,12 @@ import math
 nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb.de/dcc', 'si': 'https://ptb.de/si'}
 # schema
 schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation")
+
+DEFAULT_DCC_VERSION = '3.3.0'
+SUPPORTED_DCC_VERSIONS = {
+    '3.2.0': 'https://ptb.de/dcc/v3.2.0/dcc.xsd',
+    '3.3.0': 'https://www.ptb.de/dcc/v3.3.0/dcc.xsd',
+}
 
 app = Flask(__name__, static_url_path='/dcc/static')
 app.debug = True
@@ -145,6 +151,30 @@ def declaracoes(dados) :
     return declaracao
 
 
+def resolve_dcc_version(dados):
+    """
+    Resolve DCC schema version with backward compatibility.
+
+    Optional input keys supported:
+    - dcc_version
+    - schema_version
+
+    If not provided, default is DEFAULT_DCC_VERSION.
+    """
+    requested_version = dados.get('dcc_version') or dados.get('schema_version') or DEFAULT_DCC_VERSION
+    if requested_version in SUPPORTED_DCC_VERSIONS:
+        return requested_version
+    return DEFAULT_DCC_VERSION
+
+
+def is_truthy(value):
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in {'true', '1', 'yes', 'sim', 'y'}
+
+
 def campo_name(parent_node, text, lang="pt"):  # Add lang parameter
     parent_node_name = etree.SubElement(parent_node, etree.QName(nsmap['dcc'], 'name'))
     parent_node_name_content = etree.SubElement(
@@ -168,9 +198,11 @@ def campo_texto(parent_node, nome_campo, texto_campo, lang="pt") :
 
 def dccGen(dcc_version, dados, declaracao) :
 
+    schema_url = SUPPORTED_DCC_VERSIONS.get(dcc_version, 'https://www.ptb.de/dcc/v'+dcc_version+'/dcc.xsd')
+
     dcc = etree.Element(
         etree.QName(nsmap['dcc'], 'digitalCalibrationCertificate'),
-        {schemaLocation: 'https://ptb.de/dcc https://ptb.de/dcc/v'+dcc_version+'/dcc.xsd', 'schemaVersion' : dcc_version},
+        {schemaLocation: 'https://ptb.de/dcc '+schema_url, 'schemaVersion' : dcc_version},
         nsmap=nsmap)
 
     # admistrativeData block
@@ -519,7 +551,8 @@ def dccGen(dcc_version, dados, declaracao) :
     # value, unc e k
     # listas de listas, referenciados ao mensurando
     value = {}
-    unc = {} 
+    unc = {}
+    unc_input = {}
     k = {}
     
     # organizar nomes e unidades dos mensurandos e indices de forma indexada
@@ -532,6 +565,7 @@ def dccGen(dcc_version, dados, declaracao) :
             indexes[linha['label']] = {}
             value[linha['label']] = []
             unc[linha['label']] = []
+            unc_input[linha['label']] = []
             k[linha['label']] = []
             # dados
             mensurando_data[linha['label']] = linha
@@ -556,13 +590,12 @@ def dccGen(dcc_version, dados, declaracao) :
     
                 # resultados
                 value[mensurando].append(resultados['value'])                
+                unc_input[mensurando].append(resultados['unc'])
 
                 # se incerteza esta em ppm, converter para valor absoluto
-                if (mensurando_data[mensurando]['unc_relativa']) :
-                    ##  17/12/2025
-                    # alterado para dois algarismos significativos
+                input_unc_relative = is_truthy(mensurando_data[mensurando].get('unc_relativa'))
+                if input_unc_relative :
                     unc[mensurando].append(format_two_sig_scientific(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
-                    #unc[mensurando].append("{:.2g}".format(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
                 else :
                     unc[mensurando].append(resultados['unc'])
                 
@@ -611,24 +644,41 @@ def dccGen(dcc_version, dados, declaracao) :
             
         # nome da coluna de resultados 
         campo_name(quantity, mensurando_data[mensurando]['col_name'])
+        # sempre manter resultado completo legado em si:realListXMLList
         si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
 
         if label :
             si_labelXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'labelXMLList'))
             si_labelXMLList.text = label
-    
+
         si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
         si_valueXMLList.text = ' '.join(value[mensurando])
         si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
         si_unitXMLList.text = mensurando_data[mensurando]['unit']
+
+        # lógica legada: incerteza no bloco SI (absoluta)
         si_expandedUncXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'expandedUncXMLList'))
         si_uncertaintyXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'uncertaintyXMLList'))
         si_uncertaintyXMLList.text = ' '.join(unc[mensurando])
         si_coverageFactorXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageFactorXMLList'))
         si_coverageFactorXMLList.text = ' '.join(k[mensurando])
         si_converageProbabilityXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageProbabilityXMLList'))
-        # parametro fixo, estudar se vale a pena ser ajustavel
         si_converageProbabilityXMLList.text = '0.9545'
+
+        # opcional: bloco dcc:relativeUncertainty completo (resultado + incerteza)
+        if is_truthy(mensurando_data[mensurando].get('relative_uncertainty_in_dcc')):
+            relative_uncertainty = etree.SubElement(quantity, etree.QName(nsmap['dcc'], 'relativeUncertainty'))
+            relative_uncertainty_xml_list = etree.SubElement(relative_uncertainty, etree.QName(nsmap['dcc'], 'relativeUncertaintyXmlList'))
+
+            if label :
+                si_relative_labelXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'labelXMLList'))
+                si_relative_labelXMLList.text = label
+
+            # relative uncertainty values
+            si_relative_valueXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'valueXMLList'))
+            si_relative_valueXMLList.text = ' '.join(unc_input[mensurando])
+            si_relative_unitXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'unitXMLList'))
+            si_relative_unitXMLList.text = mensurando_data[mensurando].get('relative_unc_unit', '\\micro\\one')
   
     return etree.tostring(dcc, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
@@ -737,6 +787,10 @@ def excel_to_json(excel_path):
             "unc_relativa": row['unc_relativa'] == "Sim",
             # refType: somente se existir
             **({"refType": str(row['refType'])} if str(row['refType']) != 'nan' else {}),
+            # opcional: incluir incerteza relativa no bloco dcc:relativeUncertainty
+            **({"relative_uncertainty_in_dcc": str(row['relative_uncertainty_in_dcc']) == "Sim"} if 'relative_uncertainty_in_dcc' in row and str(row['relative_uncertainty_in_dcc']) != 'nan' else {}),
+            # opcional: unidade da incerteza relativa (padrão: \micro\one)
+            **({"relative_unc_unit": str(row['relative_unc_unit'])} if 'relative_unc_unit' in row and str(row['relative_unc_unit']) != 'nan' else {}),
             }
             for _, row in sheets["Mensurando"].iterrows()
         ], 
@@ -950,37 +1004,50 @@ def upload_xml_hr():
 @app.route('/dcc/validate_xml', methods=['GET', 'POST'])
 def validate_xml():
     if request.method == 'POST':
-        # Check if the post request has the file part
+        validation_result = {
+            'status': 'error',
+            'title': 'Falha na validação',
+            'message': '',
+            'errors': [],
+            'file_name': None,
+        }
+
         if 'xml_file' not in request.files:
-            return jsonify({'error': 'No file part in the request'}), 400
-    
+            validation_result['message'] = 'Nenhum arquivo foi enviado na requisição.'
+            return render_template('validate_xml.html', validation_result=validation_result), 400
+
         file = request.files['xml_file']
-    
-        # If the user does not select a file
+        validation_result['file_name'] = file.filename
+
         if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-    
-        # Validate the file
+            validation_result['message'] = 'Nenhum arquivo selecionado.'
+            return render_template('validate_xml.html', validation_result=validation_result), 400
+
+        tmp_xml_path = None
         try:
-            # Create a temporary file for the uploaded XML
             with tempfile.NamedTemporaryFile(delete=False, suffix='.xml') as tmp_file:
                 file.save(tmp_file.name)
                 tmp_xml_path = tmp_file.name
-            
-                # Validate the XML
-                is_valid, errors = validate_dcc_xml_upload(tmp_xml_path)
-        
-                # Clean up
-                os.unlink(tmp_xml_path)
-                
-                if is_valid:
-                    return Response("XML is valid", status=200, mimetype='text/plain')
-                else:
-                    error_message = "XML is invalid\n" + "\n".join(errors)
-                    return Response(error_message, status=400, mimetype='text/plain')
-            
+
+            is_valid, errors = validate_dcc_xml_upload(tmp_xml_path)
+
+            if is_valid:
+                validation_result['status'] = 'success'
+                validation_result['title'] = 'XML válido'
+                validation_result['message'] = 'O arquivo foi validado com sucesso contra o schema informado no próprio XML.'
+                validation_result['errors'] = []
+                return render_template('validate_xml.html', validation_result=validation_result), 200
+
+            validation_result['message'] = 'O XML não passou na validação. Verifique os erros abaixo.'
+            validation_result['errors'] = errors
+            return render_template('validate_xml.html', validation_result=validation_result), 400
+
         except Exception as e:
-            return jsonify({'error': f'Validation failed: {str(e)}'}), 500
+            validation_result['message'] = f'Erro interno durante a validação: {str(e)}'
+            return render_template('validate_xml.html', validation_result=validation_result), 500
+        finally:
+            if tmp_xml_path and os.path.exists(tmp_xml_path):
+                os.unlink(tmp_xml_path)
                 
     ## GET Request - exibe formulario de upload
     return render_template('validate_xml.html')
@@ -1179,7 +1246,7 @@ def generate_dcc():
     ## TODO ##
     # implementar logica para tratamento de erros ao gerar o DCC
     declaracao = declaracoes(dados)  
-    dcc_version = '3.2.0'
+    dcc_version = resolve_dcc_version(dados)
     xml_content = dccGen(dcc_version, dados, declaracao)  
 
     # Create response with XML attachment

@@ -95,7 +95,9 @@
       "name": "Resistência em Corrente Contínua",
       "col_name": "V.m.",
       "unit": "\\ohm",
-      "unc_relativa": true
+      "unc_relativa": true,
+      "relative_uncertainty_in_dcc": true,
+      "relative_unc_unit": "\\micro\\ohm\\ohm\\tothe{-1}"
     }
   ],
   "indices": [

@@ -48,6 +48,13 @@
                     <div class="col-md-8"><label class="form-label required">caracteristicas_item</label><input class="form-control" name="caracteristicas_item" required></div>
                     <div class="col-md-3"><label class="form-label required">data_calibracao</label><input type="date" class="form-control" name="data_calibracao" required></div>
                     <div class="col-md-3"><label class="form-label">data_emissao</label><input type="date" class="form-control" name="data_emissao"></div>
+                    <div class="col-md-3">
+                        <label class="form-label required">dcc_version</label>
+                        <select class="form-select" name="dcc_version" required>
+                            <option value="3.3.0" selected>3.3.0 (padrão)</option>
+                            <option value="3.2.0">3.2.0 (compatibilidade)</option>
+                        </select>
+                    </div>
                     <div class="col-md-2"><label class="form-label required">cmc</label><select class="form-select" name="cmc" required><option value="true">true</option><option value="false">false</option></select></div>
                     <div class="col-md-4"><label class="form-label required">chefe_div</label><input class="form-control" name="chefe_div" required></div>
                     <div class="col-md-4"><label class="form-label">desc_chefe_div</label><input class="form-control" name="desc_chefe_div"></div>
@@ -125,10 +132,11 @@
                 </div>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle" id="mensurandoTable">
-                        <thead><tr><th>label</th><th>name</th><th>col_name</th><th>unit</th><th>unc_relativa</th><th>refType</th><th></th></tr></thead>
+                        <thead><tr><th>label</th><th>name</th><th>col_name</th><th>unit</th><th>unc_relativa</th><th>relative_uncertainty_in_dcc</th><th>relative_unc_unit</th><th>refType</th><th></th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
+                <p class="muted-help">Use <code>relative_uncertainty_in_dcc=true</code> para adicionar também o bloco <code>dcc:relativeUncertaintyXmlList</code>. O resultado legado em <code>si:realListXMLList</code> permanece sempre presente para compatibilidade.</p>
             </div>
         </div>
 
@@ -259,6 +267,24 @@ function addMensurandoRow(values = {}) {
     });
     if (values.unc_relativa !== undefined) rel.value = String(values.unc_relativa);
     tdRel.appendChild(rel); row.appendChild(tdRel);
+
+    const tdRelDcc = document.createElement('td');
+    const relDcc = document.createElement('select');
+    relDcc.className = 'form-select form-select-sm';
+    relDcc.dataset.field = 'relative_uncertainty_in_dcc';
+    ['false','true'].forEach((v) => {
+        const o = document.createElement('option'); o.value = v; o.textContent = v; relDcc.appendChild(o);
+    });
+    if (values.relative_uncertainty_in_dcc !== undefined) relDcc.value = String(values.relative_uncertainty_in_dcc);
+    tdRelDcc.appendChild(relDcc); row.appendChild(tdRelDcc);
+
+    const tdRelUnit = document.createElement('td');
+    const relUnit = createCellInput();
+    relUnit.dataset.field = 'relative_unc_unit';
+    relUnit.placeholder = '\\micro\\one';
+    if (values.relative_unc_unit !== undefined) relUnit.value = values.relative_unc_unit;
+    tdRelUnit.appendChild(relUnit); row.appendChild(tdRelUnit);
+
     const tdRef = document.createElement('td');
     const ref = createCellInput(); ref.dataset.field = 'refType'; if (values.refType) ref.value = values.refType;
     tdRef.appendChild(ref); row.appendChild(tdRef);
@@ -314,6 +340,7 @@ function buildPayload() {
         nome_div: f.nome_div.value,
         sigla_div: f.sigla_div.value,
         num_certif: f.num_certif.value,
+        dcc_version: f.dcc_version.value,
         num_processo: f.num_processo.value,
         tipo_item: f.tipo_item.value,
         fabricante: f.fabricante.value,
@@ -382,6 +409,9 @@ function buildPayload() {
         const item = rowToObject(row);
         if (!item.label || !item.name || !item.col_name || !item.unit) return;
         item.unc_relativa = String(item.unc_relativa) === 'true';
+        if (item.relative_uncertainty_in_dcc !== undefined) {
+            item.relative_uncertainty_in_dcc = String(item.relative_uncertainty_in_dcc) === 'true';
+        }
         data.mensurando.push(item);
     });
 
@@ -460,6 +490,7 @@ function loadSample() {
     f.nome_div.value = 'Divisão de Metrologia Elétrica';
     f.sigla_div.value = 'Diele';
     f.num_certif.value = '0856/2024';
+    f.dcc_version.value = '3.3.0';
     f.num_processo.value = '0052600.003988/2023-06';
     f.tipo_item.value = 'Padrão de Transferência AC-DC';
     f.fabricante.value = 'Fluke';
@@ -490,7 +521,7 @@ function loadSample() {
     addInfoRow({ name: 'Umidade relativa', tipo: 'range', value_min: '30', value_max: '70', unc: '5', k: '2', unit: '\\percent' });
 
     document.querySelector('#mensurandoTable tbody').innerHTML = '';
-    addMensurandoRow({ label: 'acdc', name: 'Diferença AC-DC em tensão', col_name: '\\delta_u', unit: '\\micro\\volt\\volt\\tothe{-1}', unc_relativa: false });
+    addMensurandoRow({ label: 'acdc', name: 'Diferença AC-DC em tensão', col_name: '\\delta_u', unit: '\\micro\\volt\\volt\\tothe{-1}', unc_relativa: false, relative_uncertainty_in_dcc: false });
 
     document.querySelector('#indiceTable tbody').innerHTML = '';
     addIndiceRow({ mensurando: 'acdc', label: 'faixa', name: 'Faixa', unit: '\\volt' });
@@ -508,7 +539,7 @@ document.getElementById('loadSampleBtn').addEventListener('click', loadSample);
 document.getElementById('dccForm').addEventListener('submit', submitForm);
 
 addInfoRow({ name: 'Temperatura', tipo: 'single', value: '23.2', unc: '1.0', k: '2', unit: '\\degreecelsius' });
-addMensurandoRow({ label: 'acdc', name: 'Diferença AC-DC em tensão', col_name: '\\delta_u', unit: '\\micro\\volt\\volt\\tothe{-1}', unc_relativa: false });
+addMensurandoRow({ label: 'acdc', name: 'Diferença AC-DC em tensão', col_name: '\\delta_u', unit: '\\micro\\volt\\volt\\tothe{-1}', unc_relativa: false, relative_uncertainty_in_dcc: false });
 addResultadoRow({ mensurando: 'acdc', value: '-280', unc: '44', k: '2.13', indices_json: '{}' });
 </script>
 {% endblock %}
