@@ -107,8 +107,8 @@
     {% include 'nav_fragment.html' %}
     <header class="doc-header">
         <div class="container text-center">
-            <h1 class="display-4 fw-bold mb-3">FAQ - perguntas frequentes</h1>
-            <p class="lead mb-4">Repositório com as dúvidas mais frequentes sobre os Certificados de Calibração Digital (DCCs)</p>
+            <h1 class="display-4 fw-bold mb-3">FAQ - Perguntas frequentes</h1>
+            <p class="lead mb-4">Principais dúvidas sobre os Certificados de Calibração Digital (DCCs)</p>
         </div>
     </header>
 
@@ -122,22 +122,22 @@
                     <div class="card">
                         <div class="card-body">
 			    <p><strong>O que é um DCC?</strong></p>
-			    <p>DCC vem da sigla em inglês Digital Calibration Certificate. Ou seja, o DCC é um Certificado de Calibração Digital. Estamos seguindo o modelo de DCC proposto pelo <a href="https://ptb.de/dcc">PTB</a>, utilizando os dados estruturados em um arquivo no formato XML.</p>
+			    <p>DCC é a sigla, em inglês, para <i>Digital Calibration Certificate</i>. Em outras palavras, trata-se de um Certificado de Calibração Digital. Nesta ferramenta, seguimos o modelo de DCC proposto pelo <a href="https://ptb.de/dcc">PTB</a>, com dados estruturados em arquivo XML.</p>
 			</div>
 		    </div>
 		    
 		    <div class="card">
                         <div class="card-body">
 			    <p><strong>Mas ao emitir Certificados de Calibração em formato PDF com assinatura eletrônica já não estamos emitindo Certificados de Calibração Digitais?</strong></p>
-			    <p>Existem diversos conceitos, as vezes conflitantes entre si, sobre o que seria de fato a "digitalização". Aqui estamos considerando que um Certificado de Calibração é "digital" quanto o certificado segue uma estrutura amigável para a leitura automatizada por máquina. Um arquivo PDF não se enquadra nessa definição. Podemos fazer uma analogia com a Nota Fiscal Eletrônica (NFe). A nota fiscal eletrônica é baseada em um arquivo em formato XML, que pode ser facilmente integrado aos softwares de contabilidade. Em paralelo, muitas vezes recebemos também um arquivo PDF, que é mais amigável para a leitura por humanos. A ideia do Certificado de Calibração Digital é similar: vamos continuar enviando aos clientes os arquivos PDF, como fazemos hoje, porém, incluindo um arquivo XML (legível por máquina) como anexo ao PDF.</p>
+                            <p>Existem diferentes interpretações, às vezes conflitantes, sobre o que é "digitalização". Aqui, consideramos um Certificado de Calibração como "digital" quando ele segue uma estrutura adequada para leitura automatizada por máquina. Por isso, um PDF isolado não atende a essa definição. Uma boa analogia é a Nota Fiscal Eletrônica (NFe): o dado estruturado fica no XML (integrável a sistemas), enquanto o PDF continua útil para leitura humana. A proposta do DCC segue essa lógica: manter o PDF para uso cotidiano e incluir o XML legível por máquina como anexo.</p>
 			</div>
 		    </div>
 
                     <div class="card">
                         <div class="card-body">
 			    <p><strong>Essa ferramenta gera o PDF e o XML do DCC?</strong></p>
-			    <p>Não. Por enquanto essa ferramenta gera apenas o XML compatível com a proposta de DCC do <a href="https://ptb.de/dcc">PTB</a>. O PDF deve ser gerado de acordo com o fluxo utilizado atualmente pelo laboratório, seja através de alguma ferramenta própria ou manualmente. </p>
-			    <p> Entretanto, estamos disponibilizando uma ferramenta para a visualização amigável (<i>human-readable</i>) do DCC. A visualização obtida é bastante similar ao modelo de certificado de calibração atual da Dimci. Para acessar o visualizador <a href="{{ url_for('upload_xml_hr') }}">clique aqui</a>.</p>
+			    <p>Não. No momento, esta ferramenta gera apenas o XML compatível com a proposta de DCC do <a href="https://ptb.de/dcc">PTB</a>. O PDF deve ser produzido conforme o fluxo já adotado pelo laboratório, com ferramenta própria ou de forma manual.</p>
+			    <p>Também disponibilizamos um visualizador do DCC em formato amigável (<i>human-readable</i>), com apresentação semelhante ao modelo atual de certificado de calibração da Dimci. Para acessar, <a href="{{ url_for('upload_xml_hr') }}">clique aqui</a>.</p>
 			</div>
 		    </div>
 		    
