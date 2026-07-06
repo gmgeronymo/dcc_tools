@@ -951,6 +951,10 @@ def landing_page():
 def publications():
     papers = [
         {
+            'title': 'Apresentação DCC - Diele - 06/07/2026',
+            'file': 'Apresentacao_DCC_Diele.pdf'
+        },
+        {
             'title': 'DCC 2026 Conference - YouTube Presentation',
             'external_url': 'https://www.youtube.com/watch?v=tSz8SGsDny4&t=2111s',
             'source_label': 'YouTube'
@@ -990,6 +994,10 @@ def publications():
     ]
 
     return render_template('publications.html', papers=papers)
+
+@app.route('/dcc/introducao')
+def introducao():
+    return render_template('introducao.html')
 
 @app.route('/dcc/api_doc')
 def api_doc():

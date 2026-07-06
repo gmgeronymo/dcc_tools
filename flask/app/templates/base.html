@@ -60,6 +60,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('landing_page') }}">Início</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('introducao') }}">Introdução</a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Gerar DCC
@@ -84,10 +87,12 @@
                                 Ajuda
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarHelpDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('introducao') }}">Introdução</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('faq') }}">Perguntas Frequentes</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('publications') }}">Publicações</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('exemplos') }}">Exemplos de DCC</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('api_doc') }}">Documentação da API</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('excel_guide') }}">Guia da Planilha</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('exemplos') }}">Exemplos de DCC</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('faq') }}">Perguntas Frequentes</a></li>
                             </ul>
                         </li>
                          <li class="nav-item">

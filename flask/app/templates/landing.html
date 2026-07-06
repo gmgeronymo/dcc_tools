@@ -53,6 +53,21 @@
         color: #5b6572;
         font-size: .95rem;
     }
+    .section-heading {
+        border-bottom: 1px solid #d9e2ef;
+        margin-bottom: 1.5rem;
+        padding-bottom: .75rem;
+    }
+    .section-heading h2 {
+        color: #1e5799;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: .25rem;
+    }
+    .section-heading p {
+        color: #687384;
+        margin-bottom: 0;
+    }
 </style>
 {% endblock %}
 
@@ -65,6 +80,80 @@
 </section>
 
 <section class="container pb-5">
+    <div class="section-heading">
+        <h2>Informações</h2>
+        <p>Conteúdo de referência para entender, adotar e integrar Certificados Digitais de Calibração.</p>
+    </div>
+    <div class="row g-3 g-lg-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('introducao') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-info-circle"></i></span>
+                    <h5 class="card-title">Introdução</h5>
+                    <p class="card-text">Entenda o conceito de DCC, a iniciativa do Inmetro e os benefícios da leitura por máquina.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('faq') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-question-circle"></i></span>
+                    <h5 class="card-title">FAQ</h5>
+                    <p class="card-text">Perguntas frequentes sobre API, planilha, validação, anexação e publicação.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('publications') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-newspaper"></i></span>
+                    <h5 class="card-title">Publicações</h5>
+                    <p class="card-text">Artigos e materiais técnicos relacionados ao desenvolvimento do DCC Tools.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('exemplos') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-flask"></i></span>
+                    <h5 class="card-title">Exemplos de DCC</h5>
+                    <p class="card-text">Coleção de exemplos para validar fluxo, estrutura e casos de uso comuns.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('api_doc') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-book"></i></span>
+                    <h5 class="card-title">Documentação da API</h5>
+                    <p class="card-text">Especificação completa das chaves JSON, formatos e exemplos de integração.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="{{ url_for('excel_guide') }}">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fas fa-file-alt"></i></span>
+                    <h5 class="card-title">Guia da Planilha</h5>
+                    <p class="card-text">Passo a passo para usuários não técnicos preencherem a planilha sem erro.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="card service-card" href="https://github.com/gmgeronymo/dcc_tools" target="_blank">
+                <div class="card-body">
+                    <span class="icon-wrap"><i class="fab fa-github"></i></span>
+                    <h5 class="card-title">Código Fonte</h5>
+                    <p class="card-text">Repositório no GitHub com código, histórico de mudanças e contribuições.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section-heading mt-5">
+        <h2>Ferramentas</h2>
+        <p>Serviços para gerar, validar, visualizar e anexar DCCs aos fluxos operacionais.</p>
+    </div>
     <div class="row g-3 g-lg-4">
         <div class="col-12 col-md-6 col-lg-4">
             <a class="card service-card" href="{{ url_for('form_dcc') }}">
@@ -117,60 +206,6 @@
                     <span class="icon-wrap"><i class="fas fa-file-pdf"></i></span>
                     <h5 class="card-title">Embutir DCC no PDF</h5>
                     <p class="card-text">Anexe o XML no certificado PDF em conformidade com o padrão PDF/A-3.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="card service-card" href="{{ url_for('api_doc') }}">
-                <div class="card-body">
-                    <span class="icon-wrap"><i class="fas fa-book"></i></span>
-                    <h5 class="card-title">Documentação da API</h5>
-                    <p class="card-text">Especificação completa das chaves JSON, formatos e exemplos de integração.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="card service-card" href="{{ url_for('excel_guide') }}">
-                <div class="card-body">
-                    <span class="icon-wrap"><i class="fas fa-file-alt"></i></span>
-                    <h5 class="card-title">Guia da Planilha</h5>
-                    <p class="card-text">Passo a passo para usuários não técnicos preencherem a planilha sem erro.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="card service-card" href="{{ url_for('exemplos') }}">
-                <div class="card-body">
-                    <span class="icon-wrap"><i class="fas fa-flask"></i></span>
-                    <h5 class="card-title">Exemplos de DCC</h5>
-                    <p class="card-text">Coleção de exemplos para validar fluxo, estrutura e casos de uso comuns.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="card service-card" href="{{ url_for('faq') }}">
-                <div class="card-body">
-                    <span class="icon-wrap"><i class="fas fa-question-circle"></i></span>
-                    <h5 class="card-title">FAQ</h5>
-                    <p class="card-text">Perguntas frequentes sobre API, planilha, validação, anexação e publicação.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="card service-card" href="{{ url_for('publications') }}">
-                <div class="card-body">
-                    <span class="icon-wrap"><i class="fas fa-newspaper"></i></span>
-                    <h5 class="card-title">Publicações</h5>
-                    <p class="card-text">Artigos e materiais técnicos relacionados ao desenvolvimento do DCC Tools.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="card service-card" href="https://github.com/gmgeronymo/dcc_tools" target="_blank">
-                <div class="card-body">
-                    <span class="icon-wrap"><i class="fab fa-github"></i></span>
-                    <h5 class="card-title">Código-fonte</h5>
-                    <p class="card-text">Repositório no GitHub com código, histórico de mudanças e contribuições.</p>
                 </div>
             </a>
         </div>
