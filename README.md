@@ -15,6 +15,7 @@ Principais funcionalidades:
 - Validar XML DCC contra schema (`/dcc/validate_xml`)
 - Visualizar DCC em formato legível por humanos (`/dcc/visualizar_dcc`)
 - Interface web com documentação, exemplos, FAQ e publicações (`/dcc/`)
+- Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
 
 Versões de schema DCC suportadas:
 - `3.3.0` (padrão)
@@ -106,6 +107,7 @@ Main capabilities:
 - Validate DCC XML against schema (`/dcc/validate_xml`)
 - Render human-readable DCC from XML (`/dcc/visualizar_dcc`)
 - Web UI with documentation, examples, FAQ, and publications (`/dcc/`)
+- Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
 
 Supported DCC schema versions:
 - `3.3.0` (default)

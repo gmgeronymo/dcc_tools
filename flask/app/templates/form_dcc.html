@@ -161,10 +161,10 @@
                     <h2 class="h5 section-title mb-0">7) Resultados</h2>
                     <button type="button" class="btn btn-sm btn-outline-primary" id="addResultadoBtn">Adicionar linha</button>
                 </div>
-                <p class="muted-help">Campo <code>indices_json</code> deve conter JSON de pares label/valor (ex.: <code>{"faixa":"0.022","frequency":"50"}</code>).</p>
+                <p class="muted-help">Campo <code>indices_json</code> deve conter JSON de pares label/valor (ex.: <code>{"faixa":"0.022","frequency":"50"}</code>). O campo <code>nueff</code> (graus de liberdade efetivos) é opcional.</p>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle" id="resultadoTable">
-                        <thead><tr><th>mensurando</th><th>value</th><th>unc</th><th>k</th><th>indices_json</th><th></th></tr></thead>
+                        <thead><tr><th>mensurando</th><th>value</th><th>unc</th><th>k</th><th>nueff</th><th>indices_json</th><th></th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -309,7 +309,7 @@ function addIndiceRow(values = {}) {
 function addResultadoRow(values = {}) {
     const tbody = document.querySelector('#resultadoTable tbody');
     const row = document.createElement('tr');
-    ['mensurando','value','unc','k','indices_json'].forEach((f) => {
+    ['mensurando','value','unc','k','nueff','indices_json'].forEach((f) => {
         const td = document.createElement('td');
         const el = createCellInput();
         el.dataset.field = f;
@@ -528,7 +528,7 @@ function loadSample() {
     addIndiceRow({ mensurando: 'acdc', label: 'frequency', name: 'Frequência', unit: '\\kilo\\hertz' });
 
     document.querySelector('#resultadoTable tbody').innerHTML = '';
-    addResultadoRow({ mensurando: 'acdc', value: '-280', unc: '44', k: '2.13', indices_json: '{"faixa":"0.022","frequency":"0.01"}' });
+    addResultadoRow({ mensurando: 'acdc', value: '-280', unc: '44', k: '2.13', nueff: '58.4', indices_json: '{"faixa":"0.022","frequency":"0.01"}' });
 }
 
 document.getElementById('addInfoBtn').addEventListener('click', () => addInfoRow());

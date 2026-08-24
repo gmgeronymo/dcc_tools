@@ -1009,7 +1009,8 @@
         "frequency": "0.01",
         "value": "-280",
         "unc": "44",
-        "k": "2.13"
+        "k": "2.13",
+        "nueff": "58.4"
     },
     {
         "mensurando": "acdc",
@@ -1018,7 +1019,8 @@
         "frequency": "0.02",
         "value": "3",
         "unc": "37",
-        "k": "2.28"
+        "k": "2.28",
+        "nueff": "62.1"
     }
 ]</div>
                             
@@ -1058,6 +1060,12 @@
                                         <td>"k": "2.28"</td>
                                     </tr>
                                     <tr>
+                                        <td>nueff</td>
+                                        <td>Graus de liberdade efetivos (νeff) do resultado. Deve ser um valor numérico e positivo (aceita valores fracionários).</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"nueff": "58.4"</td>
+                                    </tr>
+                                    <tr>
                                         <td>Índices</td>
                                         <td>Quaisquer índices previamente definidos</td>
                                         <td><span class="optional">Opcional</span></td>
@@ -1065,6 +1073,8 @@
                                     </tr>
                                 </tbody>
                             </table>
+
+                            <p class="mt-3"><strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> campo opcional. Quando presente, a API gera uma <code>dcc:quantity</code> adicional na mesma <code>dcc:list</code> de resultados, nomeada <em>Graus de liberdade efetivos</em> (pt) / <em>Effective degrees of freedom</em> (en), com os valores em <code>si:realListXMLList</code> e unidade <code>\one</code>. O número de valores de <code>nueff</code> deve ser igual ao número de resultados do mensurando associado. Valores <code>0</code>, negativos, <code>null</code>, vazios, <code>NaN</code> ou infinitos são rejeitados. Se omitido, o certificado é gerado sem a quantidade adicional, preservando o comportamento anterior.</p>
                         </div>
                     </div>
                 </div>
@@ -1248,7 +1258,8 @@
             "frequency": "0.01",
             "value": "-280",
             "unc": "44",
-            "k": "2.13"
+            "k": "2.13",
+            "nueff": "58.4"
         },
         {
             "mensurando": "acdc",
@@ -1257,7 +1268,8 @@
             "frequency": "0.02",
             "value": "3",
             "unc": "37",
-            "k": "2.28"
+            "k": "2.28",
+            "nueff": "62.1"
         }
     ],
     "observacoes": [

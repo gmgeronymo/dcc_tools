@@ -196,6 +196,46 @@ def campo_texto(parent_node, nome_campo, texto_campo, lang="pt") :
     return
 
 
+# cria um elemento <dcc:nome_elemento> com conteudo multilingue
+# (um <dcc:content lang=...> para cada idioma informado)
+def campo_conteudo_multilingue(parent_node, nome_elemento, textos) :
+    elemento = etree.SubElement(parent_node, etree.QName(nsmap['dcc'], nome_elemento))
+    for lang, texto in textos :
+        campo_texto(elemento, 'content', texto, lang=lang)
+    return elemento
+
+
+# validacao dos graus de liberdade efetivos (nueff)
+def validate_nueff(nueff, expected_length) :
+    if not isinstance(nueff, (list, tuple)) :
+        raise ValueError("O campo 'nueff' deve ser uma lista de valores numéricos.")
+
+    if len(nueff) != expected_length :
+        raise ValueError(
+            "O número de valores de 'nueff' (%d) deve ser igual ao número de resultados associados (%d)."
+            % (len(nueff), expected_length)
+        )
+
+    for valor in nueff :
+        if valor is None or (isinstance(valor, str) and valor.strip() == '') :
+            raise ValueError("O campo 'nueff' contém um valor ausente (null ou vazio).")
+
+        try :
+            v = float(valor)
+        except (TypeError, ValueError) :
+            raise ValueError("Valor inválido para 'nueff': %r. Os valores devem ser numéricos." % (valor,))
+
+        if not math.isfinite(v) :
+            raise ValueError("Valor inválido para 'nueff': %r. Não são aceitos NaN ou infinito." % (valor,))
+
+        if v <= 0 :
+            raise ValueError(
+                "Valor inválido para 'nueff': %r. Os graus de liberdade efetivos devem ser positivos." % (valor,)
+            )
+
+    return True
+
+
 def dccGen(dcc_version, dados, declaracao) :
 
     schema_url = SUPPORTED_DCC_VERSIONS.get(dcc_version, 'https://www.ptb.de/dcc/v'+dcc_version+'/dcc.xsd')
@@ -554,6 +594,8 @@ def dccGen(dcc_version, dados, declaracao) :
     unc = {}
     unc_input = {}
     k = {}
+    # graus de liberdade efetivos (opcional)
+    nueff = {}
     
     # organizar nomes e unidades dos mensurandos e indices de forma indexada
     mensurando_data = {}
@@ -567,6 +609,7 @@ def dccGen(dcc_version, dados, declaracao) :
             unc[linha['label']] = []
             unc_input[linha['label']] = []
             k[linha['label']] = []
+            nueff[linha['label']] = []
             # dados
             mensurando_data[linha['label']] = linha
             indices_data[linha['label']] = {}
@@ -600,6 +643,10 @@ def dccGen(dcc_version, dados, declaracao) :
                     unc[mensurando].append(resultados['unc'])
                 
                 k[mensurando].append(resultados['k'])
+
+                # graus de liberdade efetivos (opcional)
+                if 'nueff' in resultados and resultados['nueff'] is not None :
+                    nueff[mensurando].append(resultados['nueff'])
 
     # results
     results = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'results'))
@@ -679,7 +726,30 @@ def dccGen(dcc_version, dados, declaracao) :
             si_relative_valueXMLList.text = ' '.join(unc_input[mensurando])
             si_relative_unitXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'unitXMLList'))
             si_relative_unitXMLList.text = mensurando_data[mensurando].get('relative_unc_unit', '\\micro\\one')
-  
+
+        # opcional: graus de liberdade efetivos (nueff)
+        # representados como uma dcc:quantity adicional na mesma dcc:list
+        if nueff[mensurando] :
+            validate_nueff(nueff[mensurando], len(value[mensurando]))
+
+            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+
+            campo_conteudo_multilingue(quantity, 'name', [
+                ('pt', 'Graus de liberdade efetivos'),
+                ('en', 'Effective degrees of freedom'),
+            ])
+
+            campo_conteudo_multilingue(quantity, 'description', [
+                ('pt', 'Graus de liberdade efetivos da incerteza padrão combinada, νeff, utilizados na determinação do fator de abrangência.'),
+                ('en', 'Effective degrees of freedom of the combined standard uncertainty, νeff, used in the determination of the coverage factor.'),
+            ])
+
+            si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
+            si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
+            si_valueXMLList.text = ' '.join(str(v) for v in nueff[mensurando])
+            si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
+            si_unitXMLList.text = '\\one'
+   
     return etree.tostring(dcc, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
 
@@ -812,8 +882,10 @@ def excel_to_json(excel_path):
 
         
         # Results with string preservation
+        # células vazias (NaN) são descartadas para manter campos opcionais
+        # (como "nueff") ausentes quando não preenchidos
         "resultados": [
-            {col: str(row[col]) for col in row.index}
+            {col: str(row[col]) for col in row.index if pd.notnull(row[col])}
             for _, row in sheets["Resultados"].iterrows()
         ],
         
@@ -1273,7 +1345,13 @@ def generate_dcc():
     # implementar logica para tratamento de erros ao gerar o DCC
     declaracao = declaracoes(dados)  
     dcc_version = resolve_dcc_version(dados)
-    xml_content = dccGen(dcc_version, dados, declaracao)  
+
+    try :
+        xml_content = dccGen(dcc_version, dados, declaracao)
+    except ValueError as e :
+        return {'error': str(e)}, 400
+    except Exception as e :
+        return {'error': f'Erro ao gerar o DCC: {str(e)}'}, 500
 
     # Create response with XML attachment
     return Response(
