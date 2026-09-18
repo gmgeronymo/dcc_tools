@@ -524,14 +524,22 @@ class TestEmailService(unittest.TestCase):
     def tearDown(self):
         os.environ['DCC_EMAIL_ENABLED'] = 'false'
         os.environ.pop('SMTP_HOST', None)
+        os.environ.pop('SMTP_FROM', None)
 
     def test_envio_desabilitado_retorna_false(self):
         os.environ['DCC_EMAIL_ENABLED'] = 'false'
         self.assertFalse(email_service.send_email('x@inmetro.gov.br', 'assunto', 'corpo'))
 
+    def test_envio_sem_configuracao_retorna_false(self):
+        os.environ['DCC_EMAIL_ENABLED'] = 'true'
+        os.environ.pop('SMTP_HOST', None)
+        os.environ.pop('SMTP_FROM', None)
+        self.assertFalse(email_service.send_email('x@inmetro.gov.br', 'assunto', 'corpo'))
+
     def test_envio_monta_mensagem(self):
         os.environ['DCC_EMAIL_ENABLED'] = 'true'
         os.environ['SMTP_HOST'] = 'smtp.test.local'
+        os.environ['SMTP_FROM'] = 'no-reply@test.local'
 
         capturado = {}
 

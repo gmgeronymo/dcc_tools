@@ -79,9 +79,9 @@ docker compose up -d
 - `DCC_SESSION_HOURS`: duração da sessão web em horas (padrão `8`).
 - `DCC_ALLOWED_SCHEMA_HOSTS`: hosts confiáveis para download de schemas na validação de XML (padrão
   `ptb.de,w3.org`), mitigando SSRF. `DCC_MAX_SCHEMA_BYTES` limita o tamanho do schema (padrão 5 MiB).
-- E-mail SMTP (Exchange): `SMTP_HOST` (`smtp.exemplo.org`), `SMTP_PORT` (`587`), `SMTP_FROM`
-  (`no-reply@exemplo.org`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (sem autenticação por padrão),
-  `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
+- E-mail SMTP: `SMTP_HOST` e `SMTP_FROM` **devem ser definidos no `.env`** (sem padrão no código);
+  demais opções: `SMTP_PORT` (`587`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (sem autenticação
+  por padrão), `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
 - `APP_BASE_URL`: URL base oficial usada no link de recuperação de senha (padrão
   `https://sig-dimci.inmetro.gov.br`); `DCC_RESET_TOKEN_MINUTES` (padrão `60`).
 
@@ -95,9 +95,8 @@ Atenção:
 - Sirva a aplicação via **HTTPS** (proxy reverso com TLS): a senha, a API-KEY e o cookie de sessão
   trafegam na requisição.
 - Faça backup do arquivo SQLite (`flask/app/dcc_auth.db`).
-- O Exchange autoriza o envio pela origem (IP do servidor). Em produção a aplicação roda em
-  `REDACTED` (`REDACTED`); se o IP não estiver autorizado no Exchange, o envio pode falhar e a
-  configuração do Exchange deve ser ajustada.
+- Se o servidor de e-mail restringir o envio por origem (IP do servidor), ajuste-o quando a aplicação
+  mudar de host/IP.
 
 ### Desenvolvimento local (sem Docker)
 
@@ -216,8 +215,8 @@ docker compose up -d
 - `DCC_SESSION_HOURS`: web session lifetime in hours (default `8`).
 - `DCC_ALLOWED_SCHEMA_HOSTS`: trusted hosts for schema downloads during XML validation (default
   `ptb.de,w3.org`), mitigating SSRF. `DCC_MAX_SCHEMA_BYTES` caps the schema size (default 5 MiB).
-- SMTP e-mail (Exchange): `SMTP_HOST` (`smtp.exemplo.org`), `SMTP_PORT` (`587`), `SMTP_FROM`
-  (`no-reply@exemplo.org`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (no auth by default),
+- SMTP e-mail: `SMTP_HOST` and `SMTP_FROM` **must be set in `.env`** (no default in code); other
+  options: `SMTP_PORT` (`587`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (no auth by default),
   `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
 - `APP_BASE_URL`: official base URL used in the password reset link (default
   `https://sig-dimci.inmetro.gov.br`); `DCC_RESET_TOKEN_MINUTES` (default `60`).
@@ -232,9 +231,8 @@ Notes:
 - Serve the application over **HTTPS** (TLS-terminating reverse proxy): the password, API-KEY and session
   cookie travel in the request.
 - Back up the SQLite file (`flask/app/dcc_auth.db`).
-- Exchange authorizes sending based on the source IP. In production the app runs on `REDACTED`
-  (`REDACTED`); if that IP is not authorized in Exchange, sending may fail and Exchange must be
-  adjusted.
+- If the mail server restricts sending by source (server IP), adjust it when the application changes
+  host/IP.
 
 ### Local development (without Docker)
 

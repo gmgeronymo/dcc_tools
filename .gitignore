@@ -7,3 +7,6 @@ flask/app/*.db
 flask/app/*.db-wal
 flask/app/*.db-shm
 flask/.env
+
+# notas internas de infraestrutura (nao versionar)
+doc/sys-lampe-email-exchange.md

@@ -135,9 +135,9 @@ Resposta `201`:
 | `DCC_ALLOWED_SCHEMA_HOSTS` | Hosts confiáveis para download de schemas na validação de XML (padrão: `ptb.de,w3.org`; lista separada por vírgulas, cobre domínio e subdomínios). |
 | `DCC_MAX_SCHEMA_BYTES` | Tamanho máximo de um schema baixado na validação, em bytes (padrão: `5242880`). |
 | `DCC_EMAIL_ENABLED` | Habilita o envio de e-mail (padrão: `true`). |
-| `SMTP_HOST` | Host SMTP do Exchange (padrão: `smtp.exemplo.org`). |
+| `SMTP_HOST` | Host SMTP do servidor de e-mail (definido no `.env`; sem padrão no código). |
 | `SMTP_PORT` | Porta SMTP (padrão: `587`). |
-| `SMTP_FROM` | Remetente dos e-mails (padrão: `no-reply@exemplo.org`). |
+| `SMTP_FROM` | Remetente dos e-mails (definido no `.env`; sem padrão no código). |
 | `SMTP_USE_AUTH` / `SMTP_USERNAME` / `SMTP_PASSWORD` | Autenticação SMTP (padrão: sem autenticação). |
 | `SMTP_USE_TLS` | STARTTLS (padrão: `false`). |
 | `SMTP_TIMEOUT` | Timeout da conexão SMTP, em segundos (padrão: `15`). |

@@ -6,13 +6,13 @@
 #
 # Variaveis de ambiente:
 #   DCC_EMAIL_ENABLED  (padrao: true)
-#   SMTP_HOST          (padrao: smtp.exemplo.org)
+#   SMTP_HOST          (obrigatorio; definir no .env)
 #   SMTP_PORT          (padrao: 587)
 #   SMTP_USERNAME      (padrao: vazio)
 #   SMTP_PASSWORD      (padrao: vazio)
 #   SMTP_USE_AUTH      (padrao: false)
 #   SMTP_USE_TLS       (padrao: false; STARTTLS)
-#   SMTP_FROM          (padrao: no-reply@exemplo.org)
+#   SMTP_FROM          (obrigatorio; definir no .env)
 #   SMTP_TIMEOUT       (padrao: 15 segundos)
 
 # Author: Gean Marcos Geronymo
@@ -60,20 +60,20 @@ def get_config():
 
     return {
         'enabled': _bool_env('DCC_EMAIL_ENABLED', True),
-        'host': (os.environ.get('SMTP_HOST', 'smtp.exemplo.org') or '').strip(),
+        'host': (os.environ.get('SMTP_HOST', '') or '').strip(),
         'port': port,
         'username': os.environ.get('SMTP_USERNAME', ''),
         'password': os.environ.get('SMTP_PASSWORD', ''),
         'use_auth': _bool_env('SMTP_USE_AUTH', False),
         'use_tls': _bool_env('SMTP_USE_TLS', False),
-        'from_addr': os.environ.get('SMTP_FROM', 'no-reply@exemplo.org'),
+        'from_addr': (os.environ.get('SMTP_FROM', '') or '').strip(),
         'timeout': timeout,
     }
 
 
 def is_enabled():
     cfg = get_config()
-    return bool(cfg['enabled'] and cfg['host'])
+    return bool(cfg['enabled'] and cfg['host'] and cfg['from_addr'])
 
 
 def send_email(to, subject, body, html=None):
@@ -88,8 +88,9 @@ def send_email(to, subject, body, html=None):
         logger.warning("Envio de e-mail desabilitado (DCC_EMAIL_ENABLED=false); "
                        "mensagem para %s nao enviada.", to)
         return False
-    if not cfg['host']:
-        logger.error("SMTP_HOST nao configurado; mensagem para %s nao enviada.", to)
+    if not cfg['host'] or not cfg['from_addr']:
+        logger.error("Configuracao SMTP incompleta (SMTP_HOST/SMTP_FROM); "
+                     "mensagem para %s nao enviada.", to)
         return False
 
     message = EmailMessage()
