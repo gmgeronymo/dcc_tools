@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}DCC Tools - Redefinir senha{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-3">Definir nova senha</h1>
+
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">{{ error }}</div>
+                    {% endif %}
+
+                    {% if token %}
+                    <form method="post" action="{{ url_for('redefinir_senha') }}">
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Nova senha</label>
+                            <input type="password" class="form-control" id="new_password"
+                                   name="new_password" autocomplete="new-password" minlength="8" required>
+                            <div class="form-text">Mínimo de 8 caracteres.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password_confirm" class="form-label">Confirme a nova senha</label>
+                            <input type="password" class="form-control" id="new_password_confirm"
+                                   name="new_password_confirm" autocomplete="new-password" minlength="8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar nova senha</button>
+                    </form>
+                    {% else %}
+                    <p class="mb-3">Link inválido. Solicite uma nova recuperação de senha.</p>
+                    <a href="{{ url_for('esqueci_senha') }}" class="btn btn-primary">Recuperar senha</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.querySelectorAll('form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            var p = document.getElementById('new_password');
+            var c = document.getElementById('new_password_confirm');
+            if (p && c && p.value !== c.value) {
+                e.preventDefault();
+                alert('As senhas não coincidem.');
+            }
+        });
+    });
+</script>
+{% endblock %}

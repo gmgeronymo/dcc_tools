@@ -51,6 +51,9 @@ from urllib.parse import urlparse, urljoin
 # autenticacao (cadastro de usuarios / API-KEY)
 import auth
 
+# envio de e-mail (recuperacao de senha)
+import email_service
+
 # PDF attach
 import pikepdf
 from pikepdf import Pdf, Name, String, Array
@@ -1092,6 +1095,7 @@ def login():
         next=next_url,
         auth_required=auth_required,
         username=auth.current_username(),
+        reset=request.args.get('reset'),
     )
 
 
@@ -1111,11 +1115,104 @@ def perfil():
     return render_template('perfil.html', user=user)
 
 
+@app.route('/dcc/perfil/senha', methods=['GET', 'POST'])
+@auth.require_auth
+def alterar_senha():
+    error = None
+    success = None
+
+    if request.method == 'POST':
+        current = request.form.get('current_password', '')
+        new = request.form.get('new_password', '')
+        confirm = request.form.get('new_password_confirm', '')
+
+        if new != confirm:
+            error = 'A confirmação da nova senha não confere.'
+        else:
+            try:
+                if auth.change_password(g.user_id, current, new):
+                    success = 'Senha alterada com sucesso.'
+                else:
+                    error = 'Senha atual incorreta.'
+            except ValueError as e:
+                error = str(e)
+
+    return render_template('alterar_senha.html', error=error, success=success)
+
+
 @app.route('/dcc/perfil/regenerar', methods=['POST'])
 @auth.require_auth
 def regenerar_api_key():
     auth.regenerate_api_key(g.user_id)
     return redirect(url_for('perfil'))
+
+
+def _reset_password_link(token):
+    base = (os.environ.get('APP_BASE_URL') or '').rstrip('/')
+    path = url_for('redefinir_senha', token=token)
+    if base:
+        return base + path
+    return url_for('redefinir_senha', token=token, _external=True)
+
+
+def send_password_reset_email(user, link):
+    minutes = auth.reset_token_minutes()
+    subject = 'DCC Tools - Recuperação de senha'
+    body = (
+        "Foi solicitada uma recuperação de senha para o usuário '%s'.\n\n"
+        "Para definir uma nova senha, acesse o link abaixo (válido por %d minutos):\n"
+        "%s\n\n"
+        "Se você não fez esta solicitação, ignore esta mensagem.\n"
+        % (user['username'], minutes, link)
+    )
+    return email_service.send_email(user['email'], subject, body)
+
+
+@app.route('/dcc/esqueci-senha', methods=['GET', 'POST'])
+def esqueci_senha():
+    message = None
+
+    if request.method == 'POST':
+        email = request.form.get('email', '')
+        user = auth.get_user_by_email(email)
+
+        if user is not None:
+            if auth.count_recent_reset_requests(user['id']) < auth.MAX_RESET_REQUESTS_PER_HOUR:
+                token = auth.create_password_reset_token(user['id'])
+                send_password_reset_email(user, _reset_password_link(token))
+            else:
+                app.logger.warning(
+                    'Limite de solicitações de recuperação excedido para %s', user['username']
+                )
+
+        # resposta genérica (evita revelar se o e-mail está cadastrado)
+        message = ('Se o endereço estiver cadastrado, você receberá um e-mail com as '
+                   'instruções para redefinir sua senha.')
+
+    return render_template('esqueci_senha.html', message=message)
+
+
+@app.route('/dcc/redefinir-senha', methods=['GET', 'POST'])
+def redefinir_senha():
+    token = request.values.get('token', '')
+    error = None
+
+    if request.method == 'POST':
+        new = request.form.get('new_password', '')
+        confirm = request.form.get('new_password_confirm', '')
+
+        if new != confirm:
+            error = 'A confirmação da nova senha não confere.'
+        else:
+            try:
+                username = auth.consume_password_reset_token(token, new)
+                if username:
+                    return redirect(url_for('login', reset=1))
+                error = 'Link inválido ou expirado. Solicite uma nova recuperação de senha.'
+            except ValueError as e:
+                error = str(e)
+
+    return render_template('redefinir_senha.html', token=token, error=error)
 
 
 @app.route('/dcc/register', methods=['GET', 'POST'])

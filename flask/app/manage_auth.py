@@ -4,7 +4,7 @@
 #
 # Uso (a partir de flask/app/):
 #   python manage_auth.py init-db
-#   python manage_auth.py create-user <username> [--email <email>] [--password <senha>]
+#   python manage_auth.py create-user <username> --email <email> [--password <senha>]
 #   python manage_auth.py set-password <username> [--password <senha>]
 #   python manage_auth.py list-users
 #   python manage_auth.py revoke <username>
@@ -121,7 +121,7 @@ def build_parser():
 
     p_create = sub.add_parser('create-user', help='Cria um usuário e exibe a API-KEY.')
     p_create.add_argument('username')
-    p_create.add_argument('--email', default=None)
+    p_create.add_argument('--email', required=True, help='E-mail institucional @inmetro.gov.br.')
     p_create.add_argument('--password', default=None, help='Senha; se omitida, é solicitada.')
     p_create.add_argument('--inactive', action='store_true', help='Cria o usuário já desativado.')
 

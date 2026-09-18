@@ -17,6 +17,7 @@ Principais funcionalidades:
 - Interface web com documentação, exemplos, FAQ e publicações (`/dcc/`)
 - Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
+- Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
 
 Versões de schema DCC suportadas:
 - `3.3.0` (padrão)
@@ -78,15 +79,25 @@ docker compose up -d
 - `DCC_SESSION_HOURS`: duração da sessão web em horas (padrão `8`).
 - `DCC_ALLOWED_SCHEMA_HOSTS`: hosts confiáveis para download de schemas na validação de XML (padrão
   `ptb.de,w3.org`), mitigando SSRF. `DCC_MAX_SCHEMA_BYTES` limita o tamanho do schema (padrão 5 MiB).
+- E-mail SMTP (Exchange): `SMTP_HOST` (`smtp.exemplo.org`), `SMTP_PORT` (`587`), `SMTP_FROM`
+  (`no-reply@exemplo.org`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (sem autenticação por padrão),
+  `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
+- `APP_BASE_URL`: URL base oficial usada no link de recuperação de senha; `DCC_RESET_TOKEN_MINUTES`
+  (padrão `60`).
 
-Os usuários se cadastram em `/dcc/register` (usuário + senha) e fazem login em `/dcc/login`. Cada
-usuário recebe uma API-KEY, consultável na área de perfil (`/dcc/perfil`) e usada no cabeçalho
-`X-API-Key` da API REST. Na interface web, a autorização é transparente via sessão.
+Os usuários se cadastram em `/dcc/register` (usuário + senha + e-mail **`@inmetro.gov.br`**) e fazem
+login em `/dcc/login`. Cada usuário recebe uma API-KEY, consultável na área de perfil (`/dcc/perfil`) e
+usada no cabeçalho `X-API-Key` da API REST. Na interface web, a autorização é transparente via sessão.
+A troca de senha (`/dcc/perfil/senha`) e a recuperação por e-mail (`/dcc/esqueci-senha`) também estão
+disponíveis.
 
 Atenção:
 - Sirva a aplicação via **HTTPS** (proxy reverso com TLS): a senha, a API-KEY e o cookie de sessão
   trafegam na requisição.
 - Faça backup do arquivo SQLite (`flask/app/dcc_auth.db`).
+- O Exchange autoriza o envio pela origem (IP do servidor). Em produção a aplicação roda em
+  `REDACTED` (`REDACTED`); se o IP não estiver autorizado no Exchange, o envio pode falhar e a
+  configuração do Exchange deve ser ajustada.
 
 ### Desenvolvimento local (sem Docker)
 
@@ -143,6 +154,7 @@ Main capabilities:
 - Web UI with documentation, examples, FAQ, and publications (`/dcc/`)
 - Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
 - User registration with API-KEY and protection of generation/upload functions
+- Password change and e-mail password recovery (`@inmetro.gov.br`)
 
 Supported DCC schema versions:
 - `3.3.0` (default)
@@ -204,15 +216,25 @@ docker compose up -d
 - `DCC_SESSION_HOURS`: web session lifetime in hours (default `8`).
 - `DCC_ALLOWED_SCHEMA_HOSTS`: trusted hosts for schema downloads during XML validation (default
   `ptb.de,w3.org`), mitigating SSRF. `DCC_MAX_SCHEMA_BYTES` caps the schema size (default 5 MiB).
+- SMTP e-mail (Exchange): `SMTP_HOST` (`smtp.exemplo.org`), `SMTP_PORT` (`587`), `SMTP_FROM`
+  (`no-reply@exemplo.org`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (no auth by default),
+  `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
+- `APP_BASE_URL`: official base URL used in the password reset link; `DCC_RESET_TOKEN_MINUTES`
+  (default `60`).
 
-Users register at `/dcc/register` (username + password) and log in at `/dcc/login`. Each user receives
-an API-KEY, available in the profile area (`/dcc/perfil`) and used in the `X-API-Key` header of the REST
-API. On the web interface, authorization is transparent via the session.
+Users register at `/dcc/register` (username + password + **`@inmetro.gov.br`** e-mail) and log in at
+`/dcc/login`. Each user receives an API-KEY, available in the profile area (`/dcc/perfil`) and used in
+the `X-API-Key` header of the REST API. On the web interface, authorization is transparent via the
+session. Password change (`/dcc/perfil/senha`) and e-mail recovery (`/dcc/esqueci-senha`) are also
+available.
 
 Notes:
 - Serve the application over **HTTPS** (TLS-terminating reverse proxy): the password, API-KEY and session
   cookie travel in the request.
 - Back up the SQLite file (`flask/app/dcc_auth.db`).
+- Exchange authorizes sending based on the source IP. In production the app runs on `REDACTED`
+  (`REDACTED`); if that IP is not authorized in Exchange, sending may fail and Exchange must be
+  adjusted.
 
 ### Local development (without Docker)
 

@@ -22,6 +22,12 @@
                     </p>
                     {% endif %}
 
+                    {% if reset %}
+                    <div class="alert alert-success" role="alert">
+                        Senha redefinida com sucesso. Faça login com a nova senha.
+                    </div>
+                    {% endif %}
+
                     {% if error %}
                     <div class="alert alert-danger" role="alert">{{ error }}</div>
                     {% endif %}
@@ -48,7 +54,11 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="submit" class="btn btn-primary">Entrar</button>
-                            <a href="{{ url_for('register') }}" class="link-secondary">Cadastrar novo usuário</a>
+                            <span>
+                                <a href="{{ url_for('esqueci_senha') }}" class="link-secondary">Esqueci minha senha</a>
+                                <span class="text-muted">·</span>
+                                <a href="{{ url_for('register') }}" class="link-secondary">Cadastrar</a>
+                            </span>
                         </div>
                     </form>
                 </div>

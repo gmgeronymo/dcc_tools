@@ -88,7 +88,7 @@ Content-Type: application/json
 ```json
 {
   "username": "nome_usuario",
-  "email": "opcional@exemplo.com",
+  "email": "nome_usuario@inmetro.gov.br",
   "password": "senha_com_no_minimo_8_caracteres"
 }
 ```
@@ -98,16 +98,18 @@ Resposta `201`:
 ```json
 {
   "username": "nome_usuario",
-  "email": "opcional@exemplo.com",
+  "email": "nome_usuario@inmetro.gov.br",
   "api_key": "dcc_...",
   "created_at": "2026-09-18T12:00:00+00:00"
 }
 ```
 
 - A `password` é obrigatória (mínimo de 8 caracteres) e armazenada com hash.
+- O `email` é **obrigatório**, **único** e deve ser do domínio **`@inmetro.gov.br`**.
 - A `api_key` é gerada automaticamente; pode ser consultada depois na área de perfil.
 - `username` deve ser único (até 64 caracteres: letras, números e `. _ @ -`).
-- Duplicidade, nome inválido ou senha curta → `400` com `{"error": "<mensagem>"}`.
+- Duplicidade (usuário ou e-mail), nome inválido, e-mail fora do domínio ou senha curta → `400` com
+  `{"error": "<mensagem>"}`.
 
 ### 1.3 Interface web
 
@@ -115,6 +117,9 @@ Resposta `201`:
 - `POST /dcc/login`: autentica usuário e senha e cria uma sessão (cookie assinado por `DCC_SECRET_KEY`).
 - `GET /dcc/perfil`: área de perfil do usuário logado, onde a **API-KEY** fica disponível (com opção de
   gerar uma nova).
+- `GET|POST /dcc/perfil/senha`: troca de senha (exige a senha atual).
+- `GET|POST /dcc/esqueci-senha`: solicita recuperação de senha por e-mail.
+- `GET|POST /dcc/redefinir-senha?token=...`: define uma nova senha usando o token do e-mail.
 - `GET /dcc/logout`: encerra a sessão.
 - Acesso não autenticado a uma função protegida redireciona para `/dcc/login?auth_required=1`, que
   avisa que a função requer autenticação e aponta para login e cadastro.
@@ -129,6 +134,15 @@ Resposta `201`:
 | `DCC_SESSION_HOURS` | Duração da sessão da interface web, em horas (padrão: `8`). |
 | `DCC_ALLOWED_SCHEMA_HOSTS` | Hosts confiáveis para download de schemas na validação de XML (padrão: `ptb.de,w3.org`; lista separada por vírgulas, cobre domínio e subdomínios). |
 | `DCC_MAX_SCHEMA_BYTES` | Tamanho máximo de um schema baixado na validação, em bytes (padrão: `5242880`). |
+| `DCC_EMAIL_ENABLED` | Habilita o envio de e-mail (padrão: `true`). |
+| `SMTP_HOST` | Host SMTP do Exchange (padrão: `smtp.exemplo.org`). |
+| `SMTP_PORT` | Porta SMTP (padrão: `587`). |
+| `SMTP_FROM` | Remetente dos e-mails (padrão: `no-reply@exemplo.org`). |
+| `SMTP_USE_AUTH` / `SMTP_USERNAME` / `SMTP_PASSWORD` | Autenticação SMTP (padrão: sem autenticação). |
+| `SMTP_USE_TLS` | STARTTLS (padrão: `false`). |
+| `SMTP_TIMEOUT` | Timeout da conexão SMTP, em segundos (padrão: `15`). |
+| `APP_BASE_URL` | URL base oficial usada no link de recuperação (se vazia, derivada da requisição). |
+| `DCC_RESET_TOKEN_MINUTES` | Validade do token de recuperação, em minutos (padrão: `60`). |
 
 ### 1.5 Gerenciamento (CLI)
 
@@ -136,7 +150,7 @@ A partir de `flask/app/`:
 
 ```bash
 python manage_auth.py init-db
-python manage_auth.py create-user <username> [--email <email>] [--password <senha>]
+python manage_auth.py create-user <username> --email <email> [--password <senha>]
 python manage_auth.py set-password <username> [--password <senha>]
 python manage_auth.py list-users
 python manage_auth.py revoke <username>
@@ -560,11 +574,14 @@ Além do gerador, a aplicação expõe:
 | `/dcc/pdf_attach` | POST | API-KEY ou sessão web | Anexa um XML DCC a um PDF (PDF/A-3), recebendo `pdf_file` e `xml_file` (multipart). |
 | `/dcc/validate_xml` | GET/POST | aberta | Valida um XML DCC contra o schema informado no próprio XML; o download do schema é restrito a hosts confiáveis (`DCC_ALLOWED_SCHEMA_HOSTS`). |
 | `/dcc/visualizar_dcc` | POST | aberta | Converte XML em HTML legível (upload de `xml_file`). |
-| `/dcc/register` | POST | aberta | Cadastro de usuário (usuário, senha, e-mail); devolve a API-KEY. |
+| `/dcc/register` | POST | aberta | Cadastro de usuário (usuário, senha, e-mail `@inmetro.gov.br`); devolve a API-KEY. |
 | `/dcc/login` | GET/POST | aberta | Login na interface web com usuário e senha. |
 | `/dcc/logout` | GET | — | Encerra a sessão da interface web. |
 | `/dcc/perfil` | GET | sessão web | Área de perfil: exibe a API-KEY do usuário. |
+| `/dcc/perfil/senha` | GET/POST | sessão web | Troca de senha (exige a senha atual). |
 | `/dcc/perfil/regenerar` | POST | sessão web | Gera uma nova API-KEY (a anterior deixa de funcionar). |
+| `/dcc/esqueci-senha` | GET/POST | aberta | Solicita recuperação de senha por e-mail (resposta genérica). |
+| `/dcc/redefinir-senha` | GET/POST | aberta | Define nova senha com o token enviado por e-mail. |
 
 Rotas de interface web informativas (abertas): `/dcc/`, `/dcc/api_doc`, `/dcc/excel_guide`,
 `/dcc/exemplos`, `/dcc/faq`, `/dcc/publications`, `/dcc/introducao`.

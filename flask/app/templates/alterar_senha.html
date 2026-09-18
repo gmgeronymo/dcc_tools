@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}DCC Tools - Alterar senha{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-3">Alterar senha</h1>
+
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">{{ error }}</div>
+                    {% endif %}
+                    {% if success %}
+                    <div class="alert alert-success" role="alert">{{ success }}</div>
+                    {% endif %}
+
+                    <form method="post" action="{{ url_for('alterar_senha') }}">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Senha atual</label>
+                            <input type="password" class="form-control" id="current_password"
+                                   name="current_password" autocomplete="current-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Nova senha</label>
+                            <input type="password" class="form-control" id="new_password"
+                                   name="new_password" autocomplete="new-password" minlength="8" required>
+                            <div class="form-text">Mínimo de 8 caracteres.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password_confirm" class="form-label">Confirme a nova senha</label>
+                            <input type="password" class="form-control" id="new_password_confirm"
+                                   name="new_password_confirm" autocomplete="new-password" minlength="8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <a href="{{ url_for('perfil') }}" class="link-secondary ms-2">Voltar ao perfil</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        var p = document.getElementById('new_password');
+        var c = document.getElementById('new_password_confirm');
+        if (p && c && p.value !== c.value) {
+            e.preventDefault();
+            alert('As senhas não coincidem.');
+        }
+    });
+</script>
+{% endblock %}

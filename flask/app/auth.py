@@ -28,7 +28,7 @@ import os
 import re
 import secrets
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from flask import Response, g, redirect, request, session, url_for
 from lxml import etree
@@ -43,8 +43,15 @@ API_KEY_PREFIX = 'dcc_'
 KEY_PREFIX_LENGTH = 12
 # tamanho minimo da senha
 MIN_PASSWORD_LENGTH = 8
+# e-mail institucional exigido no cadastro
+EMAIL_DOMAIN = 'inmetro.gov.br'
+# validade do token de recuperacao de senha (minutos)
+DEFAULT_RESET_TOKEN_MINUTES = 60
+# limite de solicitacoes de recuperacao por usuario em 1 hora
+MAX_RESET_REQUESTS_PER_HOUR = 5
 
 USERNAME_RE = re.compile(r'^[A-Za-z0-9._@-]{1,64}$')
+EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+\-]+@inmetro\.gov\.br$', re.IGNORECASE)
 
 
 def _db_path():
@@ -93,6 +100,15 @@ def _validate_password(password):
     return password
 
 
+def _validate_email(email):
+    email = (email or '').strip().lower()
+    if not email:
+        raise ValueError("O e-mail é obrigatório.")
+    if not EMAIL_RE.match(email):
+        raise ValueError("Informe um e-mail institucional @%s válido." % EMAIL_DOMAIN)
+    return email
+
+
 # ---------------------------------------------------------------------------
 # banco de dados
 # ---------------------------------------------------------------------------
@@ -116,8 +132,23 @@ def init_db():
             )
             '''
         )
+        conn.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token_hash TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                used_at TEXT
+            )
+            '''
+        )
         _ensure_columns(conn)
         conn.execute('CREATE INDEX IF NOT EXISTS idx_users_api_key_hash ON users(api_key_hash)')
+        conn.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
+        conn.execute('CREATE INDEX IF NOT EXISTS idx_prt_token_hash ON password_reset_tokens(token_hash)')
+        conn.execute('CREATE INDEX IF NOT EXISTS idx_prt_user_id ON password_reset_tokens(user_id)')
         conn.commit()
     finally:
         conn.close()
@@ -139,13 +170,16 @@ def _ensure_columns(conn):
 # ---------------------------------------------------------------------------
 
 def create_user(username, password, email=None, active=True):
-    """Cria um usuario (usuario + senha) e gera a API-KEY.
+    """Cria um usuario (usuario + senha + e-mail) e gera a API-KEY.
 
     Retorna um dict com os dados do usuario, incluindo a API-KEY em texto puro.
     """
     username = _validate_username(username)
     _validate_password(password)
-    email = (email or '').strip() or None
+    email = _validate_email(email)
+
+    if get_user_by_email(email) is not None:
+        raise ValueError("Já existe um usuário com esse e-mail.")
 
     api_key = generate_api_key()
     created_at = _now()
@@ -273,6 +307,152 @@ def get_user_by_username(username):
             'SELECT * FROM users WHERE username = ? AND active = 1',
             ((username or '').strip(),),
         ).fetchone()
+    finally:
+        conn.close()
+
+
+def get_user_by_email(email):
+    email = (email or '').strip().lower()
+    if not email:
+        return None
+    conn = _connect()
+    try:
+        return conn.execute(
+            'SELECT * FROM users WHERE lower(email) = ? AND active = 1 LIMIT 1',
+            (email,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+
+def change_password(user_id, current_password, new_password):
+    """Troca a senha do usuario logado, exigindo a senha atual.
+
+    Retorna True em sucesso; False se a senha atual estiver incorreta.
+    """
+    user = get_user_by_id(user_id)
+    if user is None or not user['password_hash']:
+        raise ValueError("Usuário inválido.")
+    if not check_password_hash(user['password_hash'], current_password or ''):
+        return False
+    _validate_password(new_password)
+    set_password(user['username'], new_password)
+    return True
+
+
+# ---------------------------------------------------------------------------
+# recuperacao de senha
+# ---------------------------------------------------------------------------
+
+def reset_token_minutes():
+    try:
+        return int(os.environ.get('DCC_RESET_TOKEN_MINUTES', DEFAULT_RESET_TOKEN_MINUTES))
+    except ValueError:
+        return DEFAULT_RESET_TOKEN_MINUTES
+
+
+def _parse_dt(value):
+    try:
+        return datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def count_recent_reset_requests(user_id, minutes=60):
+    """Conta tokens de recuperacao emitidos para o usuario na ultima janela."""
+    cutoff = datetime.now(timezone.utc).timestamp() - (minutes * 60)
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            'SELECT created_at FROM password_reset_tokens WHERE user_id = ?',
+            (user_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    count = 0
+    for row in rows:
+        dt = _parse_dt(row['created_at'])
+        if dt is not None and dt.timestamp() >= cutoff:
+            count += 1
+    return count
+
+
+def create_password_reset_token(user_id, ttl_minutes=None):
+    """Gera um token de recuperacao (uso unico). Retorna o token em texto puro.
+
+    Tokens anteriores ainda validos do mesmo usuario sao invalidados.
+    """
+    ttl = ttl_minutes or reset_token_minutes()
+    now = datetime.now(timezone.utc)
+    token = secrets.token_urlsafe(32)
+
+    conn = _connect()
+    try:
+        # invalida tokens anteriores nao utilizados
+        conn.execute(
+            'UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL',
+            (now.isoformat(timespec='seconds'), user_id),
+        )
+        conn.execute(
+            'INSERT INTO password_reset_tokens (user_id, token_hash, created_at, expires_at) '
+            'VALUES (?, ?, ?, ?)',
+            (
+                user_id,
+                hash_key(token),
+                now.isoformat(timespec='seconds'),
+                (now + timedelta(minutes=ttl)).isoformat(timespec='seconds'),
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    return token
+
+
+def consume_password_reset_token(token, new_password):
+    """Valida o token, redefine a senha e marca o token como usado.
+
+    Retorna o username em sucesso ou None se o token for invalido/expirado/usado.
+    """
+    if not token:
+        return None
+    _validate_password(new_password)
+
+    conn = _connect()
+    try:
+        row = conn.execute(
+            'SELECT * FROM password_reset_tokens WHERE token_hash = ? AND used_at IS NULL',
+            (hash_key(token),),
+        ).fetchone()
+
+        if row is None:
+            return None
+
+        expires = _parse_dt(row['expires_at'])
+        if expires is None or expires < datetime.now(timezone.utc):
+            return None
+
+        user = conn.execute(
+            'SELECT * FROM users WHERE id = ? AND active = 1',
+            (row['user_id'],),
+        ).fetchone()
+        if user is None:
+            return None
+
+        now_iso = datetime.now(timezone.utc).isoformat(timespec='seconds')
+        conn.execute(
+            'UPDATE users SET password_hash = ? WHERE id = ?',
+            (generate_password_hash(new_password), user['id']),
+        )
+        # uso unico: invalida este e quaisquer outros tokens pendentes
+        conn.execute(
+            'UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL',
+            (now_iso, user['id']),
+        )
+        conn.commit()
+        return user['username']
     finally:
         conn.close()
 

@@ -43,8 +43,13 @@
                             <div class="form-text">Até 64 caracteres: letras, números e <code>. _ @ -</code>.</div>
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">E-mail (opcional)</label>
-                            <input type="email" class="form-control" id="email" name="email" autocomplete="email">
+                            <label for="email" class="form-label">E-mail institucional</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   placeholder="usuario@inmetro.gov.br"
+                                   pattern="[^@\s]+@inmetro\.gov\.br"
+                                   title="Informe um e-mail @inmetro.gov.br"
+                                   autocomplete="email" required>
+                            <div class="form-text">Obrigatório, no domínio <code>@inmetro.gov.br</code>.</div>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Senha</label>
@@ -88,6 +93,12 @@
         if (p && c && p.value !== c.value) {
             e.preventDefault();
             alert('As senhas não coincidem.');
+            return;
+        }
+        var email = document.getElementById('email');
+        if (email && !/@inmetro\.gov\.br$/i.test(email.value.trim())) {
+            e.preventDefault();
+            alert('Informe um e-mail @inmetro.gov.br.');
         }
     });
 </script>
