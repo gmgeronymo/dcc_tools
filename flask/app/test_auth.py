@@ -156,8 +156,20 @@ class TestInterfaceWeb(AuthTestBase):
         self.assertIn('auth_required=1', resp.headers['Location'])
 
     def test_pagina_publica_permanece_aberta(self):
-        for rota in ['/dcc/', '/dcc/api_doc', '/dcc/exemplos', '/dcc/faq']:
+        rotas = ['/dcc/', '/dcc/api_doc', '/dcc/exemplos', '/dcc/faq',
+                 '/dcc/upload_xml_hr', '/dcc/validate_xml']
+        for rota in rotas:
             self.assertEqual(self.client.get(rota).status_code, 200, rota)
+
+    def test_ferramenta_visualizar_aberta(self):
+        # sem sessao e sem API-KEY: nao deve ser 401 (ferramenta aberta)
+        resp = self.client.post('/dcc/visualizar_dcc', data={})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_ferramenta_validar_aberta(self):
+        # sem sessao e sem API-KEY: nao deve ser 401
+        resp = self.client.post('/dcc/validate_xml', data={})
+        self.assertEqual(resp.status_code, 400)
 
     def test_login_correto_libera_acesso(self):
         self.api_key('alice')

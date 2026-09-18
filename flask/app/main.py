@@ -38,14 +38,14 @@ from flask import Flask, jsonify, request, abort, Response, send_file, render_te
 import requests
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
-from urllib.parse import urlparse
-from werkzeug.utils import secure_filename
 import os
 import re
 import tempfile
 import shutil
 import secrets
+import ipaddress
 from datetime import timedelta
+from urllib.parse import urlparse, urljoin
 
 
 # autenticacao (cadastro de usuarios / API-KEY)
@@ -1224,12 +1224,10 @@ def upload_xml():
     return render_template('upload_xml.html')
 
 @app.route('/dcc/upload_xml_hr')
-@auth.require_auth
 def upload_xml_hr():
     return render_template('upload_xml_hr.html')
 
 @app.route('/dcc/validate_xml', methods=['GET', 'POST'])
-@auth.require_auth
 def validate_xml():
     if request.method == 'POST':
         validation_result = {
@@ -1496,7 +1494,6 @@ def generate_dcc():
 
 # gerar human readable usando xslt
 @app.route('/dcc/visualizar_dcc', methods=['POST'])
-@auth.require_auth
 def visualizar_dcc():
     """Handle file upload and transformation"""
     # Check if a file was uploaded
@@ -1531,65 +1528,165 @@ def visualizar_dcc():
 
 
 # validacao do XML
+class SchemaDownloadError(Exception):
+    """Erro ao baixar um schema (host nao confiavel, rede ou tamanho)."""
+    pass
+
+
+# hosts confiaveis para download de schemas na validacao (lista separada por virgula).
+# cada entrada casa com o proprio dominio e seus subdominios.
+# ptb.de: schemas DCC/SI; w3.org: xmldsig referenciado por schemas DCC antigos.
+DEFAULT_ALLOWED_SCHEMA_HOSTS = 'ptb.de,w3.org'
+MAX_SCHEMA_BYTES = int(os.environ.get('DCC_MAX_SCHEMA_BYTES', str(5 * 1024 * 1024)))
+MAX_SCHEMA_REDIRECTS = 5
+
+
+def _allowed_schema_hosts():
+    raw = os.environ.get('DCC_ALLOWED_SCHEMA_HOSTS', DEFAULT_ALLOWED_SCHEMA_HOSTS)
+    return [h.strip().lower() for h in raw.split(',') if h.strip()]
+
+
+def _host_matches(host, domain):
+    return host == domain or host.endswith('.' + domain)
+
+
+def is_allowed_schema_url(url):
+    """Permite apenas http(s) para hosts confiaveis, sem IP privado nem credenciais."""
+    try:
+        parsed = urlparse(url)
+        host = (parsed.hostname or '').lower()
+    except ValueError:
+        return False
+
+    if parsed.scheme not in ('http', 'https'):
+        return False
+    if not host or parsed.username or parsed.password:
+        return False
+    if host == 'localhost':
+        return False
+
+    # bloqueia IP literal privado/reservado/loopback (evita SSRF direto)
+    try:
+        ip = ipaddress.ip_address(host)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            return False
+    except ValueError:
+        pass
+
+    return any(_host_matches(host, domain) for domain in _allowed_schema_hosts())
+
+
+def download_file(url, local_path):
+    """Baixa um arquivo validando o host contra a allowlist de schemas."""
+    current = url
+    for _ in range(MAX_SCHEMA_REDIRECTS):
+        if not is_allowed_schema_url(current):
+            raise SchemaDownloadError(
+                "Download bloqueado: host não confiável para schema: %s" % current
+            )
+
+        try:
+            response = requests.get(current, timeout=30, stream=True, allow_redirects=False)
+        except Exception as e:
+            raise SchemaDownloadError("Falha ao baixar o schema %s: %s" % (current, e))
+
+        try:
+            if response.is_redirect or 300 <= response.status_code < 400:
+                location = response.headers.get('Location')
+                if not location:
+                    raise SchemaDownloadError(
+                        "Redirecionamento sem 'Location' ao baixar o schema %s" % current
+                    )
+                current = urljoin(current, location)
+                continue
+
+            try:
+                response.raise_for_status()
+            except Exception as e:
+                raise SchemaDownloadError("Falha ao baixar o schema %s: %s" % (current, e))
+
+            chunks = []
+            size = 0
+            for chunk in response.iter_content(chunk_size=65536):
+                if not chunk:
+                    continue
+                size += len(chunk)
+                if size > MAX_SCHEMA_BYTES:
+                    raise SchemaDownloadError(
+                        "Schema excede o tamanho máximo permitido (%d bytes)." % MAX_SCHEMA_BYTES
+                    )
+                chunks.append(chunk)
+
+            data = b''.join(chunks)
+            text = data.decode(response.encoding or 'utf-8', errors='replace')
+
+            with open(local_path, 'w', encoding='utf-8') as f:
+                f.write(text)
+            return
+        finally:
+            response.close()
+
+    raise SchemaDownloadError("Muitos redirecionamentos ao baixar o schema %s" % url)
+
+
 def validate_dcc_xml_upload(xml_path):
     """
     Validate a DCC XML file from an uploaded file
-    
+
     Args:
         xml_path (str): Path to the temporary XML file
-    
+
     Returns:
         tuple: (is_valid, list_of_errors)
     """
     # Create a temporary directory for all XSD files
     temp_dir = tempfile.mkdtemp()
     errors = []
-    
+
     try:
         # Read the XML file
         with open(xml_path, 'r') as f:
             xml_content = f.read()
-        
+
         # Extract the schema URL from the XML
         schema_match = re.search(r'xsi:schemaLocation="[^"]*\.xsd"', xml_content)
         if not schema_match:
             raise ValueError("schemaLocation attribute not found or doesn't contain XSD")
-        
+
         schema_location = schema_match.group(0)
         schema_url = schema_location.split()[-1].replace('"', '').strip()
-        
+
         # Download the main XSD file
         main_xsd_name = os.path.basename(urlparse(schema_url).path)
         main_xsd_path = os.path.join(temp_dir, main_xsd_name)
-        
-        download_file(schema_url, main_xsd_path)
-        
-        # Process dependencies in the main XSD
-        process_xsd_dependencies(main_xsd_path, temp_dir)
-        
+
+        try:
+            download_file(schema_url, main_xsd_path)
+
+            # Process dependencies in the main XSD
+            process_xsd_dependencies(main_xsd_path, temp_dir)
+        except SchemaDownloadError as e:
+            # schema em host nao confiavel / indisponivel: falha de validacao clara
+            return False, [str(e)]
+
         # Validate the XML using the main XSD
         is_valid, validation_errors = validate_with_xsd(xml_path, main_xsd_path)
         errors.extend(validation_errors)
-        
+
         return is_valid, errors
-    
+
     finally:
         # Clean up the temporary directory
         shutil.rmtree(temp_dir)
 
-def download_file(url, local_path):
-    """Download a file from a URL to a local path"""
-    try:
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
-        
-        with open(local_path, 'w', encoding='utf-8') as f:
-            f.write(response.text)
-    except Exception as e:
-        raise Exception(f"Failed to download file from {url}: {str(e)}")
-
-def process_xsd_dependencies(xsd_path, temp_dir):
+def process_xsd_dependencies(xsd_path, temp_dir, seen=None):
     """Process an XSD file to download its dependencies and update references"""
+    if seen is None:
+        seen = set()
+    if xsd_path in seen:
+        return
+    seen.add(xsd_path)
+
     with open(xsd_path, 'r', encoding='utf-8') as f:
         xsd_content = f.read()
     
@@ -1607,7 +1704,7 @@ def process_xsd_dependencies(xsd_path, temp_dir):
         xsd_content = xsd_content.replace(schema_url, dep_xsd_name)
         
         # Recursively process dependencies of this dependency
-        process_xsd_dependencies(dep_xsd_path, temp_dir)
+        process_xsd_dependencies(dep_xsd_path, temp_dir, seen)
     
     # Write the updated content back to the main XSD
     with open(xsd_path, 'w', encoding='utf-8') as f:

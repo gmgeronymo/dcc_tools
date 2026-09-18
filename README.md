@@ -76,6 +76,8 @@ docker compose up -d
   chave efêmera e as sessões são invalidadas a cada reinício.
 - `DCC_DB_PATH`: caminho do banco SQLite (padrão `/app/dcc_auth.db`, persistido em `flask/app/`).
 - `DCC_SESSION_HOURS`: duração da sessão web em horas (padrão `8`).
+- `DCC_ALLOWED_SCHEMA_HOSTS`: hosts confiáveis para download de schemas na validação de XML (padrão
+  `ptb.de,w3.org`), mitigando SSRF. `DCC_MAX_SCHEMA_BYTES` limita o tamanho do schema (padrão 5 MiB).
 
 Os usuários se cadastram em `/dcc/register` (usuário + senha) e fazem login em `/dcc/login`. Cada
 usuário recebe uma API-KEY, consultável na área de perfil (`/dcc/perfil`) e usada no cabeçalho
@@ -200,6 +202,8 @@ docker compose up -d
   and sessions are invalidated on every restart.
 - `DCC_DB_PATH`: SQLite database path (default `/app/dcc_auth.db`, persisted in `flask/app/`).
 - `DCC_SESSION_HOURS`: web session lifetime in hours (default `8`).
+- `DCC_ALLOWED_SCHEMA_HOSTS`: trusted hosts for schema downloads during XML validation (default
+  `ptb.de,w3.org`), mitigating SSRF. `DCC_MAX_SCHEMA_BYTES` caps the schema size (default 5 MiB).
 
 Users register at `/dcc/register` (username + password) and log in at `/dcc/login`. Each user receives
 an API-KEY, available in the profile area (`/dcc/perfil`) and used in the `X-API-Key` header of the REST

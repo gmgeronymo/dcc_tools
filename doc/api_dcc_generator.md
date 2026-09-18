@@ -127,6 +127,8 @@ Resposta `201`:
 | `DCC_SECRET_KEY` | Chave para assinar a sessão da interface web. Obrigatória em produção. |
 | `DCC_DB_PATH` | Caminho do banco SQLite (padrão: `flask/app/dcc_auth.db`). |
 | `DCC_SESSION_HOURS` | Duração da sessão da interface web, em horas (padrão: `8`). |
+| `DCC_ALLOWED_SCHEMA_HOSTS` | Hosts confiáveis para download de schemas na validação de XML (padrão: `ptb.de,w3.org`; lista separada por vírgulas, cobre domínio e subdomínios). |
+| `DCC_MAX_SCHEMA_BYTES` | Tamanho máximo de um schema baixado na validação, em bytes (padrão: `5242880`). |
 
 ### 1.5 Gerenciamento (CLI)
 
@@ -556,8 +558,8 @@ Além do gerador, a aplicação expõe:
 | `/dcc/upload_json` | GET/POST | API-KEY ou sessão web | Upload de arquivo JSON; encaminha para `/dcc/generate` e baixa o XML. |
 | `/dcc/upload_xls` | GET/POST | API-KEY ou sessão web | Upload de planilha `.xlsx`; converte para JSON e gera o XML. |
 | `/dcc/pdf_attach` | POST | API-KEY ou sessão web | Anexa um XML DCC a um PDF (PDF/A-3), recebendo `pdf_file` e `xml_file` (multipart). |
-| `/dcc/validate_xml` | GET/POST | API-KEY ou sessão web | Valida um XML DCC contra o schema (upload de `xml_file`). |
-| `/dcc/visualizar_dcc` | POST | API-KEY ou sessão web | Converte XML em HTML legível (upload de `xml_file`). |
+| `/dcc/validate_xml` | GET/POST | aberta | Valida um XML DCC contra o schema informado no próprio XML; o download do schema é restrito a hosts confiáveis (`DCC_ALLOWED_SCHEMA_HOSTS`). |
+| `/dcc/visualizar_dcc` | POST | aberta | Converte XML em HTML legível (upload de `xml_file`). |
 | `/dcc/register` | POST | aberta | Cadastro de usuário (usuário, senha, e-mail); devolve a API-KEY. |
 | `/dcc/login` | GET/POST | aberta | Login na interface web com usuário e senha. |
 | `/dcc/logout` | GET | — | Encerra a sessão da interface web. |
@@ -568,7 +570,9 @@ Rotas de interface web informativas (abertas): `/dcc/`, `/dcc/api_doc`, `/dcc/ex
 `/dcc/exemplos`, `/dcc/faq`, `/dcc/publications`, `/dcc/introducao`.
 
 Rotas de interface web funcionais (exigem sessão): `/dcc/form_dcc`, `/dcc/upload_json`,
-`/dcc/upload_xls`, `/dcc/upload_xml`, `/dcc/upload_xml_hr`, `/dcc/validate_xml`.
+`/dcc/upload_xls`, `/dcc/upload_xml`.
+
+Rotas de ferramentas abertas: `/dcc/upload_xml_hr` (visualizar DCC) e `/dcc/validate_xml` (validar XML).
 
 ---
 
