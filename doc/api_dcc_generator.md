@@ -12,7 +12,7 @@ O gerador recebe um **JSON** e devolve um **XML DCC** compatível com o modelo d
 ## 1. Visão geral
 
 - **Protocolo**: HTTP/1.1, JSON no corpo da requisição, XML na resposta.
-- **Autenticação**: nenhuma (endpoints abertos na implementação atual).
+- **Autenticação**: API-KEY de usuário no cabeçalho `X-API-Key` (ver §1.1).
 - **Codificação**: UTF-8.
 - **Schema DCC suportado**: `3.3.0` (padrão) e `3.2.0`.
 
@@ -27,12 +27,119 @@ POST /dcc/generate
 | `Content-Type` da requisição | `application/json` |
 | `Content-Type` da resposta | `text/xml` |
 | `Content-Disposition` da resposta | `attachment; filename="CC_DIMCI_<num_certif>.xml"` |
+| Autenticação | `X-API-Key: <api-key de usuário>` |
 | Sucesso | `200` com o XML DCC no corpo |
+| Não autorizado | `401` com JSON `{"error": "<mensagem>"}` |
 | Erro de validação | `400` com JSON `{"error": "<mensagem>"}` |
 | Erro interno | `500` com JSON `{"error": "<mensagem>"}` |
 
 **Base URL de produção** (exemplo): `https://sig-dimci.inmetro.gov.br/dcc/generate`.
 O caminho da rota é sempre `/dcc/generate`; o host pode variar conforme o ambiente.
+
+### 1.1 Autenticação por API-KEY
+
+Os endpoints de geração e upload exigem uma **API-KEY de usuário**, enviada no cabeçalho HTTP:
+
+```
+X-API-Key: dcc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- Sem chave, chave inválida ou revogada → `401`.
+- Cada usuário cadastrado recebe uma API-KEY, que pode ser consultada na área de perfil da interface
+  web (`/dcc/perfil`) ou pelo administrador (`python manage_auth.py list-users`).
+- Na interface web, a autenticação é transparente: o usuário faz login e a sessão autoriza as funções;
+  não é necessário informar a API-KEY na tela.
+
+**Transição para clientes antigos:** clientes de API que ainda não enviam a API-KEY recebem, em vez de
+um JSON, uma **resposta XML** (`401`) com instruções de cadastro e de ajuste do software. É emitida
+quando a requisição não é uma navegação de página (por exemplo, `POST` com `Accept: */*` ou
+`application/xml`). Navegadores são redirecionados para `/dcc/login?auth_required=1`.
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<autenticacaoNecessaria xmlns="https://inmetro.gov.br/dcc/api">
+  <codigo>401</codigo>
+  <mensagem lang="pt">A partir de agora o uso da API do DCC Generator requer cadastro e API-KEY.</mensagem>
+  <mensagem lang="en">Using the DCC Generator API now requires registration and an API-KEY.</mensagem>
+  <cadastro>
+    <url>https://HOST/dcc/register</url>
+    <metodo>POST</metodo>
+    <contentType>application/json</contentType>
+    <corpoExemplo>{"username":"meu_usuario","password":"minha_senha","email":"eu@exemplo.com"}</corpoExemplo>
+    <respostaExemplo>{"username":"meu_usuario","api_key":"dcc_..."}</respostaExemplo>
+    <orientacao lang="pt">Cadastre-se uma vez para obter a API-KEY. A chave também fica disponível na área de perfil após o login na interface web.</orientacao>
+  </cadastro>
+  <uso>
+    <cabecalho>X-API-Key</cabecalho>
+    <instrucao lang="pt">Ajuste o seu software para enviar o cabeçalho X-API-Key com a sua API-KEY em todas as requisições.</instrucao>
+    <exemploCurl>curl -X POST "https://HOST/dcc/generate" -H "X-API-Key: dcc_SUA_CHAVE" -H "Content-Type: application/json" --data @dados.json</exemploCurl>
+  </uso>
+  <documentacao>https://HOST/dcc/api_doc</documentacao>
+</autenticacaoNecessaria>
+```
+
+### 1.2 Cadastro de usuário (auto-cadastro)
+
+```
+POST /dcc/register
+Content-Type: application/json
+```
+
+```json
+{
+  "username": "nome_usuario",
+  "email": "opcional@exemplo.com",
+  "password": "senha_com_no_minimo_8_caracteres"
+}
+```
+
+Resposta `201`:
+
+```json
+{
+  "username": "nome_usuario",
+  "email": "opcional@exemplo.com",
+  "api_key": "dcc_...",
+  "created_at": "2026-09-18T12:00:00+00:00"
+}
+```
+
+- A `password` é obrigatória (mínimo de 8 caracteres) e armazenada com hash.
+- A `api_key` é gerada automaticamente; pode ser consultada depois na área de perfil.
+- `username` deve ser único (até 64 caracteres: letras, números e `. _ @ -`).
+- Duplicidade, nome inválido ou senha curta → `400` com `{"error": "<mensagem>"}`.
+
+### 1.3 Interface web
+
+- `GET /dcc/login`: formulário de login (campos `username` e `password`).
+- `POST /dcc/login`: autentica usuário e senha e cria uma sessão (cookie assinado por `DCC_SECRET_KEY`).
+- `GET /dcc/perfil`: área de perfil do usuário logado, onde a **API-KEY** fica disponível (com opção de
+  gerar uma nova).
+- `GET /dcc/logout`: encerra a sessão.
+- Acesso não autenticado a uma função protegida redireciona para `/dcc/login?auth_required=1`, que
+  avisa que a função requer autenticação e aponta para login e cadastro.
+- Páginas informativas (início, introdução, FAQ, exemplos, documentação) permanecem abertas.
+
+### 1.4 Configuração (variáveis de ambiente)
+
+| Variável | Descrição |
+| --- | --- |
+| `DCC_SECRET_KEY` | Chave para assinar a sessão da interface web. Obrigatória em produção. |
+| `DCC_DB_PATH` | Caminho do banco SQLite (padrão: `flask/app/dcc_auth.db`). |
+| `DCC_SESSION_HOURS` | Duração da sessão da interface web, em horas (padrão: `8`). |
+
+### 1.5 Gerenciamento (CLI)
+
+A partir de `flask/app/`:
+
+```bash
+python manage_auth.py init-db
+python manage_auth.py create-user <username> [--email <email>] [--password <senha>]
+python manage_auth.py set-password <username> [--password <senha>]
+python manage_auth.py list-users
+python manage_auth.py revoke <username>
+python manage_auth.py activate <username>
+```
 
 ---
 
@@ -425,6 +532,7 @@ A rota `/dcc/generate` retorna:
 
 | Código | Situação | Corpo |
 | --- | --- | --- |
+| `401` | API-KEY ausente, inválida ou revogada | XML `<autenticacaoNecessaria>` com instruções (ver §1.1); navegadores são redirecionados |
 | `400` | JSON ausente ou inválido | `{"error": "No JSON provided"}` / `{"error": "Invalid JSON: ..."}` |
 | `400` | Falha de validação (ex.: `nueff` inválido) | `{"error": "<mensagem clara>"}` |
 | `500` | Erro inesperado na geração | `{"error": "Erro ao gerar o DCC: ..."}` |
@@ -442,22 +550,32 @@ Mensagens de erro de `nueff` (exemplos):
 
 Além do gerador, a aplicação expõe:
 
-| Endpoint | Método | Descrição |
-| --- | --- | --- |
-| `/dcc/generate` | POST | JSON → XML DCC (principal). |
-| `/dcc/upload_json` | GET/POST | Upload de arquivo JSON; encaminha para `/dcc/generate` e baixa o XML. |
-| `/dcc/upload_xls` | GET/POST | Upload de planilha `.xlsx`; converte para JSON e gera o XML. |
-| `/dcc/pdf_attach` | POST | Anexa um XML DCC a um PDF (PDF/A-3), recebendo `pdf_file` e `xml_file` (multipart). |
-| `/dcc/validate_xml` | GET/POST | Valida um XML DCC contra o schema (upload de `xml_file`). |
-| `/dcc/visualizar_dcc` | POST | Converte XML em HTML legível (upload de `xml_file`). |
+| Endpoint | Método | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `/dcc/generate` | POST | API-KEY | JSON → XML DCC (principal). |
+| `/dcc/upload_json` | GET/POST | API-KEY ou sessão web | Upload de arquivo JSON; encaminha para `/dcc/generate` e baixa o XML. |
+| `/dcc/upload_xls` | GET/POST | API-KEY ou sessão web | Upload de planilha `.xlsx`; converte para JSON e gera o XML. |
+| `/dcc/pdf_attach` | POST | API-KEY ou sessão web | Anexa um XML DCC a um PDF (PDF/A-3), recebendo `pdf_file` e `xml_file` (multipart). |
+| `/dcc/validate_xml` | GET/POST | API-KEY ou sessão web | Valida um XML DCC contra o schema (upload de `xml_file`). |
+| `/dcc/visualizar_dcc` | POST | API-KEY ou sessão web | Converte XML em HTML legível (upload de `xml_file`). |
+| `/dcc/register` | POST | aberta | Cadastro de usuário (usuário, senha, e-mail); devolve a API-KEY. |
+| `/dcc/login` | GET/POST | aberta | Login na interface web com usuário e senha. |
+| `/dcc/logout` | GET | — | Encerra a sessão da interface web. |
+| `/dcc/perfil` | GET | sessão web | Área de perfil: exibe a API-KEY do usuário. |
+| `/dcc/perfil/regenerar` | POST | sessão web | Gera uma nova API-KEY (a anterior deixa de funcionar). |
 
-Rotas de interface web (HTML): `/dcc/`, `/dcc/api_doc`, `/dcc/excel_guide`, `/dcc/exemplos`, `/dcc/faq`,
-`/dcc/form_dcc`, `/dcc/publications`, `/dcc/introducao`.
+Rotas de interface web informativas (abertas): `/dcc/`, `/dcc/api_doc`, `/dcc/excel_guide`,
+`/dcc/exemplos`, `/dcc/faq`, `/dcc/publications`, `/dcc/introducao`.
+
+Rotas de interface web funcionais (exigem sessão): `/dcc/form_dcc`, `/dcc/upload_json`,
+`/dcc/upload_xls`, `/dcc/upload_xml`, `/dcc/upload_xml_hr`, `/dcc/validate_xml`.
 
 ---
 
 ## 9. Notas de implementação para um cliente
 
+- Cadastre-se em `POST /dcc/register` e envie a API-KEY recebida no cabeçalho `X-API-Key` em todas as
+  chamadas aos endpoints de geração/upload.
 - Envie todos os campos de metadados como **string**, exceto `cmc` (boolean) e `unc_relativa` (boolean).
 - `resultados[].value`, `unc`, `k` e `nueff` podem ser string ou número; use string para preservar o valor exato.
 - A ordem das chaves no JSON é irrelevante.

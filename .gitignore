@@ -3,3 +3,7 @@ aws_lambda/dccSpreadsheet/code/__pycache__/*
 aws_lambda/dccSpreadsheet/code/myenv/*
 aws_lambda/dccPdfAttach/code/example/*
 flask/app/__pycache__/*
+flask/app/*.db
+flask/app/*.db-wal
+flask/app/*.db-shm
+flask/.env

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}DCC Tools - Perfil{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <h1 class="h4 mb-4">Área de perfil</h1>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h6 text-muted text-uppercase mb-3">Dados do usuário</h2>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Usuário</dt>
+                        <dd class="col-sm-9">{{ user['username'] }}</dd>
+                        <dt class="col-sm-3">E-mail</dt>
+                        <dd class="col-sm-9">{{ user['email'] or '—' }}</dd>
+                        <dt class="col-sm-3">Cadastro</dt>
+                        <dd class="col-sm-9">{{ user['created_at'] }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h6 text-muted text-uppercase mb-3">API-KEY</h2>
+                    <p class="text-muted">
+                        Use esta chave no cabeçalho <code>X-API-Key</code> das chamadas à API REST.
+                        A interface web já usa a sua sessão, então não é necessário informá-la aqui.
+                    </p>
+
+                    {% if user['api_key'] %}
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control font-monospace" id="apiKeyValue"
+                               value="{{ user['api_key'] }}" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="copyApiKeyBtn">Copiar</button>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        Nenhuma API-KEY disponível para exibição (conta criada antes desta funcionalidade).
+                        Gere uma nova abaixo.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="{{ url_for('regenerar_api_key') }}"
+                          onsubmit="return confirm('Gerar uma nova API-KEY? A chave atual deixará de funcionar.');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Gerar nova API-KEY</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if user['api_key'] %}
+<script>
+    document.getElementById('copyApiKeyBtn').addEventListener('click', function () {
+        var input = document.getElementById('apiKeyValue');
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(function () {
+            document.getElementById('copyApiKeyBtn').textContent = 'Copiado!';
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

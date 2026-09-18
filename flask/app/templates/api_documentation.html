@@ -119,6 +119,7 @@
                     <h5 class="mb-3">Sumário</h5>
                     <ul>
                         <li><a href="#introduction">Introdução</a></li>
+                        <li><a href="#authentication">Autenticação</a></li>
                         <li><a href="#keys-description">Descrição das Chaves</a></li>
                         <li><a href="#software">Software</a></li>
                         <li><a href="#ref-type">RefTypeDefinitions</a></li>
@@ -161,6 +162,41 @@
     ],
     "chave4": "valor"
 }</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Autenticação -->
+                <div class="page-section" id="authentication">
+                    <h2 class="section-title">Autenticação</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>As funções de geração e upload exigem uma <strong>API-KEY de usuário</strong>, enviada no cabeçalho HTTP <code>X-API-Key</code>. Requisições sem chave, com chave inválida ou revogada recebem <code>401</code>.</p>
+                            <p><strong>Transição para clientes antigos:</strong> clientes de API que ainda não enviam a API-KEY recebem uma <strong>resposta XML</strong> (<code>&lt;autenticacaoNecessaria&gt;</code>, status <code>401</code>) com o aviso de cadastro, o endereço de <code>/dcc/register</code> e instruções para incluir o cabeçalho <code>X-API-Key</code>. Navegadores são redirecionados para <code>/dcc/login</code>.</p>
+
+                            <h5 class="mt-4">Cadastro de usuário (auto-cadastro):</h5>
+                            <p><code>POST /dcc/register</code></p>
+                            <div class="example-box">{
+    "username": "nome_usuario",
+    "email": "opcional@exemplo.com",
+    "password": "senha_com_no_minimo_8_caracteres"
+}</div>
+                            <p class="mt-3">Resposta <code>201</code>:</p>
+                            <div class="example-box">{
+    "username": "nome_usuario",
+    "email": "opcional@exemplo.com",
+    "api_key": "dcc_...",
+    "created_at": "2026-09-18T12:00:00+00:00"
+}</div>
+                            <p class="mt-3">A <code>password</code> é obrigatória (mínimo de 8 caracteres) e armazenada com hash. A <code>api_key</code> é gerada automaticamente e também pode ser consultada na área de perfil.</p>
+
+                            <h5 class="mt-4">Exemplo de chamada:</h5>
+                            <div class="example-box">POST /dcc/generate
+X-API-Key: dcc_...
+Content-Type: application/json</div>
+
+                            <h5 class="mt-4">Interface web:</h5>
+                            <p>O login é feito em <code>/dcc/login</code> com <strong>usuário e senha</strong> e cria uma sessão; a autorização das funções é transparente (não é preciso informar a API-KEY). Na área de perfil (<code>/dcc/perfil</code>) o usuário consulta a sua <strong>API-KEY</strong> e pode gerar uma nova. As páginas informativas permanecem abertas; as funções de geração e upload exigem login. Ao tentar acessar uma função sem estar autenticado, a aplicação avisa que a autenticação é necessária e indica login e cadastro.</p>
                         </div>
                     </div>
                 </div>

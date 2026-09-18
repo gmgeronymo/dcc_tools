@@ -16,6 +16,7 @@ Principais funcionalidades:
 - Visualizar DCC em formato legível por humanos (`/dcc/visualizar_dcc`)
 - Interface web com documentação, exemplos, FAQ e publicações (`/dcc/`)
 - Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
+- Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 
 Versões de schema DCC suportadas:
 - `3.3.0` (padrão)
@@ -53,6 +54,37 @@ URL padrão:
 Observações:
 - A porta do host está em `flask/docker-compose.yml` (`9099:80`).
 - Você pode alterar a porta externa nesse arquivo.
+
+### Configuração de autenticação (produção)
+
+Os segredos ficam em `flask/.env` (não versionado). Crie a partir do modelo:
+
+```bash
+cd flask
+cp .env.example .env
+chmod 600 .env
+```
+
+Gere o valor e preencha o `.env`:
+
+```bash
+python3 -c "import secrets; print('DCC_SECRET_KEY=' + secrets.token_hex(32))"
+docker compose up -d
+```
+
+- `DCC_SECRET_KEY` (**obrigatória**): assina a sessão da interface web. Sem ela, cada worker usa uma
+  chave efêmera e as sessões são invalidadas a cada reinício.
+- `DCC_DB_PATH`: caminho do banco SQLite (padrão `/app/dcc_auth.db`, persistido em `flask/app/`).
+- `DCC_SESSION_HOURS`: duração da sessão web em horas (padrão `8`).
+
+Os usuários se cadastram em `/dcc/register` (usuário + senha) e fazem login em `/dcc/login`. Cada
+usuário recebe uma API-KEY, consultável na área de perfil (`/dcc/perfil`) e usada no cabeçalho
+`X-API-Key` da API REST. Na interface web, a autorização é transparente via sessão.
+
+Atenção:
+- Sirva a aplicação via **HTTPS** (proxy reverso com TLS): a senha, a API-KEY e o cookie de sessão
+  trafegam na requisição.
+- Faça backup do arquivo SQLite (`flask/app/dcc_auth.db`).
 
 ### Desenvolvimento local (sem Docker)
 
@@ -108,6 +140,7 @@ Main capabilities:
 - Render human-readable DCC from XML (`/dcc/visualizar_dcc`)
 - Web UI with documentation, examples, FAQ, and publications (`/dcc/`)
 - Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
+- User registration with API-KEY and protection of generation/upload functions
 
 Supported DCC schema versions:
 - `3.3.0` (default)
@@ -145,6 +178,37 @@ Default URL:
 Notes:
 - The host port is configured in `flask/docker-compose.yml` (`9099:80`).
 - You can change the external port in that file.
+
+### Authentication configuration (production)
+
+Secrets are kept in `flask/.env` (not versioned). Create it from the template:
+
+```bash
+cd flask
+cp .env.example .env
+chmod 600 .env
+```
+
+Generate the value and fill in `.env`:
+
+```bash
+python3 -c "import secrets; print('DCC_SECRET_KEY=' + secrets.token_hex(32))"
+docker compose up -d
+```
+
+- `DCC_SECRET_KEY` (**required**): signs the web session. Without it, each worker uses an ephemeral key
+  and sessions are invalidated on every restart.
+- `DCC_DB_PATH`: SQLite database path (default `/app/dcc_auth.db`, persisted in `flask/app/`).
+- `DCC_SESSION_HOURS`: web session lifetime in hours (default `8`).
+
+Users register at `/dcc/register` (username + password) and log in at `/dcc/login`. Each user receives
+an API-KEY, available in the profile area (`/dcc/perfil`) and used in the `X-API-Key` header of the REST
+API. On the web interface, authorization is transparent via the session.
+
+Notes:
+- Serve the application over **HTTPS** (TLS-terminating reverse proxy): the password, API-KEY and session
+  cookie travel in the request.
+- Back up the SQLite file (`flask/app/dcc_auth.db`).
 
 ### Local development (without Docker)
 

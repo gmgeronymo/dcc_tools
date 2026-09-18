@@ -6,4 +6,9 @@ services:
     - ./app:/app
     ports:
     - 9099:80
-    
+    environment:
+      # Valores lidos do arquivo ./flask/.env (nao versionado).
+      # Veja .env.example para gerar e configurar.
+      DCC_SECRET_KEY: ${DCC_SECRET_KEY:-}
+      DCC_DB_PATH: ${DCC_DB_PATH:-}
+      DCC_SESSION_HOURS: ${DCC_SESSION_HOURS:-8}

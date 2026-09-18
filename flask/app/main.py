@@ -34,7 +34,7 @@ __author_email__="gmgeronymo@inmetro.gov.br"
 # bibliotecas
 import json
 from lxml import etree
-from flask import Flask, jsonify, request, abort, Response, send_file, render_template, redirect
+from flask import Flask, jsonify, request, abort, Response, send_file, render_template, redirect, session, url_for, g
 import requests
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -44,7 +44,12 @@ import os
 import re
 import tempfile
 import shutil
+import secrets
+from datetime import timedelta
 
+
+# autenticacao (cadastro de usuarios / API-KEY)
+import auth
 
 # PDF attach
 import pikepdf
@@ -73,7 +78,24 @@ app = Flask(__name__, static_url_path='/dcc/static')
 app.debug = True
 
 # App is behind one proxy that sets the -For and -Host headers.
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_proto=1)
+
+# chave de assinatura das sessoes da interface web
+# em producao definir DCC_SECRET_KEY; caso contrario uma chave efemera eh gerada
+_secret_key = os.environ.get('DCC_SECRET_KEY')
+if not _secret_key:
+    app.logger.warning(
+        'DCC_SECRET_KEY nao definida: usando chave efemera. Em producao defina '
+        'DCC_SECRET_KEY (ex.: arquivo flask/.env) para que as sessoes da interface '
+        'web sejam persistentes e consistentes entre workers.'
+    )
+app.secret_key = _secret_key or secrets.token_hex(32)
+
+# duracao da sessao da interface web (padrao: 8 horas)
+app.permanent_session_lifetime = timedelta(hours=int(os.environ.get('DCC_SESSION_HOURS', '8')))
+
+# cria as tabelas de autenticacao (idempotente)
+auth.init_db()
 
 # funcoes auxiliares
 
@@ -1039,6 +1061,86 @@ def attach_xml_to_pdfa3b(pdf_path, xml_path, output_path):
 
 
 ## ROTAS do webapp
+
+def _safe_next(next_url):
+    """Aceita apenas redirecionamentos internos (evita open redirect)."""
+    if not next_url:
+        return None
+    if next_url.startswith('/dcc/') and not next_url.startswith('//'):
+        return next_url
+    return None
+
+
+@app.route('/dcc/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    next_url = _safe_next(request.args.get('next') or request.form.get('next'))
+    auth_required = request.args.get('auth_required') or request.form.get('auth_required')
+
+    if request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        user = auth.authenticate(username, password)
+        if user is not None:
+            auth.start_session(user)
+            return redirect(next_url or url_for('landing_page'))
+        error = 'Usuário ou senha inválidos.'
+
+    return render_template(
+        'login.html',
+        error=error,
+        next=next_url,
+        auth_required=auth_required,
+        username=auth.current_username(),
+    )
+
+
+@app.route('/dcc/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('landing_page'))
+
+
+@app.route('/dcc/perfil')
+@auth.require_auth
+def perfil():
+    user = auth.get_user_by_id(g.user_id)
+    if user is None:
+        session.clear()
+        return redirect(url_for('login'))
+    return render_template('perfil.html', user=user)
+
+
+@app.route('/dcc/perfil/regenerar', methods=['POST'])
+@auth.require_auth
+def regenerar_api_key():
+    auth.regenerate_api_key(g.user_id)
+    return redirect(url_for('perfil'))
+
+
+@app.route('/dcc/register', methods=['GET', 'POST'])
+def register():
+    created = None
+    error = None
+
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or request.form
+        username = (data.get('username') or '').strip()
+        email = (data.get('email') or '').strip() or None
+        password = data.get('password') or ''
+        try:
+            created = auth.create_user(username, password, email)
+        except ValueError as e:
+            error = str(e)
+
+        if created and request.is_json:
+            return jsonify(created), 201
+        if error and request.is_json:
+            return jsonify({'error': error}), 400
+
+    return render_template('register.html', created=created, error=error)
+
+
 @app.route('/dcc/')
 def landing_page():
     return render_template('landing.html')
@@ -1100,6 +1202,7 @@ def api_doc():
     return render_template('api_documentation.html')
 
 @app.route('/dcc/form_dcc')
+@auth.require_auth
 def form_dcc():
     return render_template('form_dcc.html')
 
@@ -1116,14 +1219,17 @@ def faq():
     return render_template('faq.html')
 
 @app.route('/dcc/upload_xml')
+@auth.require_auth
 def upload_xml():
     return render_template('upload_xml.html')
 
 @app.route('/dcc/upload_xml_hr')
+@auth.require_auth
 def upload_xml_hr():
     return render_template('upload_xml_hr.html')
 
 @app.route('/dcc/validate_xml', methods=['GET', 'POST'])
+@auth.require_auth
 def validate_xml():
     if request.method == 'POST':
         validation_result = {
@@ -1175,6 +1281,7 @@ def validate_xml():
     return render_template('validate_xml.html')
 
 @app.route('/dcc/upload_json', methods=['GET', 'POST'])
+@auth.require_auth
 def upload_json():
     if request.method == 'POST':
         # Check if a file was uploaded
@@ -1232,6 +1339,7 @@ def upload_json():
 
 
 @app.route('/dcc/upload_xls', methods=['GET', 'POST'])
+@auth.require_auth
 def upload_xls():
     if request.method == 'POST':
 
@@ -1292,6 +1400,7 @@ def upload_xls():
 
 # embutir XML no PDF
 @app.route('/dcc/pdf_attach', methods = ['POST'])
+@auth.require_auth
 def pdf_attach():
     if request.method == 'POST' :
         if 'pdf_file' not in request.files :
@@ -1339,6 +1448,7 @@ def pdf_attach():
 # modularidade: as funcoes podem ficar em arquivos separados, mantendo a versao AWS funcional e atualizada
 
 @app.route('/dcc/generate', methods=['POST'])
+@auth.require_auth
 def generate_dcc():
     # Get JSON data from request body
     try:
@@ -1386,6 +1496,7 @@ def generate_dcc():
 
 # gerar human readable usando xslt
 @app.route('/dcc/visualizar_dcc', methods=['POST'])
+@auth.require_auth
 def visualizar_dcc():
     """Handle file upload and transformation"""
     # Check if a file was uploaded

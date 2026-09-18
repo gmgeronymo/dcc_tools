@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}DCC Tools - Cadastro de usuário{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-3">Cadastro de usuário</h1>
+                    <p class="text-muted">
+                        Crie sua conta para acessar o DCC Generator. Uma <strong>API-KEY</strong> será
+                        gerada automaticamente e ficará disponível na sua área de perfil.
+                    </p>
+
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">{{ error }}</div>
+                    {% endif %}
+
+                    {% if created %}
+                    <div class="alert alert-success" role="alert">
+                        Usuário <strong>{{ created.username }}</strong> criado com sucesso.
+                    </div>
+                    <div class="alert alert-warning" role="alert">
+                        <p class="mb-2"><strong>Guarde a API-KEY abaixo.</strong> Ela também estará sempre
+                            disponível na sua área de perfil.</p>
+                        <div class="input-group">
+                            <input type="text" class="form-control font-monospace" id="apiKeyValue"
+                                   value="{{ created.api_key }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="copyApiKeyBtn">Copiar</button>
+                        </div>
+                    </div>
+                    <p class="mb-0">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">Entrar</a>
+                    </p>
+                    {% else %}
+                    <form method="post" action="{{ url_for('register') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nome de usuário</label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   maxlength="64" autocomplete="username" required>
+                            <div class="form-text">Até 64 caracteres: letras, números e <code>. _ @ -</code>.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-mail (opcional)</label>
+                            <input type="email" class="form-control" id="email" name="email" autocomplete="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   autocomplete="new-password" minlength="8" required>
+                            <div class="form-text">Mínimo de 8 caracteres.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password_confirm" class="form-label">Confirme a senha</label>
+                            <input type="password" class="form-control" id="password_confirm" name="password_confirm"
+                                   autocomplete="new-password" minlength="8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cadastrar</button>
+                        <a href="{{ url_for('login') }}" class="link-secondary ms-2">Já tenho conta</a>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if created %}
+<script>
+    document.getElementById('copyApiKeyBtn').addEventListener('click', function () {
+        var input = document.getElementById('apiKeyValue');
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(function () {
+            document.getElementById('copyApiKeyBtn').textContent = 'Copiado!';
+        });
+    });
+</script>
+{% else %}
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        var p = document.getElementById('password');
+        var c = document.getElementById('password_confirm');
+        if (p && c && p.value !== c.value) {
+            e.preventDefault();
+            alert('As senhas não coincidem.');
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
