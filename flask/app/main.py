@@ -77,6 +77,10 @@ SUPPORTED_DCC_VERSIONS = {
     '3.3.0': 'https://www.ptb.de/dcc/v3.3.0/dcc.xsd',
 }
 
+# URL base oficial do servico (usada, p.ex., no link de recuperacao de senha).
+# Pode ser sobrescrita pela variavel de ambiente APP_BASE_URL.
+DEFAULT_APP_BASE_URL = 'https://sig-dimci.inmetro.gov.br'
+
 app = Flask(__name__, static_url_path='/dcc/static')
 app.debug = True
 
@@ -1147,12 +1151,12 @@ def regenerar_api_key():
     return redirect(url_for('perfil'))
 
 
+def _app_base_url():
+    return (os.environ.get('APP_BASE_URL') or DEFAULT_APP_BASE_URL).rstrip('/')
+
+
 def _reset_password_link(token):
-    base = (os.environ.get('APP_BASE_URL') or '').rstrip('/')
-    path = url_for('redefinir_senha', token=token)
-    if base:
-        return base + path
-    return url_for('redefinir_senha', token=token, _external=True)
+    return _app_base_url() + url_for('redefinir_senha', token=token)
 
 
 def send_password_reset_email(user, link):

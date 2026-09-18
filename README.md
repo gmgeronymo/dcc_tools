@@ -82,8 +82,8 @@ docker compose up -d
 - E-mail SMTP (Exchange): `SMTP_HOST` (`smtp.exemplo.org`), `SMTP_PORT` (`587`), `SMTP_FROM`
   (`no-reply@exemplo.org`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (sem autenticação por padrão),
   `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
-- `APP_BASE_URL`: URL base oficial usada no link de recuperação de senha; `DCC_RESET_TOKEN_MINUTES`
-  (padrão `60`).
+- `APP_BASE_URL`: URL base oficial usada no link de recuperação de senha (padrão
+  `https://sig-dimci.inmetro.gov.br`); `DCC_RESET_TOKEN_MINUTES` (padrão `60`).
 
 Os usuários se cadastram em `/dcc/register` (usuário + senha + e-mail **`@inmetro.gov.br`**) e fazem
 login em `/dcc/login`. Cada usuário recebe uma API-KEY, consultável na área de perfil (`/dcc/perfil`) e
@@ -219,8 +219,8 @@ docker compose up -d
 - SMTP e-mail (Exchange): `SMTP_HOST` (`smtp.exemplo.org`), `SMTP_PORT` (`587`), `SMTP_FROM`
   (`no-reply@exemplo.org`), `SMTP_USE_AUTH`/`SMTP_USERNAME`/`SMTP_PASSWORD` (no auth by default),
   `SMTP_USE_TLS` (`false`), `SMTP_TIMEOUT` (`15`), `DCC_EMAIL_ENABLED` (`true`).
-- `APP_BASE_URL`: official base URL used in the password reset link; `DCC_RESET_TOKEN_MINUTES`
-  (default `60`).
+- `APP_BASE_URL`: official base URL used in the password reset link (default
+  `https://sig-dimci.inmetro.gov.br`); `DCC_RESET_TOKEN_MINUTES` (default `60`).
 
 Users register at `/dcc/register` (username + password + **`@inmetro.gov.br`** e-mail) and log in at
 `/dcc/login`. Each user receives an API-KEY, available in the profile area (`/dcc/perfil`) and used in

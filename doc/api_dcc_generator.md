@@ -141,7 +141,7 @@ Resposta `201`:
 | `SMTP_USE_AUTH` / `SMTP_USERNAME` / `SMTP_PASSWORD` | Autenticação SMTP (padrão: sem autenticação). |
 | `SMTP_USE_TLS` | STARTTLS (padrão: `false`). |
 | `SMTP_TIMEOUT` | Timeout da conexão SMTP, em segundos (padrão: `15`). |
-| `APP_BASE_URL` | URL base oficial usada no link de recuperação (se vazia, derivada da requisição). |
+| `APP_BASE_URL` | URL base oficial usada no link de recuperação (padrão: `https://sig-dimci.inmetro.gov.br`). |
 | `DCC_RESET_TOKEN_MINUTES` | Validade do token de recuperação, em minutos (padrão: `60`). |
 
 ### 1.5 Gerenciamento (CLI)

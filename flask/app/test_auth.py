@@ -379,6 +379,7 @@ class TestRecuperacaoSenha(AuthTestBase):
             main.send_password_reset_email = original
 
         self.assertIn('link', capturado)
+        self.assertTrue(capturado['link'].startswith('https://sig-dimci.inmetro.gov.br/dcc/redefinir-senha'))
         token = parse_qs(urlparse(capturado['link']).query)['token'][0]
 
         resp = self.client.post('/dcc/redefinir-senha', data={
@@ -389,6 +390,23 @@ class TestRecuperacaoSenha(AuthTestBase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn('reset=1', resp.headers['Location'])
         self.assertIsNotNone(auth.authenticate('alice', 'novaSenha123'))
+
+    def test_link_usa_base_padrao(self):
+        os.environ.pop('APP_BASE_URL', None)
+        with app.test_request_context():
+            link = main._reset_password_link('tok123')
+        self.assertEqual(
+            link, 'https://sig-dimci.inmetro.gov.br/dcc/redefinir-senha?token=tok123'
+        )
+
+    def test_link_usa_app_base_url(self):
+        os.environ['APP_BASE_URL'] = 'https://exemplo.local/'
+        try:
+            with app.test_request_context():
+                link = main._reset_password_link('tok123')
+        finally:
+            os.environ.pop('APP_BASE_URL', None)
+        self.assertEqual(link, 'https://exemplo.local/dcc/redefinir-senha?token=tok123')
 
     def test_redefinir_com_token_invalido(self):
         resp = self.client.post('/dcc/redefinir-senha', data={
