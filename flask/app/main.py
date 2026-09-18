@@ -205,6 +205,34 @@ def campo_conteudo_multilingue(parent_node, nome_elemento, textos) :
     return elemento
 
 
+# graus de liberdade efetivos (nueff): detecta +inf, tanto como numero
+# (math.inf) quanto como string ("inf", "+inf", "Infinity", "∞", ...)
+def is_positive_infinite(value) :
+    if isinstance(value, str) :
+        return value.strip().lower() in ('inf', '+inf', 'infinity', '+infinity', '∞', '+∞')
+
+    try :
+        v = float(value)
+    except (TypeError, ValueError) :
+        return False
+
+    return math.isinf(v) and v > 0
+
+
+# serializa os graus de liberdade efetivos (nueff) para dcc:charsXMLList
+# valores finitos viram sua representacao textual; +inf vira "inf"
+def serialize_nueff(values) :
+    serialized = []
+
+    for value in values :
+        if is_positive_infinite(value) :
+            serialized.append('inf')
+        else :
+            serialized.append(str(value))
+
+    return ' '.join(serialized)
+
+
 # validacao dos graus de liberdade efetivos (nueff)
 def validate_nueff(nueff, expected_length) :
     if not isinstance(nueff, (list, tuple)) :
@@ -220,13 +248,19 @@ def validate_nueff(nueff, expected_length) :
         if valor is None or (isinstance(valor, str) and valor.strip() == '') :
             raise ValueError("O campo 'nueff' contém um valor ausente (null ou vazio).")
 
+        if is_positive_infinite(valor) :
+            continue
+
         try :
             v = float(valor)
         except (TypeError, ValueError) :
             raise ValueError("Valor inválido para 'nueff': %r. Os valores devem ser numéricos." % (valor,))
 
-        if not math.isfinite(v) :
-            raise ValueError("Valor inválido para 'nueff': %r. Não são aceitos NaN ou infinito." % (valor,))
+        if math.isnan(v) :
+            raise ValueError("Valor inválido para 'nueff': %r. Não são aceitos NaN." % (valor,))
+
+        if math.isinf(v) :
+            raise ValueError("Valor inválido para 'nueff': %r. Não são aceitos -inf." % (valor,))
 
         if v <= 0 :
             raise ValueError(
@@ -728,27 +762,17 @@ def dccGen(dcc_version, dados, declaracao) :
             si_relative_unitXMLList.text = mensurando_data[mensurando].get('relative_unc_unit', '\\micro\\one')
 
         # opcional: graus de liberdade efetivos (nueff)
-        # representados como uma dcc:quantity adicional na mesma dcc:list
+        # representados como uma dcc:quantity adicional na mesma dcc:list,
+        # usando dcc:charsXMLList (representacao textual, sem unidade)
         if nueff[mensurando] :
             validate_nueff(nueff[mensurando], len(value[mensurando]))
 
             quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
 
-            campo_conteudo_multilingue(quantity, 'name', [
-                ('pt', 'Graus de liberdade efetivos'),
-                ('en', 'Effective degrees of freedom'),
-            ])
+            campo_name(quantity, 'Graus de liberdade efetivos')
 
-            campo_conteudo_multilingue(quantity, 'description', [
-                ('pt', 'Graus de liberdade efetivos da incerteza padrão combinada, νeff, utilizados na determinação do fator de abrangência.'),
-                ('en', 'Effective degrees of freedom of the combined standard uncertainty, νeff, used in the determination of the coverage factor.'),
-            ])
-
-            si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
-            si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
-            si_valueXMLList.text = ' '.join(str(v) for v in nueff[mensurando])
-            si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
-            si_unitXMLList.text = '\\one'
+            charsXMLList = etree.SubElement(quantity, etree.QName(nsmap['dcc'], 'charsXMLList'))
+            charsXMLList.text = serialize_nueff(nueff[mensurando])
    
     return etree.tostring(dcc, encoding="utf-8", xml_declaration=True, pretty_print=True)
 

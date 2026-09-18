@@ -655,7 +655,7 @@
       <xsl:variable name="currentIndex" select="position()"/>
       <tr>
         <xsl:for-each select="$quantities">
-          <xsl:variable name="quantityValues" select="normalize-space(si:realListXMLList/si:valueXMLList)"/>
+          <xsl:variable name="quantityValues" select="normalize-space(concat(si:realListXMLList/si:valueXMLList, dcc:charsXMLList))"/>
           <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
           <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
           <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>

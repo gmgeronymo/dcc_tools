@@ -30,6 +30,7 @@ from main import (
     dccGen,
     declaracoes,
     resolve_dcc_version,
+    serialize_nueff,
     validate_nueff,
 )
 
@@ -115,9 +116,19 @@ class TestValidateNueff(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_nueff([float('nan')], 1)
 
-    def test_valor_infinito(self):
+    def test_valor_infinito_positivo(self):
+        self.assertTrue(validate_nueff([float('inf')], 1))
+
+    def test_valor_infinito_negativo(self):
         with self.assertRaises(ValueError):
-            validate_nueff([float('inf')], 1)
+            validate_nueff([float('-inf')], 1)
+
+    def test_valor_inf_string(self):
+        self.assertTrue(validate_nueff(['inf'], 1))
+
+    def test_valor_inf_string_negativo(self):
+        with self.assertRaises(ValueError):
+            validate_nueff(['-inf'], 1)
 
     def test_valor_negativo(self):
         with self.assertRaises(ValueError):
@@ -150,16 +161,56 @@ class TestNueffGeneration(unittest.TestCase):
         self.assertEqual(len(quantidades), 1)
 
         q = quantidades[0]
-        real_list = q.find(SI_NS + 'realListXMLList')
-        self.assertIsNotNone(real_list)
+        chars = q.find(DCC_NS + 'charsXMLList')
+        self.assertIsNotNone(chars)
 
-        value = real_list.find(SI_NS + 'valueXMLList')
-        unit = real_list.find(SI_NS + 'unitXMLList')
-        self.assertIsNotNone(value)
-        self.assertIsNotNone(unit)
+        self.assertIsNone(q.find(SI_NS + 'realListXMLList'))
+        self.assertIsNone(q.find(DCC_NS + 'description'))
+        self.assertEqual(chars.text.split(), valores)
 
-        self.assertEqual(unit.text, '\\one')
-        self.assertEqual(value.text.split(), valores)
+    def test_nueff_valores_infinitos(self):
+        dados = base_dados()
+        n = sum(1 for r in dados['resultados'] if r['mensurando'] == 'acdc')
+        valores = []
+        i = 0
+        for r in dados['resultados']:
+            if r['mensurando'] == 'acdc':
+                valores.append('inf' if i % 2 == 0 else str(round(10.0 + i * 1.3, 2)))
+                i += 1
+        i = 0
+        for r in dados['resultados']:
+            if r['mensurando'] == 'acdc':
+                r['nueff'] = valores[i]
+                i += 1
+
+        xml = gerar(dados)
+        quantidades = encontrar_quantidade_nueff(xml)
+        self.assertEqual(len(quantidades), 1)
+
+        chars = quantidades[0].find(DCC_NS + 'charsXMLList')
+        self.assertIsNotNone(chars)
+        self.assertEqual(chars.text.split(), valores)
+
+    def test_nueff_somente_infinito(self):
+        dados = base_dados()
+        n = sum(1 for r in dados['resultados'] if r['mensurando'] == 'acdc')
+        for r in dados['resultados']:
+            if r['mensurando'] == 'acdc':
+                r['nueff'] = 'inf'
+
+        xml = gerar(dados)
+        quantidades = encontrar_quantidade_nueff(xml)
+        self.assertEqual(len(quantidades), 1)
+
+        chars = quantidades[0].find(DCC_NS + 'charsXMLList')
+        self.assertIsNotNone(chars)
+        self.assertEqual(chars.text.split(), ['inf'] * n)
+
+    def test_serialize_nueff(self):
+        self.assertEqual(serialize_nueff([12.5, 20.7, 35.2]), '12.5 20.7 35.2')
+        self.assertEqual(serialize_nueff([12.5, 'inf', 35.2, 'inf']), '12.5 inf 35.2 inf')
+        self.assertEqual(serialize_nueff(['inf', 'inf', 'inf']), 'inf inf inf')
+        self.assertEqual(serialize_nueff([12.5, float('inf'), 35.2]), '12.5 inf 35.2')
 
     def test_nueff_ausente_nao_gera_quantidade(self):
         dados = base_dados()
@@ -176,7 +227,7 @@ class TestNueffGeneration(unittest.TestCase):
             gerar(dados)
 
     def test_nueff_valor_invalido_gera_erro(self):
-        for valor_invalido in ['0', '-1', 'abc']:
+        for valor_invalido in ['0', '-1', 'abc', '-inf', 'nan', float('nan'), float('-inf')]:
             dados = base_dados()
             dados['resultados'] = [r for r in dados['resultados'] if r['mensurando'] == 'acdc'][:2]
             for r in dados['resultados']:

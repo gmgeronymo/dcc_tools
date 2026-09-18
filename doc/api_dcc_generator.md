@@ -354,7 +354,8 @@ A resposta é um XML válido contra `https://www.ptb.de/dcc/v3.3.0/dcc.xsd` (ou 
 - `dcc:measurementResults` → `dcc:measurementResult` → `dcc:results` → `dcc:result` → `dcc:data` → `dcc:list`.
 
 Na tabela de resultados (`dcc:list`), cada coluna é uma `dcc:quantity` com `si:realListXMLList`
-(`si:valueXMLList` + `si:unitXMLList`). A coluna de resultado inclui também
+(`si:valueXMLList` + `si:unitXMLList`), exceto a coluna opcional de `nueff`, que usa `dcc:charsXMLList`
+(ver §6). A coluna de resultado inclui também
 `si:expandedUncXMLList` (`si:uncertaintyXMLList`, `si:coverageFactorXMLList`,
 `si:coverageProbabilityXMLList`).
 
@@ -379,7 +380,7 @@ As unidades seguem o formato D-SI usado pelo schema PTB:
 - Prefixos SI: `\micro`, `\milli`, `\kilo`, `\nano`, etc.
 - Multiplicação por justaposição: `\micro\volt\volt\tothe{-1}`.
 - Temperatura: `\degreecelsius`; percentual: `\percent`.
-- Adimensional: `\one` (usado para `nueff`).
+- Adimensional: `\one`.
 
 ---
 
@@ -394,9 +395,11 @@ incerteza do resultado.
    devem informá-lo.
 2. **Comprimento**: o número de valores de `nueff` deve ser igual ao número de resultados do mensurando.
 3. **Valores**: numéricos e **estritamente positivos** (`> 0`); aceita valores fracionários (ex.: `12.7`).
-4. **Valores rejeitados** (geram erro `400`): `0`, negativos, `null`, string vazia, `NaN`, infinito,
+4. **Infinito**: `νeff = +∞` pode ser representado por `"inf"` (string) ou `Infinity`/`+Infinity`.
+   No XML, é serializado como `inf`.
+5. **Valores rejeitados** (geram erro `400`): `0`, negativos, `-inf`, `null`, string vazia, `NaN` e
    valores não numéricos.
-5. **Ausência**: se `nueff` não for informado, nenhuma quantidade adicional é gerada (comportamento anterior preservado).
+6. **Ausência**: se `nueff` não for informado, nenhuma quantidade adicional é gerada (comportamento anterior preservado).
 
 **Resultado no XML**: uma `dcc:quantity` adicional na mesma `dcc:list`, com:
 
@@ -404,18 +407,13 @@ incerteza do resultado.
 <dcc:quantity>
   <dcc:name>
     <dcc:content lang="pt">Graus de liberdade efetivos</dcc:content>
-    <dcc:content lang="en">Effective degrees of freedom</dcc:content>
   </dcc:name>
-  <dcc:description>
-    <dcc:content lang="pt">Graus de liberdade efetivos da incerteza padrão combinada, νeff, utilizados na determinação do fator de abrangência.</dcc:content>
-    <dcc:content lang="en">Effective degrees of freedom of the combined standard uncertainty, νeff, used in the determination of the coverage factor.</dcc:content>
-  </dcc:description>
-  <si:realListXMLList>
-    <si:valueXMLList>58.4 62.1</si:valueXMLList>
-    <si:unitXMLList>\one</si:unitXMLList>
-  </si:realListXMLList>
+  <dcc:charsXMLList>58.4 62.1 inf</dcc:charsXMLList>
 </dcc:quantity>
 ```
+
+A nova quantidade usa `dcc:charsXMLList` (representação textual, sem unidade) e **não** inclui
+`dcc:description` nem `si:unitXMLList`.
 
 A estrutura `si:expandedUncXMLList` existente **não é alterada**.
 
@@ -435,7 +433,8 @@ Mensagens de erro de `nueff` (exemplos):
 
 - `O número de valores de 'nueff' (N) deve ser igual ao número de resultados associados (M).`
 - `Valor inválido para 'nueff': '0'. Os graus de liberdade efetivos devem ser positivos.`
-- `Valor inválido para 'nueff': 'nan'. Não são aceitos NaN ou infinito.`
+- `Valor inválido para 'nueff': 'nan'. Não são aceitos NaN.`
+- `Valor inválido para 'nueff': '-inf'. Não são aceitos -inf.`
 
 ---
 

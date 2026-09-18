@@ -1061,7 +1061,7 @@
                                     </tr>
                                     <tr>
                                         <td>nueff</td>
-                                        <td>Graus de liberdade efetivos (νeff) do resultado. Deve ser um valor numérico e positivo (aceita valores fracionários).</td>
+                                        <td>Graus de liberdade efetivos (νeff) do resultado. Deve ser um valor numérico e positivo (aceita valores fracionários). O infinito (`+∞`) pode ser informado como <code>"inf"</code>.</td>
                                         <td><span class="optional">Opcional</span></td>
                                         <td>"nueff": "58.4"</td>
                                     </tr>
@@ -1074,7 +1074,7 @@
                                 </tbody>
                             </table>
 
-                            <p class="mt-3"><strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> campo opcional. Quando presente, a API gera uma <code>dcc:quantity</code> adicional na mesma <code>dcc:list</code> de resultados, nomeada <em>Graus de liberdade efetivos</em> (pt) / <em>Effective degrees of freedom</em> (en), com os valores em <code>si:realListXMLList</code> e unidade <code>\one</code>. O número de valores de <code>nueff</code> deve ser igual ao número de resultados do mensurando associado. Valores <code>0</code>, negativos, <code>null</code>, vazios, <code>NaN</code> ou infinitos são rejeitados. Se omitido, o certificado é gerado sem a quantidade adicional, preservando o comportamento anterior.</p>
+                            <p class="mt-3"><strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> campo opcional. Quando presente, a API gera uma <code>dcc:quantity</code> adicional na mesma <code>dcc:list</code> de resultados, nomeada <em>Graus de liberdade efetivos</em>, com os valores em <code>dcc:charsXMLList</code> (representação textual, sem unidade). O número de valores de <code>nueff</code> deve ser igual ao número de resultados do mensurando associado. Valores <code>0</code>, negativos, <code>-inf</code>, <code>null</code>, vazios, <code>NaN</code> ou não numéricos são rejeitados; o infinito positivo pode ser informado como <code>"inf"</code> e é representado como <code>inf</code> no XML. Se omitido, o certificado é gerado sem a quantidade adicional, preservando o comportamento anterior.</p>
                         </div>
                     </div>
                 </div>

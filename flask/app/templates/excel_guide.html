@@ -928,7 +928,7 @@ acdc       | frequency | Frequência  | \kilo\hertz |
                                     </tr>
                                     <tr>
                                         <td><strong>nueff</strong> <span class="field-optional">(opcional)</span></td>
-                                        <td>Graus de liberdade efetivos (νeff). Valor numérico positivo, podendo ser fracionário (ex: 12.7). Se a coluna estiver vazia ou ausente, o certificado é gerado sem a quantidade adicional.</td>
+                                        <td>Graus de liberdade efetivos (νeff). Valor numérico positivo, podendo ser fracionário (ex: 12.7). O infinito positivo pode ser informado como <code>inf</code>. Se a coluna estiver vazia ou ausente, o certificado é gerado sem a quantidade adicional.</td>
                                         <td>58.4</td>
                                     </tr>
                                 </tbody>
@@ -945,7 +945,7 @@ rstdc      |       |         |           | 1.23  | 0.01 | 2    |
                                 <strong>Importante:</strong> O nome da coluna <code>value</code> na aba Resultados é fixo. Não use o <code>col_name</code> do mensurando aqui — isso é apenas para identificar a coluna de valores numéricos no certificado impresso.
                             </div>
                             <div class="tip-box">
-                                <strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> preencha um valor numérico positivo por linha. O número de valores informados deve corresponder ao número de resultados do mensurando. Valores <code>0</code>, negativos, vazios, <code>NaN</code> ou infinitos são rejeitados. O <code>nueff</code> é adicionado ao certificado como uma coluna extra na tabela de resultados (unidade <code>\one</code>).
+                                <strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> preencha um valor numérico positivo por linha. O número de valores informados deve corresponder ao número de resultados do mensurando. Valores <code>0</code>, negativos, vazios, <code>-inf</code> ou <code>NaN</code> são rejeitados; o infinito positivo pode ser informado como <code>inf</code>. O <code>nueff</code> é adicionado ao certificado como uma coluna extra na tabela de resultados, em uma <code>dcc:quantity</code> com <code>dcc:charsXMLList</code> (representação textual, sem unidade).
                             </div>
                         </div>
                     </div>
