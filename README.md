@@ -15,6 +15,7 @@ Principais funcionalidades:
 - Validar XML DCC contra schema (`/dcc/validate_xml`)
 - Visualizar DCC em formato legível por humanos (`/dcc/visualizar_dcc`)
 - Interface web com documentação, exemplos, FAQ e publicações (`/dcc/`)
+- Documentação de acesso à API para LLMs, em Markdown, com instruções e prompts para baixar e anexar ao assistente (`/dcc/llm_doc` e `/dcc/llm_doc.md`)
 - Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 - Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
@@ -31,6 +32,7 @@ Versões de schema DCC suportadas:
 │   ├── app/
 │   │   ├── main.py
 │   │   ├── requirements.txt
+│   │   ├── docs/
 │   │   ├── templates/
 │   │   └── static/
 │   ├── Dockerfile
@@ -118,6 +120,8 @@ Ao executar diretamente, a aplicação inicia na porta `80` (ver `main.py`).
 Rotas de interface:
 - `GET /dcc/`
 - `GET /dcc/api_doc`
+- `GET /dcc/llm_doc`
+- `GET /dcc/llm_doc.md`
 - `GET /dcc/excel_guide`
 - `GET /dcc/exemplos`
 - `GET /dcc/faq`
@@ -151,6 +155,7 @@ Main capabilities:
 - Validate DCC XML against schema (`/dcc/validate_xml`)
 - Render human-readable DCC from XML (`/dcc/visualizar_dcc`)
 - Web UI with documentation, examples, FAQ, and publications (`/dcc/`)
+- LLM-oriented API access guide in Markdown, with instructions and prompts to download and attach to the assistant (`/dcc/llm_doc` and `/dcc/llm_doc.md`)
 - Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
 - User registration with API-KEY and protection of generation/upload functions
 - Password change and e-mail password recovery (`@inmetro.gov.br`)
@@ -167,6 +172,7 @@ Supported DCC schema versions:
 │   ├── app/
 │   │   ├── main.py
 │   │   ├── requirements.txt
+│   │   ├── docs/
 │   │   ├── templates/
 │   │   └── static/
 │   ├── Dockerfile
@@ -254,6 +260,8 @@ When running directly, the app starts on port `80` (see `main.py`).
 UI routes:
 - `GET /dcc/`
 - `GET /dcc/api_doc`
+- `GET /dcc/llm_doc`
+- `GET /dcc/llm_doc.md`
 - `GET /dcc/excel_guide`
 - `GET /dcc/exemplos`
 - `GET /dcc/faq`

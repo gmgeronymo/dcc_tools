@@ -7,6 +7,11 @@ implemente um cliente que consuma a API corretamente.
 O gerador recebe um **JSON** e devolve um **XML DCC** compatível com o modelo do PTB
 ([Digital Calibration Certificate](https://www.ptb.de/dcc)).
 
+> Para instruções de uso com assistentes de IA (ChatGPT, Claude, Gemini, Copilot) e prompts prontos,
+> consulte o **Guia de acesso à API para LLMs**: `/dcc/llm_doc` (HTML) ou `/dcc/llm_doc.md`
+> (Markdown). O arquivo fonte fica em `flask/app/docs/llm_doc.md`. Como o serviço roda em
+> intranet, **baixe o `.md` e anexe-o ao assistente**; a URL interna normalmente não é acessível pela LLM.
+
 ---
 
 ## 1. Visão geral
@@ -33,7 +38,7 @@ POST /dcc/generate
 | Erro de validação | `400` com JSON `{"error": "<mensagem>"}` |
 | Erro interno | `500` com JSON `{"error": "<mensagem>"}` |
 
-**Base URL de produção** (exemplo): `https://sig-dimci.inmetro.gov.br/dcc/generate`.
+**Base URL** (exemplo; o serviço roda em ambiente de intranet): `https://sig-dimci.inmetro.gov.br/dcc/generate`.
 O caminho da rota é sempre `/dcc/generate`; o host pode variar conforme o ambiente.
 
 ### 1.1 Autenticação por API-KEY

@@ -1302,6 +1302,28 @@ def introducao():
 def api_doc():
     return render_template('api_documentation.html')
 
+def _llm_doc_path():
+    """Caminho do guia Markdown para LLMs (versionado junto com a aplicação)."""
+    return os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'docs', 'llm_doc.md'
+    )
+
+@app.route('/dcc/llm_doc')
+def llm_doc():
+    with open(_llm_doc_path(), 'r', encoding='utf-8') as doc_file:
+        doc_markdown = doc_file.read()
+    return render_template('llm_doc.html', doc_markdown=doc_markdown)
+
+@app.route('/dcc/llm_doc.md')
+def llm_doc_md():
+    """Entrega o guia em Markdown, pronto para ser anexado a uma LLM."""
+    return send_file(
+        _llm_doc_path(),
+        mimetype='text/markdown',
+        as_attachment=False,
+        download_name='llm_doc.md',
+    )
+
 @app.route('/dcc/form_dcc')
 @auth.require_auth
 def form_dcc():
