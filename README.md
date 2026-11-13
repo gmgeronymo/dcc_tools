@@ -17,6 +17,7 @@ Principais funcionalidades:
 - Interface web com documentação, exemplos, FAQ e publicações (`/dcc/`)
 - Documentação de acesso à API para LLMs, em Markdown, com instruções e prompts para baixar e anexar ao assistente (`/dcc/llm_doc` e `/dcc/llm_doc.md`)
 - Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
+- Marcação estruturada de pontos dentro/fora da CMC do laboratório (`in_cmc`, `cmc_padrao` e `cmc_declaracao`; `basic_isInCMC` no XML)
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 - Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
 
@@ -159,6 +160,7 @@ Main capabilities:
 - Web UI with documentation, examples, FAQ, and publications (`/dcc/`)
 - LLM-oriented API access guide in Markdown, with instructions and prompts to download and attach to the assistant (`/dcc/llm_doc` and `/dcc/llm_doc.md`)
 - Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
+- Structured marking of measurement points inside/outside the laboratory CMC (`in_cmc`, `cmc_padrao`, and `cmc_declaracao`; `basic_isInCMC` in the XML)
 - User registration with API-KEY and protection of generation/upload functions
 - Password change and e-mail password recovery (`@inmetro.gov.br`)
 

@@ -187,7 +187,9 @@ devem ser mantidas exatamente como abaixo (incluindo acentos).
 | `caracteristicas_item` | string | sim | Características adicionais do item. |
 | `data_calibracao` | string | sim | Data da calibração, ISO 8601 (`YYYY-MM-DD`). |
 | `data_emissao` | string | não | Data de emissão (`YYYY-MM-DD`). Se omitida, o XML inclui a declaração "Ver data da assinatura eletrônica presente no certificado". |
-| `cmc` | boolean | sim | Indica se o certificado possui CMC. |
+| `cmc` | boolean | sim | Indica se o certificado possui a declaração textual de CMC (MRA/CIPM). |
+| `cmc_padrao` | boolean | não | Valor de cobertura de CMC aplicado aos resultados que não informam `in_cmc`. Se omitido, o padrão é `false`. |
+| `cmc_declaracao` | objeto | não | Personaliza a declaração estruturada `basic_isInCMC`. Ver §2.13. |
 | `chefe_div` | string | sim | Nome do chefe da divisão. |
 | `desc_chefe_div` | string | não | Cargo do chefe da divisão. Se fornecido, é sufixado com `" da " + nome_div`; senão usa `"Chefe da " + nome_div`. |
 | `chefe_lab` | string | sim | Nome do chefe do laboratório. |
@@ -409,6 +411,7 @@ Array de medições. Cada item referencia um `mensurando`, possui `value`/`unc`/
 | `k` | string/number | sim | Fator de abrangência. |
 | `<índice>` | string/number | depende | Uma chave para cada índice definido do mensurando (ex.: `faixa`, `voltage`, `frequency`). |
 | `nueff` | string/number | não | Graus de liberdade efetivos (νeff). Ver §6. |
+| `in_cmc` | boolean | não | `true` se o ponto está coberto pela CMC; `false` se está fora. Se omitido, usa `cmc_padrao` (padrão `false`). Ver §2.13. |
 
 > Os valores são convertidos internamente para string na saída XML. Recomenda-se enviar como string para
 > preservar a representação exata (ex.: `"2.13"`).
@@ -416,6 +419,120 @@ Array de medições. Cada item referencia um `mensurando`, possui `value`/`unc`/
 ### 2.12 `observacoes` (opcional)
 
 Array de strings. Cada item vira um statement "Observação N" no XML.
+
+### 2.13 Marcação de pontos dentro/fora da CMC (`in_cmc`)
+
+O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o mecanismo definido pelo
+*Good Practice* DKD‑E 7‑2, §4.5, e pelo vocabulário `basic_isInCMC` do DKD/PTB:
+
+1. cria um `dcc:statement` com `id` estável e `refType="basic_isInCMC"` em
+   `administrativeData/statements`;
+2. em cada `dcc:quantity` de resultado, adiciona
+   `dcc:measurementMetaData/dcc:metaData[@refId="<id>"]`;
+3. usa `dcc:valid` para um ponto único ou `dcc:validXMLList` para vários pontos, com um booleano por
+   valor, na mesma ordem de `si:valueXMLList`.
+
+**Campos de entrada**
+
+| Chave | Onde | Tipo | Descrição |
+| --- | --- | --- | --- |
+| `in_cmc` | cada item de `resultados` | boolean | Cobertura de CMC daquele ponto. Aceita `true`/`false`, `1`/`0`, `yes`/`no` ou `Sim`/`Não`. |
+| `cmc_padrao` | raiz | boolean | Valor aplicado aos resultados sem `in_cmc`. Ausente = `false`. |
+| `cmc_declaracao` | raiz | objeto | Personaliza `id`, `nome`, `referencia`, `link`, `descricao` e `autoridade` (`nome`, `cidade`, `pais`). |
+
+**Ativação e valor padrão**
+
+- A marcação só é gerada quando pelo menos um resultado informa `in_cmc` **ou** quando `cmc_padrao`
+  é informado. Sem isso, o XML permanece idêntico ao comportamento anterior.
+- A ausência de marcação em um ponto vinculado significa `false`, conforme o vocabulário. Por isso,
+  para indicar **apenas as exceções**, use `cmc_padrao: true` e marque com `in_cmc: false` os pontos
+  fora da CMC.
+- `in_cmc` ausente com `cmc_padrao` ausente resulta em `false`.
+- A declaração estruturada é independente do campo `cmc`: `cmc` controla a declaração textual do
+  MRA/CIPM; `in_cmc` controla a cobertura ponto a ponto.
+
+**Exemplo — todos cobertos, exceto dois pontos**
+
+```json
+{
+  "cmc": true,
+  "cmc_padrao": true,
+  "resultados": [
+    { "mensurando": "acdc", "frequency": "0.01", "value": "-280", "unc": "44", "k": "2.13", "in_cmc": true },
+    { "mensurando": "acdc", "frequency": "0.02", "value": "3", "unc": "37", "k": "2.28", "in_cmc": false },
+    { "mensurando": "acdc", "frequency": "0.03", "value": "12", "unc": "40", "k": "2.10", "in_cmc": false }
+  ]
+}
+```
+
+**Exemplo — personalização da declaração (laboratório acreditado)**
+
+```json
+{
+  "cmc_padrao": false,
+  "cmc_declaracao": {
+    "id": "escopoRBC",
+    "nome": "Cgcre/RBC",
+    "referencia": "Escopo de acreditação RBC 1234",
+    "link": "https://www.gov.br/inmetro/pt-br/acesso-a-informacao/acreditacao",
+    "descricao": "Cobertura conforme o escopo acreditado.",
+    "autoridade": { "nome": "Cgcre/Inmetro", "cidade": "Duque de Caxias", "pais": "BR" }
+  },
+  "resultados": [
+    { "mensurando": "acdc", "value": "10", "unc": "1", "k": "2", "in_cmc": true }
+  ]
+}
+```
+
+**XML gerado (trecho)**
+
+```xml
+<dcc:statement id="inCMC" refType="basic_isInCMC">
+  <dcc:name>
+    <dcc:content lang="pt">CIPM-MRA</dcc:content>
+  </dcc:name>
+  <dcc:description>
+    <dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:valid ...</dcc:content>
+  </dcc:description>
+  <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
+  <dcc:link>https://www.bipm.org/kcdb/</dcc:link>
+  <dcc:respAuthority>
+    <dcc:name><dcc:content lang="pt">BIPM</dcc:content></dcc:name>
+    <dcc:location>
+      <dcc:city>Paris</dcc:city>
+      <dcc:countryCode>FR</dcc:countryCode>
+    </dcc:location>
+  </dcc:respAuthority>
+</dcc:statement>
+```
+
+```xml
+<dcc:quantity refType="basic_measuredValue">
+  <dcc:name><dcc:content lang="pt">\delta_u</dcc:content></dcc:name>
+  <si:realListXMLList>...</si:realListXMLList>
+  <dcc:measurementMetaData>
+    <dcc:metaData refId="inCMC">
+      <dcc:validXMLList>true false false</dcc:validXMLList>
+    </dcc:metaData>
+  </dcc:measurementMetaData>
+</dcc:quantity>
+```
+
+Quando o mensurando tem um único ponto, o gerador usa `<dcc:valid>true</dcc:valid>` (ou `false`) em
+vez de `validXMLList`.
+
+O namespace `basic` é declarado automaticamente em `administrativeData/refTypeDefinitions` quando a
+marcação está ativa e o usuário não o declarou em `refTypeDefinitions`.
+
+**Critério metrológico:** um ponto só deve receber `true` quando (a) o valor está dentro da faixa
+coberta pela CMC aplicável e (b) a incerteza declarada é maior ou igual à incerteza da CMC,
+comparadas na mesma base estatística (mesmo `k` ou ambas convertidas para incerteza padrão). A
+marcação é uma afirmação sobre o resultado declarado, não sobre a adequação do instrumento ao uso.
+Referência: `Consideracoes_CMC_DCC_v1.0.md`.
+
+> Não use `dcc:conformity` para indicar CMC: ele declara conformidade com requisito, não cobertura de
+> CMC. Também não coloque `dcc:valid` dentro do `dcc:statement`; o `valid` pertence aos vínculos
+> (`metaData`).
 
 ---
 
@@ -496,6 +613,9 @@ Na tabela de resultados (`dcc:list`), cada coluna é uma `dcc:quantity` com `si:
 - `si:coverageProbabilityXMLList` é fixo em `0.9545`.
 - Quando `nueff` está presente, uma `dcc:quantity` adicional é adicionada ao final da mesma `dcc:list`
   (ver §6).
+- Quando `in_cmc`/`cmc_padrao` estão presentes, a `dcc:quantity` de resultado recebe
+  `dcc:measurementMetaData/dcc:metaData[@refId]` com `dcc:valid` ou `dcc:validXMLList`, e o
+  `administrativeData/statements` recebe o `dcc:statement` com `refType="basic_isInCMC"` (ver §2.13).
 
 ### Detalhes fixos do certificado
 
@@ -566,6 +686,8 @@ A rota `/dcc/generate` retorna:
 | `400` | Falha de validação (ex.: `nueff` inválido) | `{"error": "<mensagem clara>"}` |
 | `400` | Versão de schema não suportada (`3.2.0` ou desconhecida) | `{"error": "O schema DCC 3.2.0 não é mais suportado..."}` |
 | `400` | `relative_uncertainty_in_dcc=true` com `unc_relativa=false` | `{"error": "relative_uncertainty_in_dcc=true exige unc_relativa=true..."}` |
+| `400` | `in_cmc` ou `cmc_padrao` com valor não booleano | `{"error": "Valor inválido para 'in_cmc': ... Use true/false (ou Sim/Não)."}` |
+| `400` | `cmc_declaracao` inválida (tipo ou `id`) | `{"error": "O campo 'cmc_declaracao' deve ser um objeto."}` / `{"error": "Identificador inválido em 'cmc_declaracao.id': ..."}` |
 | `500` | Erro inesperado na geração | `{"error": "Erro ao gerar o DCC: ..."}` |
 
 Mensagens de erro de `nueff` (exemplos):
@@ -612,8 +734,11 @@ Rotas de ferramentas abertas: `/dcc/upload_xml_hr` (visualizar DCC) e `/dcc/vali
 
 - Cadastre-se em `POST /dcc/register` e envie a API-KEY recebida no cabeçalho `X-API-Key` em todas as
   chamadas aos endpoints de geração/upload.
-- Envie todos os campos de metadados como **string**, exceto `cmc` (boolean) e `unc_relativa` (boolean).
+- Envie todos os campos de metadados como **string**, exceto `cmc`, `cmc_padrao`, `in_cmc` e
+  `unc_relativa` (booleanos).
 - `resultados[].value`, `unc`, `k` e `nueff` podem ser string ou número; use string para preservar o valor exato.
+- Para marcar apenas os pontos fora da CMC, use `cmc_padrao: true` e `in_cmc: false` nos pontos
+  correspondentes; a ausência de `in_cmc` sem `cmc_padrao` significa `false`.
 - A ordem das chaves no JSON é irrelevante.
 - Para múltiplos mensurandos, repita o bloco em `mensurando`, referencie os índices em `indices` e
   agrupe os resultados por `mensurando` em `resultados`.
@@ -636,3 +761,9 @@ Rotas de ferramentas abertas: `/dcc/upload_xml_hr` (visualizar DCC) e `/dcc/vali
   <https://www.ptb.de/dcc/v3.3.0/dcc.xsd>
 - Modelo DCC do PTB:
   <https://www.ptb.de/dcc>
+- `basic_isInCMC` — DKD-E 7-2, §4.5:
+  <https://doi.org/10.7795/550.20240119B>
+- Vocabulário de `refType` do DKD/PTB (`isInCMC`):
+  <https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=250>
+- `dcc:validXMLList` (PTB DCC Wiki):
+  <https://wiki.dcc.ptb.de/en/dccvalidXMLList>

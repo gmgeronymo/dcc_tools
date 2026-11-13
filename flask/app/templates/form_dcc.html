@@ -55,6 +55,14 @@
                         </select>
                     </div>
                     <div class="col-md-2"><label class="form-label required">cmc</label><select class="form-select" name="cmc" required><option value="true">true</option><option value="false">false</option></select></div>
+                    <div class="col-md-2">
+                        <label class="form-label">cmc_padrao</label>
+                        <select class="form-select" name="cmc_padrao">
+                            <option value="">(não informar)</option>
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </div>
                     <div class="col-md-4"><label class="form-label required">chefe_div</label><input class="form-control" name="chefe_div" required></div>
                     <div class="col-md-4"><label class="form-label">desc_chefe_div</label><input class="form-control" name="desc_chefe_div"></div>
                     <div class="col-md-4"><label class="form-label required">chefe_lab</label><input class="form-control" name="chefe_lab" required></div>
@@ -160,10 +168,10 @@
                     <h2 class="h5 section-title mb-0">7) Resultados</h2>
                     <button type="button" class="btn btn-sm btn-outline-primary" id="addResultadoBtn">Adicionar linha</button>
                 </div>
-                <p class="muted-help">Campo <code>indices_json</code> deve conter JSON de pares label/valor (ex.: <code>{"faixa":"0.022","frequency":"50"}</code>). O campo <code>nueff</code> (graus de liberdade efetivos) é opcional.</p>
+                <p class="muted-help">Campo <code>indices_json</code> deve conter JSON de pares label/valor (ex.: <code>{"faixa":"0.022","frequency":"50"}</code>). O campo <code>nueff</code> (graus de liberdade efetivos) é opcional. O campo <code>in_cmc</code> (opcional) indica se o ponto está coberto pela CMC; deixe em branco para usar o valor de <code>cmc_padrao</code> (ausente = <code>false</code>).</p>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle" id="resultadoTable">
-                        <thead><tr><th>mensurando</th><th>value</th><th>unc</th><th>k</th><th>nueff</th><th>indices_json</th><th></th></tr></thead>
+                        <thead><tr><th>mensurando</th><th>value</th><th>unc</th><th>k</th><th>in_cmc</th><th>nueff</th><th>indices_json</th><th></th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -308,11 +316,24 @@ function addIndiceRow(values = {}) {
 function addResultadoRow(values = {}) {
     const tbody = document.querySelector('#resultadoTable tbody');
     const row = document.createElement('tr');
-    ['mensurando','value','unc','k','nueff','indices_json'].forEach((f) => {
+    ['mensurando','value','unc','k','in_cmc','nueff','indices_json'].forEach((f) => {
         const td = document.createElement('td');
-        const el = createCellInput();
+        let el;
+        if (f === 'in_cmc') {
+            el = document.createElement('select');
+            el.className = 'form-select form-select-sm';
+            [['', '(padrão)'], ['true', 'Sim'], ['false', 'Não']].forEach(([v, label]) => {
+                const o = document.createElement('option');
+                o.value = v;
+                o.textContent = label;
+                el.appendChild(o);
+            });
+            if (values[f] !== undefined) el.value = String(values[f]);
+        } else {
+            el = createCellInput();
+            if (values[f] !== undefined) el.value = values[f];
+        }
         el.dataset.field = f;
-        if (values[f] !== undefined) el.value = values[f];
         td.appendChild(el); row.appendChild(td);
     });
     row.appendChild(addRemoveBtn(row));
@@ -375,6 +396,7 @@ function buildPayload() {
     if (f.data_emissao.value) data.data_emissao = f.data_emissao.value;
     if (f.desc_chefe_div.value) data.desc_chefe_div = f.desc_chefe_div.value;
     if (f.desc_chefe_lab.value) data.desc_chefe_lab = f.desc_chefe_lab.value;
+    if (f.cmc_padrao.value !== '') data.cmc_padrao = f.cmc_padrao.value === 'true';
 
     const eqs = parseLines(f.metodo_medicao_equation.value);
     if (eqs.length) data.metodo_medicao_equation = eqs;
@@ -424,6 +446,7 @@ function buildPayload() {
     document.querySelectorAll('#resultadoTable tbody tr').forEach((row) => {
         const item = rowToObject(row);
         if (!item.mensurando || !item.value || !item.unc || !item.k) return;
+        if (item.in_cmc !== undefined) item.in_cmc = item.in_cmc === 'true';
         const idxJson = item.indices_json;
         delete item.indices_json;
         if (idxJson) {

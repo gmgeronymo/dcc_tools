@@ -889,6 +889,7 @@ acdc       | frequency | Frequência  | \kilo\hertz |
 
                             <ul>
                                 <li><strong>Colunas fixas:</strong> <code>mensurando</code>, <code>value</code>, <code>unc</code>, <code>k</code> e <code>nueff</code> (opcional)</li>
+                                <li><strong>Coluna opcional:</strong> <code>in_cmc</code> (cobertura do ponto pela CMC do laboratório)</li>
                                 <li><strong>Colunas dinâmicas:</strong> Uma coluna para cada índice definido na aba "Índices" (ex: <code>faixa</code>, <code>voltage</code>, <code>frequency</code>)</li>
                             </ul>
 
@@ -930,6 +931,11 @@ acdc       | frequency | Frequência  | \kilo\hertz |
                                         <td><strong>nueff</strong> <span class="field-optional">(opcional)</span></td>
                                         <td>Graus de liberdade efetivos (νeff). Valor numérico positivo, podendo ser fracionário (ex: 12.7). O infinito positivo pode ser informado como <code>inf</code>. Se a coluna estiver vazia ou ausente, o certificado é gerado sem a quantidade adicional.</td>
                                         <td>58.4</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>in_cmc</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>Indica se o ponto de medição está coberto pela CMC do laboratório. Aceita <code>Sim</code>/<code>Não</code>, <code>true</code>/<code>false</code>, <code>1</code>/<code>0</code> ou <code>yes</code>/<code>no</code>. Célula vazia equivale a <code>false</code>. Preencher ao menos uma célula ativa a marcação estruturada no XML; se a coluna estiver totalmente vazia ou ausente, o XML é gerado sem marcação CMC.</td>
+                                        <td>Sim</td>
                                     </tr>
                                 </tbody>
                             </table>

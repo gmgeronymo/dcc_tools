@@ -1,7 +1,7 @@
 # DCC Tools — Guia de acesso à API para LLMs
 
-**Versão:** 2.0
-**Atualizado em:** 12/11/2026
+**Versão:** 2.1
+**Atualizado em:** 13/11/2026
 **Público:** usuários, desenvolvedores e assistentes de IA (ChatGPT, Claude, Gemini, Copilot, agentes de código).
 **Idioma:** português (pt-BR).
 
@@ -600,7 +600,9 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `caracteristicas_item` | string | sim | Características adicionais do item. |
 | `data_calibracao` | string | sim | Data da calibração (`YYYY-MM-DD`). |
 | `data_emissao` | string | não | Data de emissão (`YYYY-MM-DD`). Se omitida, o XML usa a declaração de assinatura eletrônica. |
-| `cmc` | boolean | sim | Indica se o certificado possui CMC. |
+| `cmc` | boolean | sim | Indica se o certificado possui a declaração textual de CMC (MRA/CIPM). |
+| `cmc_padrao` | boolean | não | Cobertura de CMC aplicada aos resultados sem `in_cmc`. Ausente = `false`. |
+| `cmc_declaracao` | objeto | não | Personaliza a declaração `basic_isInCMC` (`id`, `nome`, `referencia`, `link`, `descricao`, `autoridade`). |
 | `chefe_div` | string | sim | Nome do chefe da divisão. |
 | `desc_chefe_div` | string | não | Cargo do chefe da divisão. |
 | `chefe_lab` | string | sim | Nome do chefe do laboratório. |
@@ -623,7 +625,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `metodo_medicao_equation` | array de strings | não | Equações em LaTeX, alinhadas por índice a `metodo_medicao`. |
 | `mensurando` | array | sim (≥ 1) | `label`, `name`, `col_name`, `unit`, `unc_relativa`, `refType`, `relative_uncertainty_in_dcc`, `relative_unc_unit`. |
 | `indices` | array | não | `mensurando`, `label`, `name`, `unit`, `refType`. |
-| `resultados` | array | sim | `mensurando`, `value`, `unc`, `k`, uma chave por índice e `nueff` opcional. |
+| `resultados` | array | sim | `mensurando`, `value`, `unc`, `k`, uma chave por índice, `nueff` opcional e `in_cmc` opcional. |
 | `observacoes` | array de strings | não | Cada item vira um statement "Observação N". |
 | `software` | array | não | `name`, `version` de softwares adicionais. |
 | `refTypeDefinitions` | array | não | `name`, `description`, `namespace`, `link`. |
@@ -646,6 +648,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
   "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
   "data_calibracao": "2024-08-07",
   "cmc": true,
+  "cmc_padrao": true,
   "chefe_div": "Edson Afonso",
   "chefe_lab": "Gean Marcos Geronymo",
   "tecnico_executor": "Gean Marcos Geronymo",
@@ -680,17 +683,20 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
     { "mensurando": "acdc", "label": "frequency", "name": "Frequência", "unit": "\\kilo\\hertz" }
   ],
   "resultados": [
-    { "mensurando": "acdc", "frequency": "0.01", "value": "-280", "unc": "44", "k": "2.13" },
-    { "mensurando": "acdc", "frequency": "0.02", "value": "3", "unc": "37", "k": "2.28" }
+    { "mensurando": "acdc", "frequency": "0.01", "value": "-280", "unc": "44", "k": "2.13", "in_cmc": true },
+    { "mensurando": "acdc", "frequency": "0.02", "value": "3", "unc": "37", "k": "2.28", "in_cmc": false }
   ]
 }
 ```
 
 ### 8.4 Regras importantes
 
-- Envie metadados como **string**, exceto `cmc` e `unc_relativa` (booleanos).
+- Envie metadados como **string**, exceto `cmc`, `cmc_padrao`, `in_cmc` e `unc_relativa` (booleanos).
 - `value`, `unc`, `k` e `nueff` podem ser string ou número; prefira string para preservar a
   representação decimal exata.
+- `resultados[].in_cmc` indica cobertura de CMC do ponto; se omitido, vale `cmc_padrao` (padrão
+  `false`). Para marcar apenas as exceções, use `cmc_padrao: true` e `in_cmc: false` nos pontos fora
+  da CMC (ver seção 11).
 - Cada `resultados[]` deve referenciar um `mensurando` existente pelo `label`.
 - Cada índice definido em `indices` deve existir nos resultados daquele mensurando.
 - Para múltiplos mensurandos, repita o bloco em `mensurando`, referencie os índices em `indices` e
@@ -761,14 +767,95 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 
 ---
 
-## 11. Erros e solução de problemas
+## 11. Marcação de pontos dentro/fora da CMC (`in_cmc`)
+
+O DCC 3.3.0 não tem campo nativo de CMC. O DCC Tools implementa o mecanismo `basic_isInCMC` do
+DKD‑E 7‑2, §4.5:
+
+- um `dcc:statement` com `id` e `refType="basic_isInCMC"` em `administrativeData/statements`;
+- um `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` de resultado;
+- `dcc:valid` (ponto único) ou `dcc:validXMLList` (um booleano por ponto, na ordem dos valores).
+
+### 11.1 Campos
+
+| Chave | Onde | Tipo | Descrição |
+| --- | --- | --- | --- |
+| `in_cmc` | cada `resultados[]` | boolean | `true` = ponto coberto pela CMC; `false` = fora. Aceita `true`/`false`, `1`/`0`, `yes`/`no`, `Sim`/`Não`. |
+| `cmc_padrao` | raiz | boolean | Valor usado nos pontos sem `in_cmc`. Ausente = `false`. |
+| `cmc_declaracao` | raiz | objeto | Personaliza `id`, `nome`, `referencia`, `link`, `descricao` e `autoridade` (`nome`, `cidade`, `pais`). |
+
+A marcação só é gerada quando há pelo menos um `in_cmc` ou quando `cmc_padrao` é informado. A
+ausência de marcação em um ponto vinculado significa `false` (regra do vocabulário). Por isso, para
+indicar **somente os pontos sem CMC**, use `cmc_padrao: true` e marque `in_cmc: false` nas exceções.
+
+O campo `cmc` continua controlando a declaração textual do MRA/CIPM; ele não substitui `in_cmc`.
+
+### 11.2 Exemplo
+
+```json
+{
+  "cmc": true,
+  "cmc_padrao": true,
+  "resultados": [
+    { "mensurando": "acdc", "value": "10.001", "unc": "0.002", "k": "2", "in_cmc": true },
+    { "mensurando": "acdc", "value": "20.002", "unc": "0.003", "k": "2", "in_cmc": true },
+    { "mensurando": "acdc", "value": "30.003", "unc": "0.004", "k": "2", "in_cmc": false }
+  ]
+}
+```
+
+XML resultante (trechos):
+
+```xml
+<dcc:statement id="inCMC" refType="basic_isInCMC">
+  <dcc:name><dcc:content lang="pt">CIPM-MRA</dcc:content></dcc:name>
+  <dcc:description><dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:valid ...</dcc:content></dcc:description>
+  <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
+  <dcc:link>https://www.bipm.org/kcdb/</dcc:link>
+  <dcc:respAuthority>
+    <dcc:name><dcc:content lang="pt">BIPM</dcc:content></dcc:name>
+    <dcc:location><dcc:city>Paris</dcc:city><dcc:countryCode>FR</dcc:countryCode></dcc:location>
+  </dcc:respAuthority>
+</dcc:statement>
+```
+
+```xml
+<dcc:quantity refType="basic_measuredValue">
+  <dcc:name><dcc:content lang="pt">\delta_u</dcc:content></dcc:name>
+  <si:realListXMLList>...</si:realListXMLList>
+  <dcc:measurementMetaData>
+    <dcc:metaData refId="inCMC">
+      <dcc:validXMLList>true true false</dcc:validXMLList>
+    </dcc:metaData>
+  </dcc:measurementMetaData>
+</dcc:quantity>
+```
+
+Com um único ponto, o XML usa `<dcc:valid>true</dcc:valid>` (ou `false`). O namespace `basic` é
+declarado automaticamente em `refTypeDefinitions` quando a marcação está ativa e o usuário não o
+declarou.
+
+### 11.3 Critério metrológico
+
+Um ponto só deve ser marcado com `true` quando **as duas condições** forem atendidas:
+
+1. o valor está dentro da faixa coberta pela CMC aplicável à grandeza, ao método e à faixa;
+2. a incerteza declarada é maior ou igual à incerteza da CMC, comparadas na mesma base estatística
+   (mesmo `k` ou ambas convertidas para incerteza padrão).
+
+Não use `dcc:conformity` para indicar CMC e não coloque `dcc:valid` dentro do `dcc:statement`.
+Referência: `Consideracoes_CMC_DCC_v1.0.md` (documento de apoio do GT-DCC).
+
+---
+
+## 12. Erros e solução de problemas
 
 | Sintoma | Causa provável | Como corrigir |
 | --- | --- | --- |
 | `401` com XML `<autenticacaoNecessaria>` | API-KEY ausente, inválida ou revogada. | Confira o cabeçalho `X-API-Key` e gere/consulte a chave em `/dcc/perfil`. |
 | `400` `{"error": "No JSON provided"}` | Corpo vazio ou `Content-Type` errado. | Envie JSON e defina `Content-Type: application/json`. |
 | `400` `{"error": "Invalid JSON: ..."}` | JSON malformado. | Valide o JSON; lembre-se de escapar `\` nas unidades D-SI. |
-| `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido). | Leia a mensagem e ajuste o campo indicado. |
+| `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido ou `in_cmc` não booleano). | Leia a mensagem e ajuste o campo indicado. |
 | `500` `{"error": "Erro ao gerar o DCC: ..."}` | Campo obrigatório ausente, tipo inesperado ou falha interna. | Confira a seção 8 e os campos obrigatórios; se persistir, contate o administrador com o payload e o horário. |
 | `/dcc/validate_xml` retorna HTML com erros | XML inválido, `schemaLocation` ausente ou schema em host não confiável. | Confira o XML e o `xsi:schemaLocation`; o schema precisa estar em `ptb.de`/`w3.org` (ou na allowlist). |
 | `/dcc/upload_json` retorna texto simples | Comportamento esperado dessa rota de conveniência. | Prefira `/dcc/generate` para respostas JSON/XML consistentes. |
@@ -776,7 +863,7 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 
 ---
 
-## 12. Boas práticas para LLMs e agentes
+## 13. Boas práticas para LLMs e agentes
 
 1. **Não invente endpoints nem campos.** Use apenas o que está neste documento.
 2. **Autentique sempre** nos endpoints protegidos e nunca exponha a chave em logs ou exemplos.
@@ -792,7 +879,7 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 
 ---
 
-## 13. Links úteis
+## 14. Links úteis
 
 - Página inicial: `/dcc/`
 - Documentação completa da API (HTML): `/dcc/api_doc`
@@ -803,12 +890,15 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 - Código-fonte: <https://github.com/gmgeronymo/dcc_tools>
 - Modelo DCC do PTB: <https://www.ptb.de/dcc>
 - `dcc:relativeUncertainty` (PTB DCC Wiki): <https://wiki.dcc.ptb.de/dccrelativeUncertainty>
+- `basic_isInCMC` — DKD-E 7-2, §4.5: <https://doi.org/10.7795/550.20240119B>
+- Vocabulário `isInCMC` (DKD/PTB): <https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=250>
+- `dcc:validXMLList` (PTB DCC Wiki): <https://wiki.dcc.ptb.de/en/dccvalidXMLList>
 - D-SI 2.2.1 (SI_Format.xsd): <https://ptb.de/si/v2.2.1/SI_Format.xsd>
 - DCC 3.3.0 (dcc.xsd): <https://www.ptb.de/dcc/v3.3.0/dcc.xsd>
 
 ---
 
-## 14. Versionamento deste documento
+## 15. Versionamento deste documento
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
@@ -816,3 +906,4 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 | 1.1 | 06/11/2026 | Ajuste para ambiente de intranet: baixar/anexar o `.md` em vez de depender da URL interna. |
 | 1.2 | 06/11/2026 | Nome do arquivo unificado para `llm_doc.md`, igual ao caminho de download. |
 | 2.0 | 12/11/2026 | Schema 3.3.0 como único suportado para geração; incerteza absoluta em `si:expandedMU`; `relative_uncertainty_in_dcc` exige `unc_relativa`; referências oficiais. |
+| 2.1 | 13/11/2026 | Marcação de pontos dentro/fora da CMC com `in_cmc`, `cmc_padrao` e `cmc_declaracao` (`basic_isInCMC`, `dcc:valid`/`dcc:validXMLList`). |

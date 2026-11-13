@@ -132,6 +132,7 @@
                         <li><a href="#measurand">Mensurando</a></li>
                         <li><a href="#indices">Índices</a></li>
                         <li><a href="#results">Resultados</a></li>
+                        <li><a href="#cmc-marking">Marcação CMC</a></li>
 			<li><a href="#obs">Observações</a></li>
                         <li><a href="#full-example">Exemplo Completo</a></li>
                     </ul>
@@ -326,10 +327,24 @@ Content-Type: application/json</div>
                                     </tr>
                                     <tr>
                                         <td>cmc</td>
-                                        <td>Booleano que indica se o certificado possui CMC</td>
+                                        <td>Booleano que indica se o certificado possui a declaração textual de CMC (MRA/CIPM)</td>
                                         <td><span class="required">Obrigatória</span></td>
                                         <td>"cmc": true</td>
-                                        <td></td>
+                                        <td>Controla apenas a declaração textual do MRA; a cobertura ponto a ponto usa <code>in_cmc</code>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>cmc_padrao</td>
+                                        <td>Valor de cobertura de CMC aplicado aos resultados sem <code>in_cmc</code></td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"cmc_padrao": true</td>
+                                        <td>Se omitido, o padrão é <code>false</code>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>cmc_declaracao</td>
+                                        <td>Personaliza a declaração estruturada <code>basic_isInCMC</code></td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"cmc_declaracao": {"id": "inCMC"}</td>
+                                        <td>Subchaves: <code>id</code>, <code>nome</code>, <code>referencia</code>, <code>link</code>, <code>descricao</code>, <code>autoridade</code> (<code>nome</code>, <code>cidade</code>, <code>pais</code>).</td>
                                     </tr>
                                     <tr>
                                         <td>chefe_div</td>
@@ -1047,7 +1062,8 @@ Content-Type: application/json</div>
         "value": "-280",
         "unc": "44",
         "k": "2.13",
-        "nueff": "58.4"
+        "nueff": "58.4",
+        "in_cmc": true
     },
     {
         "mensurando": "acdc",
@@ -1057,7 +1073,8 @@ Content-Type: application/json</div>
         "value": "3",
         "unc": "37",
         "k": "2.28",
-        "nueff": "62.1"
+        "nueff": "62.1",
+        "in_cmc": false
     }
 ]</div>
                             
@@ -1097,6 +1114,12 @@ Content-Type: application/json</div>
                                         <td>"k": "2.28"</td>
                                     </tr>
                                     <tr>
+                                        <td>in_cmc</td>
+                                        <td>Cobertura de CMC do ponto: <code>true</code> = dentro da CMC; <code>false</code> = fora. Aceita <code>true</code>/<code>false</code> ou <code>Sim</code>/<code>Não</code>.</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"in_cmc": false</td>
+                                    </tr>
+                                    <tr>
                                         <td>nueff</td>
                                         <td>Graus de liberdade efetivos (νeff) do resultado. Deve ser um valor numérico e positivo (aceita valores fracionários). O infinito (`+∞`) pode ser informado como <code>"inf"</code>.</td>
                                         <td><span class="optional">Opcional</span></td>
@@ -1112,6 +1135,67 @@ Content-Type: application/json</div>
                             </table>
 
                             <p class="mt-3"><strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> campo opcional. Quando presente, a API gera uma <code>dcc:quantity</code> adicional na mesma <code>dcc:list</code> de resultados, nomeada <em>Graus de liberdade efetivos</em>, com os valores em <code>dcc:charsXMLList</code> (representação textual, sem unidade). O número de valores de <code>nueff</code> deve ser igual ao número de resultados do mensurando associado. Valores <code>0</code>, negativos, <code>-inf</code>, <code>null</code>, vazios, <code>NaN</code> ou não numéricos são rejeitados; o infinito positivo pode ser informado como <code>"inf"</code> e é representado como <code>inf</code> no XML. Se omitido, o certificado é gerado sem a quantidade adicional, preservando o comportamento anterior.</p>
+
+                            <div id="cmc-marking" class="mt-4">
+                                <h5>Marcação de pontos dentro/fora da CMC (<code>in_cmc</code>)</h5>
+                                <p>O DCC 3.3.0 não possui campo nativo de CMC. A API implementa o mecanismo
+                                    <code>basic_isInCMC</code> (DKD-E 7-2, §4.5): cria um
+                                    <code>dcc:statement</code> com <code>id</code> e
+                                    <code>refType="basic_isInCMC"</code> em
+                                    <code>administrativeData/statements</code> e vincula cada
+                                    <code>dcc:quantity</code> de resultado por
+                                    <code>dcc:measurementMetaData/dcc:metaData[@refId]</code>, usando
+                                    <code>dcc:valid</code> (ponto único) ou <code>dcc:validXMLList</code>
+                                    (um booleano por ponto, na ordem de <code>si:valueXMLList</code>).</p>
+
+                                <ul>
+                                    <li><code>in_cmc</code> por resultado: <code>true</code> = ponto coberto pela CMC; <code>false</code> = fora.</li>
+                                    <li><code>cmc_padrao</code>: valor aplicado aos resultados sem <code>in_cmc</code>. Ausente = <code>false</code>.</li>
+                                    <li>A marcação só é gerada se houver ao menos um <code>in_cmc</code> ou se <code>cmc_padrao</code> for informado.</li>
+                                    <li>Para indicar <strong>somente as exceções</strong>, use <code>"cmc_padrao": true</code> e <code>"in_cmc": false</code> nos pontos fora da CMC.</li>
+                                    <li><code>cmc_declaracao</code> personaliza <code>id</code>, <code>nome</code>, <code>referencia</code>, <code>link</code>, <code>descricao</code> e <code>autoridade</code>.</li>
+                                    <li>O namespace <code>basic</code> é declarado automaticamente em <code>refTypeDefinitions</code> quando a marcação está ativa.</li>
+                                </ul>
+
+                                <h6 class="mt-3">Exemplo</h6>
+                                <div class="example-box">"cmc": true,
+"cmc_padrao": true,
+"resultados": [
+    { "mensurando": "acdc", "value": "10.001", "unc": "0.002", "k": "2", "in_cmc": true },
+    { "mensurando": "acdc", "value": "20.002", "unc": "0.003", "k": "2", "in_cmc": true },
+    { "mensurando": "acdc", "value": "30.003", "unc": "0.004", "k": "2", "in_cmc": false }
+]</div>
+
+                                <h6 class="mt-3">XML gerado (trecho)</h6>
+                                <div class="example-box">&lt;dcc:statement id="inCMC" refType="basic_isInCMC"&gt;
+  &lt;dcc:name&gt;&lt;dcc:content lang="pt"&gt;CIPM-MRA&lt;/dcc:content&gt;&lt;/dcc:name&gt;
+  &lt;dcc:description&gt;&lt;dcc:content lang="pt"&gt;Todos os resultados são acompanhados por um elemento dcc:valid ...&lt;/dcc:content&gt;&lt;/dcc:description&gt;
+  &lt;dcc:reference&gt;CIPM-MRA — Apêndice C / KCDB&lt;/dcc:reference&gt;
+  &lt;dcc:link&gt;https://www.bipm.org/kcdb/&lt;/dcc:link&gt;
+  &lt;dcc:respAuthority&gt;
+    &lt;dcc:name&gt;&lt;dcc:content lang="pt"&gt;BIPM&lt;/dcc:content&gt;&lt;/dcc:name&gt;
+    &lt;dcc:location&gt;&lt;dcc:city&gt;Paris&lt;/dcc:city&gt;&lt;dcc:countryCode&gt;FR&lt;/dcc:countryCode&gt;&lt;/dcc:location&gt;
+  &lt;/dcc:respAuthority&gt;
+&lt;/dcc:statement&gt;
+
+&lt;dcc:quantity refType="basic_measuredValue"&gt;
+  &lt;dcc:name&gt;&lt;dcc:content lang="pt"&gt;\delta_u&lt;/dcc:content&gt;&lt;/dcc:name&gt;
+  &lt;si:realListXMLList&gt;...&lt;/si:realListXMLList&gt;
+  &lt;dcc:measurementMetaData&gt;
+    &lt;dcc:metaData refId="inCMC"&gt;
+      &lt;dcc:validXMLList&gt;true true false&lt;/dcc:validXMLList&gt;
+    &lt;/dcc:metaData&gt;
+  &lt;/dcc:measurementMetaData&gt;
+&lt;/dcc:quantity&gt;</div>
+
+                                <p class="mt-3"><strong>Critério metrológico:</strong> marque <code>true</code> somente quando
+                                    (a) o valor estiver dentro da faixa coberta pela CMC aplicável e
+                                    (b) a incerteza declarada for maior ou igual à incerteza da CMC,
+                                    comparadas na mesma base estatística (mesmo <code>k</code> ou ambas
+                                    convertidas para incerteza padrão). Não use <code>dcc:conformity</code>
+                                    para indicar CMC. Referência:
+                                    <code>Consideracoes_CMC_DCC_v1.0.md</code>.</p>
+                            </div>
                         </div>
                     </div>
                 </div>

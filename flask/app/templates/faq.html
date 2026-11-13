@@ -150,6 +150,13 @@
 
                     <div class="card">
                         <div class="card-body">
+			    <p><strong>Como indicar se um ponto de medição está dentro ou fora da CMC do laboratório?</strong></p>
+			    <p>Use o campo opcional <code>in_cmc</code> em cada item de <code>resultados</code> (<code>true</code> = ponto coberto pela CMC; <code>false</code> = fora da CMC). Também é possível definir <code>cmc_padrao</code> na raiz do JSON para aplicar um valor aos resultados sem <code>in_cmc</code>; para marcar apenas as exceções, use <code>cmc_padrao=true</code> e <code>in_cmc=false</code> nos pontos fora da CMC. A marcação é gravada no XML por meio de um <code>dcc:statement</code> com <code>refType="basic_isInCMC"</code>, metadados <code>dcc:measurementMetaData</code> e <code>dcc:valid</code>/<code>dcc:validXMLList</code>. Se nenhum <code>in_cmc</code> nem <code>cmc_padrao</code> for informado, o XML é gerado sem marcação CMC. O campo <code>cmc</code> continua controlando apenas a declaração textual do MRA.</p>
+			</div>
+		    </div>
+
+                    <div class="card">
+                        <div class="card-body">
 			    <p><strong>O que mudou no formato da incerteza expandida?</strong></p>
 			    <p>A incerteza absoluta passou a ser emitida no formato D-SI 2.2.1: <code>si:measurementUncertaintyUnivariate/si:expandedMU</code> (valor único) ou <code>si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList</code> (listas). O elemento legado <code>si:expandedUnc</code> continua sendo aceito na leitura de certificados antigos, mas não é mais gerado.</p>
 			</div>

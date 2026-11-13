@@ -207,6 +207,7 @@ Responsável por quase toda a lógica da aplicação:
 | Geração XML | `dccGen`, `declaracoes`, `resolve_dcc_version`, `campo_name`, `campo_texto`, `campo_conteudo_multilingue` |
 | Incerteza | `format_two_sig_scientific`, `add_expanded_uncertainty`, `add_expanded_uncertainty_list`, `validate_relative_uncertainty` |
 | `nueff` | `is_positive_infinite`, `serialize_nueff`, `validate_nueff` |
+| CMC | `parse_bool`, `optional_bool`, `resolve_cmc_config`, `add_cmc_metadata`, `has_basic_ref_type_definition`, `add_basic_ref_type_definition`, `add_cmc_statement` |
 | Excel | `excel_to_json` |
 | PDF/A-3 | `attach_stream`, `attach_xml_to_pdfa3b`, `sha256sum` |
 | XSLT | `transform_xml_to_html` |
@@ -313,7 +314,7 @@ testar a navegação.
 - Saída: XML DCC (`text/xml`) com `Content-Disposition: attachment; filename="CC_DIMCI_<num_certif>.xml"`.
 - Autenticação: `X-API-Key` ou sessão.
 - Erros:
-  - `400` JSON ausente/inválido ou validação de `nueff`;
+  - `400` JSON ausente/inválido ou validação de `nueff`/`in_cmc`/`cmc_declaracao`;
   - `500` erro na geração (campos obrigatórios ausentes, tipos inesperados etc.);
   - `401` XML de autenticação.
 - `dcc_version` / `schema_version`: apenas `3.3.0`; se omitido, usa `3.3.0`. `3.2.0` e valores
@@ -330,6 +331,24 @@ testar a navegação.
 - Se presente em um resultado, todos os resultados do mesmo mensurando devem informá-lo.
 - Valores numéricos e positivos; `inf`/`Infinity` representam `+∞`.
 - Rejeitar `0`, negativos, `-inf`, `null`, vazio, `NaN` e não numéricos.
+
+### Marcação CMC (`in_cmc`)
+
+- `resultados[].in_cmc` (booleano opcional) indica se o ponto está coberto pela CMC do laboratório.
+  Aceita `true`/`false`, `1`/`0`, `yes`/`no`, `Sim`/`Não`.
+- `cmc_padrao` (raiz, booleano opcional) é aplicado aos resultados sem `in_cmc`. Ausente = `false`.
+- `cmc_declaracao` (raiz, objeto opcional) personaliza `id`, `nome`, `referencia`, `link`,
+  `descricao` e `autoridade` (`nome`, `cidade`, `pais`) do `dcc:statement`.
+- A marcação só é gerada quando há ao menos um `in_cmc` ou quando `cmc_padrao` é informado. Sem
+  isso, o XML permanece idêntico ao comportamento anterior.
+- Estrutura no XML 3.3.0: `dcc:statement[@refType="basic_isInCMC"]` +
+  `dcc:measurementMetaData/dcc:metaData[@refId=...]` +
+  `dcc:valid` (ponto único) ou `dcc:validXMLList` (vários pontos, alinhado a
+  `si:valueXMLList`). Não usar `dcc:conformity` para CMC.
+- Quando a marcação está ativa e `cmc=true`, a declaração textual do MRA é embutida como
+  `dcc:declaration` dentro do `statement`; sem marcação, o comportamento anterior é preservado.
+- `basic` é adicionado automaticamente a `refTypeDefinitions` quando ainda não existir.
+- A referência completa está em `doc/api_dcc_generator.md` §2.13 e em `/dcc/api_doc#cmc-marking`.
 
 ---
 
@@ -390,6 +409,7 @@ cd flask/app
 python -m unittest test_auth.py -v
 python -m unittest test_nueff.py -v
 python -m unittest test_validation.py -v
+python -m unittest test_cmc.py -v
 ```
 
 Ou todos:

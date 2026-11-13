@@ -94,6 +94,8 @@
         <p class="lead">Use a API do DCC Tools com ChatGPT, Claude, Gemini, Copilot ou agentes de código.
             Como o serviço roda em uma intranet, <strong>baixe o guia em Markdown ou copie o conteúdo</strong>
             e anexe ao seu assistente. A URL interna não é acessível pela LLM.</p>
+        <p class="small mt-2 mb-0 opacity-75">Guia v2.1 — inclui a marcação de pontos dentro/fora da CMC
+            (<code>in_cmc</code>, <code>basic_isInCMC</code>).</p>
         <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
             <a class="btn btn-light btn-lg" href="{{ url_for('llm_doc_md') }}" download>
                 <i class="fas fa-download me-2"></i>Baixar guia .md
@@ -206,8 +208,19 @@
         </div>
         <div class="col-12 col-lg-6">
             <div class="prompt-box">
+                <h6><i class="fas fa-bullseye me-1"></i>Marcar pontos sem CMC</h6>
+                <pre>Usando a documentação do DCC Tools que anexei (llm_doc.md), ajuste o JSON abaixo para indicar quais pontos de medição estão fora da CMC. Use "cmc_padrao": true e "in_cmc": false somente nos pontos fora da CMC, mantenha os demais com "in_cmc": true e explique como o XML gerado representa a marcação (statement basic_isInCMC, metaData/refId e validXMLList).
+
+&lt;cole aqui o JSON&gt;</pre>
+                <button class="btn btn-sm btn-outline-primary" type="button" data-copy-prompt>
+                    <i class="fas fa-copy me-1"></i>Copiar prompt
+                </button>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="prompt-box">
                 <h6><i class="fas fa-search me-1"></i>Revisar um JSON existente</h6>
-                <pre>Revise o JSON abaixo usando as regras da documentação do DCC Tools que anexei (llm_doc.md). Verifique campos obrigatórios, unidades D-SI, coerência entre "indices" e "resultados" e as regras de "nueff". Responda com uma lista de problemas e com o JSON corrigido.
+                <pre>Revise o JSON abaixo usando as regras da documentação do DCC Tools que anexei (llm_doc.md). Verifique campos obrigatórios, unidades D-SI, coerência entre "indices" e "resultados", as regras de "nueff" e a coerência da marcação de CMC ("in_cmc", "cmc_padrao", "cmc_declaracao"). Responda com uma lista de problemas e com o JSON corrigido.
 
 &lt;cole aqui o JSON&gt;</pre>
                 <button class="btn btn-sm btn-outline-primary" type="button" data-copy-prompt>
@@ -268,6 +281,8 @@ Restrições: [linguagem, versão do schema, formato de saída]</pre>
                 <li>Contrato de <code>POST /dcc/generate</code> (JSON → XML), incluindo erros e versões de schema.</li>
                 <li>Upload de JSON e Excel, validação de XML, visualização e anexação em PDF/A-3.</li>
                 <li>Modelo de dados do certificado, unidades D-SI e graus de liberdade efetivos (<code>nueff</code>).</li>
+                <li>Marcação de pontos dentro/fora da CMC (<code>in_cmc</code>, <code>cmc_padrao</code>,
+                    <code>cmc_declaracao</code>) com <code>basic_isInCMC</code>.</li>
                 <li>Boas práticas para agentes, solução de problemas e prompts prontos.</li>
             </ul>
         </div>

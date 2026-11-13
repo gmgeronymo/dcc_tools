@@ -213,6 +213,234 @@ def is_truthy(value):
     return str(value).strip().lower() in {'true', '1', 'yes', 'sim', 'y'}
 
 
+# ---------------------------------------------------------------------------
+# Marcacao de pontos dentro/fora da CMC (basic_isInCMC)
+#
+# O schema DCC 3.3.0 nao possui campo nativo de CMC. A marcacao e feita com:
+#   1) dcc:statement id=... refType="basic_isInCMC" em administrativeData;
+#   2) dcc:measurementMetaData/dcc:metaData refId=... na dcc:quantity resultante;
+#   3) dcc:valid (ponto unico) ou dcc:validXMLList (um booleano por ponto).
+#
+# A entrada JSON usa:
+#   - resultados[].in_cmc  (opcional): true/false por ponto;
+#   - cmc_padrao           (opcional): valor aplicado aos pontos sem in_cmc;
+#   - cmc_declaracao       (opcional): personaliza id, textos e autoridade.
+# ---------------------------------------------------------------------------
+
+CMC_REF_TYPE = 'basic_isInCMC'
+CMC_ID_PATTERN = re.compile(r'^[A-Za-z_][A-Za-z0-9._-]*$')
+
+CMC_STATEMENT_DEFAULTS = {
+    'id': 'inCMC',
+    'nome': 'CIPM-MRA',
+    'referencia': 'CIPM-MRA — Apêndice C / KCDB',
+    'link': 'https://www.bipm.org/kcdb/',
+    'descricao': (
+        'Todos os resultados são acompanhados por um elemento dcc:valid '
+        '(ou dcc:validXMLList) com refId para este dcc:statement. O valor '
+        '"true" indica que (a) o resultado está dentro do escopo coberto '
+        'pela CMC e (b) a incerteza declarada é maior ou igual à incerteza '
+        'da CMC.'
+    ),
+    'autoridade': {
+        'nome': 'BIPM',
+        'cidade': 'Paris',
+        'pais': 'FR',
+    },
+}
+
+CMC_BOOL_TRUE = {'true', '1', 'yes', 'sim', 'y', 's', 't'}
+CMC_BOOL_FALSE = {'false', '0', 'no', 'nao', 'não', 'n', 'f'}
+
+
+def parse_bool(value, campo):
+    """Converte um valor booleano (bool, 0/1 ou texto) em bool.
+
+    Aceita true/false, 1/0, yes/no, sim/não. Valores ambíguos ou vazios
+    geram ValueError para evitar que um erro de digitacao seja
+    silenciosamente interpretado como "fora da CMC".
+    """
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, (int, float)):
+        if value == 0:
+            return False
+        if value == 1:
+            return True
+
+    if isinstance(value, str):
+        texto = value.strip().lower()
+        if texto in CMC_BOOL_TRUE:
+            return True
+        if texto in CMC_BOOL_FALSE:
+            return False
+
+    raise ValueError(
+        "Valor inválido para '%s': %r. Use true/false (ou Sim/Não)."
+        % (campo, value)
+    )
+
+
+def optional_bool(mapping, key, default):
+    """Le um booleano opcional e informa se a chave foi explicitada."""
+    if not isinstance(mapping, dict) or key not in mapping:
+        return default, False
+
+    value = mapping[key]
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return default, False
+
+    return parse_bool(value, key), True
+
+
+def resolve_cmc_config(dados):
+    """Valida e resolve a configuracao da marcacao de CMC.
+
+    A marcacao so e ativada quando o usuario informa pelo menos um
+    'resultados[].in_cmc' ou o campo 'cmc_padrao'. Sem isso, o XML
+    permanece identico ao comportamento anterior.
+    """
+    resultados = dados.get('resultados', []) or []
+    explicito = False
+
+    for resultado in resultados:
+        if not isinstance(resultado, dict):
+            continue
+        _, tem_in_cmc = optional_bool(resultado, 'in_cmc', False)
+        explicito = explicito or tem_in_cmc
+
+    cmc_padrao, tem_padrao = optional_bool(dados, 'cmc_padrao', False)
+
+    config = {
+        'id': CMC_STATEMENT_DEFAULTS['id'],
+        'nome': CMC_STATEMENT_DEFAULTS['nome'],
+        'referencia': CMC_STATEMENT_DEFAULTS['referencia'],
+        'link': CMC_STATEMENT_DEFAULTS['link'],
+        'descricao': CMC_STATEMENT_DEFAULTS['descricao'],
+        'autoridade': dict(CMC_STATEMENT_DEFAULTS['autoridade']),
+        'enabled': explicito or tem_padrao,
+        'default': cmc_padrao,
+    }
+
+    declaracao = dados.get('cmc_declaracao')
+    if declaracao is not None and not isinstance(declaracao, dict):
+        raise ValueError("O campo 'cmc_declaracao' deve ser um objeto.")
+
+    if isinstance(declaracao, dict):
+        for chave in ('id', 'nome', 'referencia', 'link', 'descricao'):
+            valor = declaracao.get(chave)
+            if valor is not None and str(valor).strip() != '':
+                config[chave] = str(valor).strip()
+
+        autoridade = declaracao.get('autoridade')
+        if autoridade is not None:
+            if not isinstance(autoridade, dict):
+                raise ValueError(
+                    "O campo 'cmc_declaracao.autoridade' deve ser um objeto."
+                )
+            for chave in ('nome', 'cidade', 'pais'):
+                valor = autoridade.get(chave)
+                if valor is not None and str(valor).strip() != '':
+                    config['autoridade'][chave] = str(valor).strip()
+
+    if not CMC_ID_PATTERN.match(config['id']):
+        raise ValueError(
+            "Identificador inválido em 'cmc_declaracao.id': %r. Use letras, "
+            "números, ponto, hífen ou sublinhado, começando por letra ou "
+            "sublinhado." % (config['id'],)
+        )
+
+    return config
+
+
+def add_cmc_metadata(parent, ref_id, statuses):
+    """Adiciona dcc:measurementMetaData com dcc:valid/validXMLList.
+
+    Para um unico ponto usa dcc:valid; para listas usa dcc:validXMLList com
+    um booleano por valor, na mesma ordem de si:valueXMLList.
+    """
+    measurement_metadata = etree.SubElement(
+        parent, etree.QName(nsmap['dcc'], 'measurementMetaData'))
+    meta_data = etree.SubElement(
+        measurement_metadata, etree.QName(nsmap['dcc'], 'metaData'),
+        refId=ref_id)
+
+    bools = ['true' if status else 'false' for status in statuses]
+    if len(bools) == 1:
+        valid = etree.SubElement(meta_data, etree.QName(nsmap['dcc'], 'valid'))
+        valid.text = bools[0]
+    else:
+        valid_list = etree.SubElement(
+            meta_data, etree.QName(nsmap['dcc'], 'validXMLList'))
+        valid_list.text = ' '.join(bools)
+
+
+def has_basic_ref_type_definition(dados):
+    """Indica se o usuario ja declarou o namespace 'basic'."""
+    for definicao in dados.get('refTypeDefinitions', []) or []:
+        if not isinstance(definicao, dict):
+            continue
+        if str(definicao.get('namespace', '')).strip().lower() == 'basic':
+            return True
+    return False
+
+
+def add_basic_ref_type_definition(ref_type_definitions):
+    """Declara o namespace 'basic' para o refType basic_isInCMC."""
+    ref_type_definition = etree.SubElement(
+        ref_type_definitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
+
+    campo_name(ref_type_definition, 'Namespace for Cross-Community RefTypes', 'en')
+
+    description = etree.SubElement(
+        ref_type_definition, etree.QName(nsmap['dcc'], 'description'))
+    campo_texto(
+        description,
+        'content',
+        "The 'basic' namespace contains RefTypes common for multiple communities.",
+        'en')
+
+    campo_texto(ref_type_definition, 'namespace', 'basic')
+    campo_texto(
+        ref_type_definition,
+        'link',
+        'https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2')
+
+
+def add_cmc_statement(statements, dados, config, declaracao):
+    """Cria o dcc:statement estruturado da marcacao basic_isInCMC."""
+    statement = etree.SubElement(
+        statements,
+        etree.QName(nsmap['dcc'], 'statement'),
+        id=config['id'],
+        refType=CMC_REF_TYPE)
+
+    campo_name(statement, config['nome'])
+
+    description = etree.SubElement(statement, etree.QName(nsmap['dcc'], 'description'))
+    campo_texto(description, 'content', config['descricao'])
+
+    campo_texto(statement, 'reference', config['referencia'])
+    campo_texto(statement, 'link', config['link'])
+
+    # Mantem a declaracao textual do MRA quando o certificado tem CMC.
+    # A ordem do XSD exige 'declaration' antes de 'respAuthority'.
+    if is_truthy(dados.get('cmc')):
+        declaration = etree.SubElement(
+            statement, etree.QName(nsmap['dcc'], 'declaration'))
+        campo_texto(declaration, 'content', declaracao['cmc'])
+
+    resp_authority = etree.SubElement(
+        statement, etree.QName(nsmap['dcc'], 'respAuthority'))
+    campo_name(resp_authority, config['autoridade']['nome'])
+
+    location = etree.SubElement(
+        resp_authority, etree.QName(nsmap['dcc'], 'location'))
+    campo_texto(location, 'city', config['autoridade']['cidade'])
+    campo_texto(location, 'countryCode', config['autoridade']['pais'])
+
+
 def validate_relative_uncertainty(dados):
     """Valida a combinacao de flags da incerteza relativa.
 
@@ -377,6 +605,9 @@ def dccGen(dcc_version, dados, declaracao) :
 
     validate_relative_uncertainty(dados)
 
+    # marcacao de pontos dentro/fora da CMC (opcional)
+    cmc_config = resolve_cmc_config(dados)
+
     dcc = etree.Element(
         etree.QName(nsmap['dcc'], 'digitalCalibrationCertificate'),
         {schemaLocation: 'https://ptb.de/dcc '+schema_url, 'schemaVersion' : dcc_version},
@@ -427,6 +658,7 @@ def dccGen(dcc_version, dados, declaracao) :
     # possibilidade de receber mais definicoes de refTypes via API
     # chave: refTypeDefinitions
     # subchaves: name, description, namespace e link
+    refTypeDefinitions = None
     if 'refTypeDefinitions' in dados:
         refTypeDefinitions = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
         for refTypeDef in dados['refTypeDefinitions'] :
@@ -440,7 +672,15 @@ def dccGen(dcc_version, dados, declaracao) :
                 campo_texto(refTypeDefinition,'namespace',refTypeDef['namespace'])
                 # link
                 campo_texto(refTypeDefinition,'link',refTypeDef['link'])
-                
+
+    # a marcacao basic_isInCMC depende do namespace 'basic'; declara-o
+    # automaticamente quando o usuario nao o informou
+    if cmc_config['enabled'] and not has_basic_ref_type_definition(dados):
+        if refTypeDefinitions is None:
+            refTypeDefinitions = etree.SubElement(
+                administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
+        add_basic_ref_type_definition(refTypeDefinitions)
+
     # coreData block
     coreData = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'coreData'))
     # country code
@@ -575,7 +815,12 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_texto(description,'content', dados['caracteristicas_item'])
 
     # declaracao cmc
-    if (dados['cmc']) :
+    # Quando ha marcacao por ponto (in_cmc), a declaracao passa a ser
+    # estruturada: statement com id e refType="basic_isInCMC", vinculado
+    # aos resultados via measurementMetaData/refId.
+    if cmc_config['enabled']:
+        add_cmc_statement(statements, dados, cmc_config, declaracao)
+    elif (dados['cmc']) :
         statement = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))
         declaration = etree.SubElement(statement, etree.QName(nsmap['dcc'], 'declaration'))
         campo_texto(declaration, 'content', declaracao['cmc'])
@@ -726,6 +971,8 @@ def dccGen(dcc_version, dados, declaracao) :
     k = {}
     # graus de liberdade efetivos (opcional)
     nueff = {}
+    # status CMC por ponto (opcional)
+    cmc_status = {}
     
     # organizar nomes e unidades dos mensurandos e indices de forma indexada
     mensurando_data = {}
@@ -740,6 +987,7 @@ def dccGen(dcc_version, dados, declaracao) :
             unc_input[linha['label']] = []
             k[linha['label']] = []
             nueff[linha['label']] = []
+            cmc_status[linha['label']] = []
             # dados
             mensurando_data[linha['label']] = linha
             indices_data[linha['label']] = {}
@@ -773,6 +1021,11 @@ def dccGen(dcc_version, dados, declaracao) :
                     unc[mensurando].append(resultados['unc'])
                 
                 k[mensurando].append(resultados['k'])
+
+                # marcacao CMC do ponto: in_cmc explicito ou cmc_padrao
+                in_cmc, _ = optional_bool(
+                    resultados, 'in_cmc', cmc_config['default'])
+                cmc_status[mensurando].append(in_cmc)
 
                 # graus de liberdade efetivos (opcional)
                 if 'nueff' in resultados and resultados['nueff'] is not None :
@@ -855,6 +1108,12 @@ def dccGen(dcc_version, dados, declaracao) :
             si_relative_valueXMLList.text = ' '.join(unc_input[mensurando])
             si_relative_unitXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'unitXMLList'))
             si_relative_unitXMLList.text = mensurando_data[mensurando].get('relative_unc_unit', '\\micro\\one')
+
+        # opcional: marcacao dos pontos dentro/fora da CMC
+        # dcc:measurementMetaData deve vir apos relativeUncertainty e antes
+        # de usedMethods/usedSoftware/measuringEquipments/influenceConditions
+        if cmc_config['enabled'] and cmc_status[mensurando]:
+            add_cmc_metadata(quantity, cmc_config['id'], cmc_status[mensurando])
 
         # opcional: graus de liberdade efetivos (nueff)
         # representados como uma dcc:quantity adicional na mesma dcc:list,
