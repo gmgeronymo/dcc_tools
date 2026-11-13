@@ -19,7 +19,7 @@ O gerador recebe um **JSON** e devolve um **XML DCC** compatível com o modelo d
 - **Protocolo**: HTTP/1.1, JSON no corpo da requisição, XML na resposta.
 - **Autenticação**: API-KEY de usuário no cabeçalho `X-API-Key` (ver §1.1).
 - **Codificação**: UTF-8.
-- **Schema DCC suportado**: `3.3.0` (padrão) e `3.2.0`.
+- **Schema DCC suportado**: `3.3.0` (padrão). O schema `3.2.0` não é mais aceito para geração.
 
 ### Endpoint principal
 
@@ -194,11 +194,12 @@ devem ser mantidas exatamente como abaixo (incluindo acentos).
 | `desc_chefe_lab` | string | não | Cargo do chefe do laboratório. Se fornecido, é sufixado com `" do " + nome_lab`; senão usa `"Chefe do " + nome_lab`. |
 | `tecnico_executor` | string | sim | Nome do técnico executor. |
 | `desc_tecnico_executor` | string | sim | Cargo/descrição do técnico executor. |
-| `dcc_version` | string | não | Versão do schema (`3.3.0` ou `3.2.0`). Padrão: `3.3.0`. |
+| `dcc_version` | string | não | Versão do schema. Único valor aceito: `3.3.0`. Padrão: `3.3.0`. |
 | `schema_version` | string | não | Alias alternativo para `dcc_version`. |
 
 > A versão de schema é resolvida na ordem: `dcc_version` → `schema_version` → `3.3.0`.
-> Valores não reconhecidos caem no padrão `3.3.0`.
+> `3.2.0` e valores desconhecidos retornam **400**. Certificados 3.2.0 já emitidos
+> continuam válidos para validação e visualização.
 
 ### 2.2 `software` (opcional)
 
@@ -348,13 +349,18 @@ Array que define os mensurandos (as tabelas de resultados).
 | `unit` | string | sim | Unidade do resultado (D-SI). |
 | `unc_relativa` | boolean | sim | `true` se a incerteza de entrada é relativa (ppm); `false` se absoluta. |
 | `refType` | string | não | RefType do resultado. |
-| `relative_uncertainty_in_dcc` | boolean | não | Se `true`, adiciona também o bloco `dcc:relativeUncertainty` (schema 3.3.0). |
+| `relative_uncertainty_in_dcc` | boolean | não | Se `true`, adiciona também o bloco `dcc:relativeUncertainty`. **Exige `unc_relativa=true`**; caso contrário, a API retorna **400**. |
 | `relative_unc_unit` | string | não | Unidade da incerteza relativa no bloco `dcc:relativeUncertainty`. Padrão: `\\micro\\one`. |
 
 > Comportamento da incerteza relativa: quando `unc_relativa` é `true`, cada `unc` de entrada (em ppm) é
 > convertida para valor absoluto com **dois algarismos significativos**
-> (`unc_abs = unc * 1e-6 * value`). O resultado absoluto é sempre incluído em `si:expandedUncXMLList`;
-> o valor relativo original é preservado opcionalmente em `dcc:relativeUncertainty`.
+> (`unc_abs = unc * 1e-6 * value`). O resultado absoluto é sempre incluído em
+> `si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList`; o valor relativo original é
+> preservado opcionalmente em `dcc:relativeUncertainty`.
+>
+> O bloco relativo só pode ser emitido quando a incerteza de entrada também é relativa. A combinação
+> `unc_relativa=false` com `relative_uncertainty_in_dcc=true` é inconsistente e retorna **400**.
+> Referência: <https://wiki.dcc.ptb.de/dccrelativeUncertainty>.
 
 ### 2.10 `indices` (opcional)
 
@@ -475,7 +481,7 @@ Array de strings. Cada item vira um statement "Observação N" no XML.
 
 ## 4. Resposta (XML DCC)
 
-A resposta é um XML válido contra `https://www.ptb.de/dcc/v3.3.0/dcc.xsd` (ou `3.2.0`). Elementos principais:
+A resposta é um XML válido contra `https://www.ptb.de/dcc/v3.3.0/dcc.xsd`. Elementos principais:
 
 - `dcc:digitalCalibrationCertificate` (raiz, com `schemaVersion`).
 - `dcc:administrativeData` (software, coreData, items, calibrationLaboratory, respPersons, customer, statements).
@@ -484,8 +490,8 @@ A resposta é um XML válido contra `https://www.ptb.de/dcc/v3.3.0/dcc.xsd` (ou 
 Na tabela de resultados (`dcc:list`), cada coluna é uma `dcc:quantity` com `si:realListXMLList`
 (`si:valueXMLList` + `si:unitXMLList`), exceto a coluna opcional de `nueff`, que usa `dcc:charsXMLList`
 (ver §6). A coluna de resultado inclui também
-`si:expandedUncXMLList` (`si:uncertaintyXMLList`, `si:coverageFactorXMLList`,
-`si:coverageProbabilityXMLList`).
+`si:measurementUncertaintyUnivariateXMLList` → `si:expandedMUXMLList`
+(`si:valueExpandedMUXMLList`, `si:coverageFactorXMLList`, `si:coverageProbabilityXMLList`).
 
 - `si:coverageProbabilityXMLList` é fixo em `0.9545`.
 - Quando `nueff` está presente, uma `dcc:quantity` adicional é adicionada ao final da mesma `dcc:list`
@@ -543,7 +549,9 @@ incerteza do resultado.
 A nova quantidade usa `dcc:charsXMLList` (representação textual, sem unidade) e **não** inclui
 `dcc:description` nem `si:unitXMLList`.
 
-A estrutura `si:expandedUncXMLList` existente **não é alterada**.
+O bloco de incerteza absoluta usa o formato D-SI 2.2.1
+(`si:measurementUncertaintyUnivariateXMLList` → `si:expandedMUXMLList`). O bloco opcional de
+`nueff` não interfere nessa estrutura.
 
 ---
 
@@ -556,6 +564,8 @@ A rota `/dcc/generate` retorna:
 | `401` | API-KEY ausente, inválida ou revogada | XML `<autenticacaoNecessaria>` com instruções (ver §1.1); navegadores são redirecionados |
 | `400` | JSON ausente ou inválido | `{"error": "No JSON provided"}` / `{"error": "Invalid JSON: ..."}` |
 | `400` | Falha de validação (ex.: `nueff` inválido) | `{"error": "<mensagem clara>"}` |
+| `400` | Versão de schema não suportada (`3.2.0` ou desconhecida) | `{"error": "O schema DCC 3.2.0 não é mais suportado..."}` |
+| `400` | `relative_uncertainty_in_dcc=true` com `unc_relativa=false` | `{"error": "relative_uncertainty_in_dcc=true exige unc_relativa=true..."}` |
 | `500` | Erro inesperado na geração | `{"error": "Erro ao gerar o DCC: ..."}` |
 
 Mensagens de erro de `nueff` (exemplos):
@@ -609,3 +619,20 @@ Rotas de ferramentas abertas: `/dcc/upload_xml_hr` (visualizar DCC) e `/dcc/vali
   agrupe os resultados por `mensurando` em `resultados`.
 - A conversão da incerteza relativa para absoluta (ppm → absoluta) ocorre apenas quando
   `mensurando[].unc_relativa` é `true`.
+- `relative_uncertainty_in_dcc=true` só é aceito com `unc_relativa=true`; a combinação contrária
+  retorna `400`.
+
+---
+
+## 10. Referências oficiais
+
+- `dcc:relativeUncertainty` (PTB DCC Wiki):
+  <https://wiki.dcc.ptb.de/dccrelativeUncertainty>
+- `dcc:quantityType` (PTB DCC Wiki):
+  <https://wiki.dcc.ptb.de/en/dccquantityType>
+- D-SI 2.2.1 (schema usado pelo DCC 3.3.0):
+  <https://ptb.de/si/v2.2.1/SI_Format.xsd>
+- DCC 3.3.0:
+  <https://www.ptb.de/dcc/v3.3.0/dcc.xsd>
+- Modelo DCC do PTB:
+  <https://www.ptb.de/dcc>

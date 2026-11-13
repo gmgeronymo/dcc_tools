@@ -32,7 +32,7 @@ os.environ['DCC_SECRET_KEY'] = 'secret-test-key'
 os.environ['DCC_EMAIL_ENABLED'] = 'false'
 
 import main  # noqa: E402
-from main import app  # noqa: E402
+from main import app, is_truthy  # noqa: E402
 import auth  # noqa: E402
 import email_service  # noqa: E402
 from werkzeug.security import check_password_hash  # noqa: E402
@@ -517,6 +517,52 @@ class TestAuthUnit(AuthTestBase):
         self.assertIn('password_hash', cols)
         self.assertIn('api_key', cols)
         self.assertIn('password_reset_tokens', tables)
+
+
+class TestGeracaoDCC(AuthTestBase):
+
+    def test_gera_dcc_com_expanded_mu(self):
+        key = self.api_key('alice')
+        resp = self.client.post(
+            '/dcc/generate', json=self.dados_exemplo(), headers={'X-API-Key': key}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b'measurementUncertaintyUnivariate', resp.data)
+        self.assertIn(b'expandedMU', resp.data)
+        self.assertIn(b'valueExpandedMUXMLList', resp.data)
+        self.assertNotIn(b'expandedUnc', resp.data)
+
+    def test_schema_320_rejeitado(self):
+        key = self.api_key('alice')
+        dados = self.dados_exemplo()
+        dados['dcc_version'] = '3.2.0'
+        resp = self.client.post(
+            '/dcc/generate', json=dados, headers={'X-API-Key': key}
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('3.2.0', resp.get_json()['error'])
+
+    def test_schema_desconhecido_rejeitado(self):
+        key = self.api_key('alice')
+        dados = self.dados_exemplo()
+        dados['dcc_version'] = '9.9.9'
+        resp = self.client.post(
+            '/dcc/generate', json=dados, headers={'X-API-Key': key}
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('9.9.9', resp.get_json()['error'])
+
+    def test_incerteza_relativa_exige_unc_relativa(self):
+        key = self.api_key('alice')
+        dados = self.dados_exemplo()
+        for mensurando in dados['mensurando']:
+            if is_truthy(mensurando.get('relative_uncertainty_in_dcc')):
+                mensurando['unc_relativa'] = False
+        resp = self.client.post(
+            '/dcc/generate', json=dados, headers={'X-API-Key': key}
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('unc_relativa', resp.get_json()['error'])
 
 
 class TestEmailService(unittest.TestCase):

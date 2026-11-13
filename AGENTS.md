@@ -18,7 +18,9 @@ O **DCC Tools** é uma aplicação do Inmetro (Dimci/Diele/Lampe) para gerar e p
 - Implementação ativa: aplicação web **Flask** em `flask/`.
 - Execução recomendada: **Docker Compose** com uWSGI + nginx.
 - Ambiente de produção: **intranet**; as URLs internas não são acessíveis por assistentes externos.
-- Versões de schema DCC suportadas: `3.3.0` (padrão) e `3.2.0`.
+- Versão de schema DCC suportada para geração: `3.3.0` (padrão). O schema `3.2.0` não é mais
+  aceito para geração (retorna `400`); certificados 3.2.0 existentes continuam válidos para
+  validação e visualização.
 - Licença: GPL-2.0-or-later.
 - Idioma do domínio e da documentação: português (pt-BR).
 
@@ -203,7 +205,7 @@ Responsável por quase toda a lógica da aplicação:
 | --- | --- |
 | Configuração DCC | `DEFAULT_DCC_VERSION`, `SUPPORTED_DCC_VERSIONS`, `nsmap`, `schemaLocation` |
 | Geração XML | `dccGen`, `declaracoes`, `resolve_dcc_version`, `campo_name`, `campo_texto`, `campo_conteudo_multilingue` |
-| Incerteza relativa | `format_two_sig_scientific` |
+| Incerteza | `format_two_sig_scientific`, `add_expanded_uncertainty`, `add_expanded_uncertainty_list`, `validate_relative_uncertainty` |
 | `nueff` | `is_positive_infinite`, `serialize_nueff`, `validate_nueff` |
 | Excel | `excel_to_json` |
 | PDF/A-3 | `attach_stream`, `attach_xml_to_pdfa3b`, `sha256sum` |
@@ -314,8 +316,10 @@ testar a navegação.
   - `400` JSON ausente/inválido ou validação de `nueff`;
   - `500` erro na geração (campos obrigatórios ausentes, tipos inesperados etc.);
   - `401` XML de autenticação.
-- `dcc_version` / `schema_version`: `3.3.0` (padrão) ou `3.2.0`; valores desconhecidos caem no
-  padrão.
+- `dcc_version` / `schema_version`: apenas `3.3.0`; se omitido, usa `3.3.0`. `3.2.0` e valores
+  desconhecidos retornam `400`.
+- Incerteza absoluta no formato D-SI 2.2.1 (`si:expandedMU` / `si:expandedMUXMLList`).
+- `relative_uncertainty_in_dcc=true` exige `unc_relativa=true`; caso contrário, retorna `400`.
 - `num_certif` não deve incluir o prefixo `DIMCI` (o XML adiciona).
 - Unidades seguem D-SI (`\volt`, `\micro\volt\volt\tothe{-1}`, `\degreecelsius`, etc.).
 - A referência completa de campos está em `doc/api_dcc_generator.md` e em `/dcc/api_doc`.

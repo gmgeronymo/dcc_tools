@@ -52,7 +52,6 @@
                         <label class="form-label required">dcc_version</label>
                         <select class="form-select" name="dcc_version" required>
                             <option value="3.3.0" selected>3.3.0 (padrão)</option>
-                            <option value="3.2.0">3.2.0 (compatibilidade)</option>
                         </select>
                     </div>
                     <div class="col-md-2"><label class="form-label required">cmc</label><select class="form-select" name="cmc" required><option value="true">true</option><option value="false">false</option></select></div>
@@ -136,7 +135,7 @@
                         <tbody></tbody>
                     </table>
                 </div>
-                <p class="muted-help">Use <code>relative_uncertainty_in_dcc=true</code> para adicionar também o bloco <code>dcc:relativeUncertaintyXmlList</code>. O resultado legado em <code>si:realListXMLList</code> permanece sempre presente para compatibilidade.</p>
+                <p class="muted-help">Use <code>relative_uncertainty_in_dcc=true</code> para adicionar também o bloco <code>dcc:relativeUncertaintyXmlList</code>. Essa opção exige <code>unc_relativa=true</code>; caso contrário, a geração retorna erro 400. A incerteza absoluta é sempre emitida em <code>si:realListXMLList</code> com <code>si:expandedMUXMLList</code>.</p>
             </div>
         </div>
 

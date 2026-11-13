@@ -354,7 +354,7 @@
 	      <xsl:for-each select="//dcc:influenceConditions/dcc:influenceCondition">
 		<xsl:variable name="conditionName" select="dcc:name/dcc:content"/>
 		<xsl:variable name="unit" select="dcc:data/dcc:quantity/si:real/si:unit"/>
-		<xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/>
+		<xsl:variable name="uncertainty" select="dcc:data/dcc:quantity/si:real/si:measurementUncertaintyUnivariate/si:expandedMU/si:valueExpandedMU | dcc:data/dcc:quantity/si:real/si:expandedUnc/si:uncertainty"/>
 		<xsl:variable name="quantityCount" select="count(dcc:data/dcc:quantity)"/>
 		<xsl:variable name="hasRefTypeMin" select="boolean(dcc:data/dcc:quantity[@refType='math_minimum'])"/>
 		<xsl:variable name="hasRefTypeMax" select="boolean(dcc:data/dcc:quantity[@refType='math_maximum'])"/>
@@ -587,7 +587,7 @@
                   <xsl:for-each select="dcc:data/dcc:list/dcc:quantity">
                     <xsl:variable name="quantityName" select="dcc:name/dcc:content"/>
                     <xsl:variable name="unit" select="si:realListXMLList/si:unitXMLList"/>
-                    <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
+                    <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:measurementUncertaintyUnivariateXMLList | si:realListXMLList/si:expandedUncXMLList"/>
                     
                     <th>
                       <xsl:value-of select="$quantityName"/>
@@ -656,9 +656,9 @@
       <tr>
         <xsl:for-each select="$quantities">
           <xsl:variable name="quantityValues" select="normalize-space(concat(si:realListXMLList/si:valueXMLList, dcc:charsXMLList))"/>
-          <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
-          <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
-          <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:expandedUncXMLList"/>
+          <xsl:variable name="quantityUncertainties" select="normalize-space(si:realListXMLList/si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList/si:valueExpandedMUXMLList | si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList)"/>
+          <xsl:variable name="quantityCoverageFactors" select="normalize-space(si:realListXMLList/si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList/si:coverageFactorXMLList | si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList)"/>
+          <xsl:variable name="hasUncertainty" select="si:realListXMLList/si:measurementUncertaintyUnivariateXMLList | si:realListXMLList/si:expandedUncXMLList"/>
 
           <td>
             <xsl:call-template name="format-number-comma">
@@ -948,8 +948,8 @@
     <xsl:variable name="frequencies" select="$resultNode/dcc:data/dcc:list/dcc:quantity[1]/si:realListXMLList/si:valueXMLList"/>
     <xsl:variable name="voltages" select="$resultNode/dcc:data/dcc:list/dcc:quantity[2]/si:realListXMLList/si:valueXMLList"/>
     <xsl:variable name="values" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:valueXMLList"/>
-    <xsl:variable name="uncertainties" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList"/>
-    <xsl:variable name="coverageFactors" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList"/>
+    <xsl:variable name="uncertainties" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList/si:valueExpandedMUXMLList | $resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:expandedUncXMLList/si:uncertaintyXMLList"/>
+    <xsl:variable name="coverageFactors" select="$resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList/si:coverageFactorXMLList | $resultNode/dcc:data/dcc:list/dcc:quantity[$valueIndex]/si:realListXMLList/si:expandedUncXMLList/si:coverageFactorXMLList"/>
     
     <xsl:call-template name="generate-table-rows">
       <xsl:with-param name="frequencies" select="$frequencies"/>

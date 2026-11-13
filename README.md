@@ -20,9 +20,11 @@ Principais funcionalidades:
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 - Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
 
-Versões de schema DCC suportadas:
+Versão de schema DCC suportada para geração:
 - `3.3.0` (padrão)
-- `3.2.0`
+
+O schema `3.2.0` não é mais aceito para geração (retorna `400`). Certificados 3.2.0 já
+emitidos continuam válidos para validação e visualização.
 
 ### Estrutura do projeto
 
@@ -160,9 +162,11 @@ Main capabilities:
 - User registration with API-KEY and protection of generation/upload functions
 - Password change and e-mail password recovery (`@inmetro.gov.br`)
 
-Supported DCC schema versions:
+Supported DCC schema version for generation:
 - `3.3.0` (default)
-- `3.2.0`
+
+Schema `3.2.0` is no longer accepted for generation (returns `400`). Previously issued
+3.2.0 certificates remain valid for validation and rendering.
 
 ### Project structure
 

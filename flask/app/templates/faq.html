@@ -140,6 +140,27 @@
 			    <p>Também disponibilizamos um visualizador do DCC em formato amigável (<i>human-readable</i>), com apresentação semelhante ao modelo atual de certificado de calibração da Dimci. Para acessar, <a href="{{ url_for('upload_xml_hr') }}">clique aqui</a>.</p>
 			</div>
 		    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+			    <p><strong>O schema DCC 3.2.0 ainda pode ser usado para gerar certificados?</strong></p>
+			    <p>Não. A geração aceita apenas o schema <code>3.3.0</code>. Requisições com <code>dcc_version="3.2.0"</code> retornam erro <code>400</code>. Certificados 3.2.0 já emitidos continuam válidos e podem ser validados e visualizados normalmente.</p>
+			</div>
+		    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+			    <p><strong>O que mudou no formato da incerteza expandida?</strong></p>
+			    <p>A incerteza absoluta passou a ser emitida no formato D-SI 2.2.1: <code>si:measurementUncertaintyUnivariate/si:expandedMU</code> (valor único) ou <code>si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList</code> (listas). O elemento legado <code>si:expandedUnc</code> continua sendo aceito na leitura de certificados antigos, mas não é mais gerado.</p>
+			</div>
+		    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+			    <p><strong>Por que <code>relative_uncertainty_in_dcc=true</code> exige <code>unc_relativa=true</code>?</strong></p>
+			    <p>O bloco <code>dcc:relativeUncertainty</code> representa uma incerteza relativa. Se a incerteza de entrada é absoluta, o bloco relativo ficaria semanticamente incorreto. Por isso, a combinação <code>unc_relativa=false</code> com <code>relative_uncertainty_in_dcc=true</code> retorna erro <code>400</code>. Referência: <a href="https://wiki.dcc.ptb.de/dccrelativeUncertainty" target="_blank" rel="noopener">dcc:relativeUncertainty (PTB DCC Wiki)</a>.</p>
+			</div>
+		    </div>
 		    
 		</div>
 	    </div>

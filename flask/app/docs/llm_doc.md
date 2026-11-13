@@ -1,7 +1,7 @@
 # DCC Tools — Guia de acesso à API para LLMs
 
-**Versão:** 1.2
-**Atualizado em:** 06/11/2026
+**Versão:** 2.0
+**Atualizado em:** 12/11/2026
 **Público:** usuários, desenvolvedores e assistentes de IA (ChatGPT, Claude, Gemini, Copilot, agentes de código).
 **Idioma:** português (pt-BR).
 
@@ -83,7 +83,7 @@ Valide o XML antes de salvar e trate os erros 400, 401 e 500. Inclua um CSV de e
 ```text
 Com base na documentação do DCC Tools que anexei (llm_doc.md), gere um JSON completo para
 um certificado de calibração de [instrumento], com [N] pontos de medição, incerteza [absoluta/relativa]
-e versão de schema [3.3.0/3.2.0]. Explique cada campo e liste os campos obrigatórios.
+e versão de schema 3.3.0. Explique cada campo e liste os campos obrigatórios.
 ```
 
 **3. Revisar um JSON existente**
@@ -182,7 +182,7 @@ represente unidades no formato D-SI (por exemplo, "\volt", "\micro\volt\volt\tot
 | Autenticação da API | cabeçalho `X-API-Key: dcc_...` |
 | Alternativa de autenticação | cookie de sessão da interface web |
 | Codificação | UTF-8 |
-| Schema DCC | `3.3.0` (padrão) e `3.2.0` |
+| Schema DCC | `3.3.0` (único suportado para geração) |
 | Formato de entrada | JSON ou `multipart/form-data` |
 | Formato de saída | XML DCC, HTML, PDF ou JSON de erro |
 
@@ -431,6 +431,22 @@ O nome do arquivo usa `num_certif` com `/` substituído por `_`. O XML inclui
 </dcc:digitalCalibrationCertificate>
 ```
 
+A incerteza expandida absoluta é emitida no formato D-SI 2.2.1:
+
+```xml
+<si:realListXMLList>
+  <si:valueXMLList>-280 3</si:valueXMLList>
+  <si:unitXMLList>\micro\volt\volt\tothe{-1}</si:unitXMLList>
+  <si:measurementUncertaintyUnivariateXMLList>
+    <si:expandedMUXMLList>
+      <si:valueExpandedMUXMLList>44 37</si:valueExpandedMUXMLList>
+      <si:coverageFactorXMLList>2.13 2.28</si:coverageFactorXMLList>
+      <si:coverageProbabilityXMLList>0.9545</si:coverageProbabilityXMLList>
+    </si:expandedMUXMLList>
+  </si:measurementUncertaintyUnivariateXMLList>
+</si:realListXMLList>
+```
+
 **Erros**
 
 | Código | Situação | Corpo |
@@ -445,8 +461,8 @@ O nome do arquivo usa `num_certif` com `/` substituído por `_`. O XML inclui
 > `{"error": "Erro ao gerar o DCC: ..."}` (e, para `num_certif`, em um erro `500` genérico antes da
 > validação). Valide o payload localmente antes de enviar.
 
-Versão do schema: o campo `dcc_version` (ou o alias `schema_version`) aceita `3.2.0` e `3.3.0`.
-Se ausente ou não reconhecido, o padrão é `3.3.0`.
+Versão do schema: o campo `dcc_version` (ou o alias `schema_version`) aceita apenas `3.3.0`.
+Se ausente, o padrão é `3.3.0`. `3.2.0` e valores desconhecidos retornam **400**.
 
 ### 7.2 `POST /dcc/upload_json`
 
@@ -591,7 +607,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `desc_chefe_lab` | string | não | Cargo do chefe do laboratório. |
 | `tecnico_executor` | string | sim | Nome do técnico executor. |
 | `desc_tecnico_executor` | string | sim | Cargo/descrição do técnico executor. |
-| `dcc_version` | string | não | `3.3.0` (padrão) ou `3.2.0`. |
+| `dcc_version` | string | não | `3.3.0` (único aceito; padrão). `3.2.0` retorna 400. |
 | `schema_version` | string | não | Alias de `dcc_version`. |
 
 ### 8.2 Blocos aninhados
@@ -681,7 +697,10 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
   agrupe os resultados por `mensurando`.
 - Quando `mensurando[].unc_relativa` é `true`, o valor de `unc` é tratado como relativo (ppm) e
   convertido para absoluto com dois algarismos significativos.
+- `mensurando[].relative_uncertainty_in_dcc=true` **exige** `unc_relativa=true`. A combinação
+  contrária retorna **400**, pois o bloco `dcc:relativeUncertainty` só representa incerteza relativa.
 - A documentação completa, campo a campo, está em `/dcc/api_doc`.
+- Referência oficial: <https://wiki.dcc.ptb.de/dccrelativeUncertainty>.
 
 ---
 
@@ -783,6 +802,9 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 - Publicações: `/dcc/publications`
 - Código-fonte: <https://github.com/gmgeronymo/dcc_tools>
 - Modelo DCC do PTB: <https://www.ptb.de/dcc>
+- `dcc:relativeUncertainty` (PTB DCC Wiki): <https://wiki.dcc.ptb.de/dccrelativeUncertainty>
+- D-SI 2.2.1 (SI_Format.xsd): <https://ptb.de/si/v2.2.1/SI_Format.xsd>
+- DCC 3.3.0 (dcc.xsd): <https://www.ptb.de/dcc/v3.3.0/dcc.xsd>
 
 ---
 
@@ -793,3 +815,4 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 | 1.0 | 06/11/2026 | Criação do guia de acesso à API para LLMs, com instruções de uso e prompts. |
 | 1.1 | 06/11/2026 | Ajuste para ambiente de intranet: baixar/anexar o `.md` em vez de depender da URL interna. |
 | 1.2 | 06/11/2026 | Nome do arquivo unificado para `llm_doc.md`, igual ao caminho de download. |
+| 2.0 | 12/11/2026 | Schema 3.3.0 como único suportado para geração; incerteza absoluta em `si:expandedMU`; `relative_uncertainty_in_dcc` exige `unc_relativa`; referências oficiais. |

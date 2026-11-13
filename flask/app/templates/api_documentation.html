@@ -148,7 +148,7 @@
                             <h4>DCC Generator</h4>
                             <p>A API recebe como entrada uma string em formato JSON, que deve ser enviada via uma requisição POST</p>
 		    <p>Endpoint da API: <a href="https://sig-dimci.inmetro.gov.br/dcc/generate">https://sig-dimci.inmetro.gov.br/dcc/generate</a></p>
-                            <p><strong>Versão de schema padrão:</strong> 3.3.0. Para compatibilidade durante transição, é possível enviar opcionalmente <code>dcc_version</code> com valor <code>3.2.0</code> ou <code>3.3.0</code>.</p>
+                            <p><strong>Versão de schema suportada:</strong> 3.3.0. O campo <code>dcc_version</code> aceita apenas <code>3.3.0</code>; se omitido, o padrão é <code>3.3.0</code>. Requisições com <code>3.2.0</code> retornam erro <code>400</code>.</p>
                             
                             <h5 class="mt-4">Exemplo de arquivo JSON:</h5>
                             <div class="example-box">{
@@ -259,7 +259,7 @@ Content-Type: application/json</div>
                                         <td>Versão do schema DCC para geração do XML</td>
                                         <td><span class="optional">Opcional</span></td>
                                         <td>"dcc_version": "3.3.0"</td>
-                                        <td>Se omitido, usa 3.3.0. Compatível com 3.2.0 para transição.</td>
+                                        <td>Se omitido, usa 3.3.0. Único valor aceito: 3.3.0. O schema 3.2.0 não é mais aceito para geração.</td>
                                     </tr>
                                     <tr>
                                         <td>num_processo</td>
@@ -874,7 +874,8 @@ Content-Type: application/json</div>
         "refType": "basic_measuredValue"
     }
 ]</div>
-                            <p class="mt-3"><strong>Comportamento:</strong> a API sempre mantém o resultado completo no bloco SI legado (<code>si:realListXMLList</code> com incerteza absoluta). Quando <code>relative_uncertainty_in_dcc = true</code>, ela adiciona também <code>dcc:relativeUncertaintyXmlList</code> com os valores de incerteza relativa em <code>valueXMLList</code> e a unidade relativa em <code>unitXMLList</code>, sem repetir resultado, k e probabilidade nesse bloco.</p>
+                            <p class="mt-3"><strong>Comportamento:</strong> a API sempre mantém o resultado completo em <code>si:realListXMLList</code>, com a incerteza absoluta em <code>si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList</code>. Quando <code>relative_uncertainty_in_dcc = true</code>, ela adiciona também <code>dcc:relativeUncertaintyXmlList</code> com os valores de incerteza relativa em <code>valueXMLList</code> e a unidade relativa em <code>unitXMLList</code>, sem repetir resultado, k e probabilidade nesse bloco.</p>
+                            <p class="mt-2"><strong>Validação:</strong> <code>relative_uncertainty_in_dcc=true</code> exige <code>unc_relativa=true</code>. A combinação contrária retorna <strong>400</strong>. Referência: <a href="https://wiki.dcc.ptb.de/dccrelativeUncertainty" target="_blank" rel="noopener">dcc:relativeUncertainty (PTB DCC Wiki)</a>.</p>
                             
                             <h5 class="mt-4">Descrição do array:</h5>
                             <table class="key-table mt-3">
@@ -919,7 +920,7 @@ Content-Type: application/json</div>
                                     </tr>
                                     <tr>
                                         <td>relative_uncertainty_in_dcc</td>
-                                        <td>Se true, inclui dcc:relativeUncertainty no XML (schema 3.3.0)</td>
+                                        <td>Se true, inclui dcc:relativeUncertainty no XML. Exige unc_relativa=true; caso contrário, retorna 400.</td>
                                         <td><span class="optional">Opcional</span></td>
                                         <td>"relative_uncertainty_in_dcc": true</td>
                                     </tr>
@@ -1315,6 +1316,21 @@ Content-Type: application/json</div>
 }
 
 			    </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-section" id="referencias">
+                    <h2 class="section-title">Referências oficiais</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li><a href="https://wiki.dcc.ptb.de/dccrelativeUncertainty" target="_blank" rel="noopener">dcc:relativeUncertainty — PTB DCC Wiki</a></li>
+                                <li><a href="https://wiki.dcc.ptb.de/en/dccquantityType" target="_blank" rel="noopener">dcc:quantityType — PTB DCC Wiki</a></li>
+                                <li><a href="https://ptb.de/si/v2.2.1/SI_Format.xsd" target="_blank" rel="noopener">D-SI 2.2.1 (SI_Format.xsd)</a></li>
+                                <li><a href="https://www.ptb.de/dcc/v3.3.0/dcc.xsd" target="_blank" rel="noopener">DCC 3.3.0 (dcc.xsd)</a></li>
+                                <li><a href="https://www.ptb.de/dcc" target="_blank" rel="noopener">Modelo DCC do PTB</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>

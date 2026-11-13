@@ -21,8 +21,8 @@
 
 # dados do programa
 # parametros do programa
-__version__ = '2.0'
-__date__="16/10/2025"
+__version__ = '2.1'
+__date__="12/11/2026"
 __appname__="dccGenerator"
 __author__="Gean Marcos Geronymo"
 __author_email__="gmgeronymo@inmetro.gov.br"
@@ -73,7 +73,6 @@ schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schem
 
 DEFAULT_DCC_VERSION = '3.3.0'
 SUPPORTED_DCC_VERSIONS = {
-    '3.2.0': 'https://ptb.de/dcc/v3.2.0/dcc.xsd',
     '3.3.0': 'https://www.ptb.de/dcc/v3.3.0/dcc.xsd',
 }
 
@@ -182,18 +181,28 @@ def declaracoes(dados) :
 
 def resolve_dcc_version(dados):
     """
-    Resolve DCC schema version with backward compatibility.
+    Resolve a versao do schema DCC.
 
-    Optional input keys supported:
+    Chaves opcionais:
     - dcc_version
     - schema_version
 
-    If not provided, default is DEFAULT_DCC_VERSION.
+    Se nao informada, usa DEFAULT_DCC_VERSION. Apenas versoes em
+    SUPPORTED_DCC_VERSIONS sao aceitas; versoes antigas ou desconhecidas
+    geram ValueError (a API responde 400).
     """
     requested_version = dados.get('dcc_version') or dados.get('schema_version') or DEFAULT_DCC_VERSION
     if requested_version in SUPPORTED_DCC_VERSIONS:
         return requested_version
-    return DEFAULT_DCC_VERSION
+    if requested_version == '3.2.0':
+        raise ValueError(
+            "O schema DCC 3.2.0 não é mais suportado para geração. "
+            "Use dcc_version='3.3.0'."
+        )
+    raise ValueError(
+        "Versão de schema não suportada: %r. Versão suportada: 3.3.0."
+        % (requested_version,)
+    )
 
 
 def is_truthy(value):
@@ -202,6 +211,64 @@ def is_truthy(value):
     if value is None:
         return False
     return str(value).strip().lower() in {'true', '1', 'yes', 'sim', 'y'}
+
+
+def validate_relative_uncertainty(dados):
+    """Valida a combinacao de flags da incerteza relativa.
+
+    O bloco dcc:relativeUncertainty representa uma incerteza relativa.
+    Por isso, so pode ser emitido quando a entrada 'unc' tambem e relativa
+    (unc_relativa=true). A combinacao inversa gera erro 400.
+    """
+    for linha in dados.get('mensurando', []) or []:
+        if (is_truthy(linha.get('relative_uncertainty_in_dcc'))
+                and not is_truthy(linha.get('unc_relativa'))):
+            label = linha.get('label', '?')
+            raise ValueError(
+                "relative_uncertainty_in_dcc=true exige unc_relativa=true "
+                "no mensurando '%s'." % label
+            )
+
+
+def add_expanded_uncertainty(parent, uncertainty, coverage_factor, probability='0.9545'):
+    """Adiciona incerteza expandida a um si:real no formato D-SI 2.2.1.
+
+    Estrutura: si:measurementUncertaintyUnivariate/si:expandedMU.
+    """
+    measurement_uncertainty = etree.SubElement(
+        parent, etree.QName(nsmap['si'], 'measurementUncertaintyUnivariate'))
+    expanded_mu = etree.SubElement(
+        measurement_uncertainty, etree.QName(nsmap['si'], 'expandedMU'))
+    value = etree.SubElement(
+        expanded_mu, etree.QName(nsmap['si'], 'valueExpandedMU'))
+    value.text = str(uncertainty)
+    coverage_factor_node = etree.SubElement(
+        expanded_mu, etree.QName(nsmap['si'], 'coverageFactor'))
+    coverage_factor_node.text = str(coverage_factor)
+    coverage_probability_node = etree.SubElement(
+        expanded_mu, etree.QName(nsmap['si'], 'coverageProbability'))
+    coverage_probability_node.text = str(probability)
+
+
+def add_expanded_uncertainty_list(parent, uncertainties, coverage_factors, probability='0.9545'):
+    """Adiciona incerteza expandida em lista no formato D-SI 2.2.1.
+
+    Estrutura:
+    si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList.
+    """
+    measurement_uncertainty = etree.SubElement(
+        parent, etree.QName(nsmap['si'], 'measurementUncertaintyUnivariateXMLList'))
+    expanded_mu = etree.SubElement(
+        measurement_uncertainty, etree.QName(nsmap['si'], 'expandedMUXMLList'))
+    value = etree.SubElement(
+        expanded_mu, etree.QName(nsmap['si'], 'valueExpandedMUXMLList'))
+    value.text = ' '.join(str(item) for item in uncertainties)
+    coverage_factor_node = etree.SubElement(
+        expanded_mu, etree.QName(nsmap['si'], 'coverageFactorXMLList'))
+    coverage_factor_node.text = ' '.join(str(item) for item in coverage_factors)
+    coverage_probability_node = etree.SubElement(
+        expanded_mu, etree.QName(nsmap['si'], 'coverageProbabilityXMLList'))
+    coverage_probability_node.text = str(probability)
 
 
 def campo_name(parent_node, text, lang="pt"):  # Add lang parameter
@@ -301,7 +368,14 @@ def validate_nueff(nueff, expected_length) :
 
 def dccGen(dcc_version, dados, declaracao) :
 
-    schema_url = SUPPORTED_DCC_VERSIONS.get(dcc_version, 'https://www.ptb.de/dcc/v'+dcc_version+'/dcc.xsd')
+    if dcc_version not in SUPPORTED_DCC_VERSIONS:
+        raise ValueError(
+            "Versão de schema não suportada: %r. Versão suportada: 3.3.0."
+            % (dcc_version,)
+        )
+    schema_url = SUPPORTED_DCC_VERSIONS[dcc_version]
+
+    validate_relative_uncertainty(dados)
 
     dcc = etree.Element(
         etree.QName(nsmap['dcc'], 'digitalCalibrationCertificate'),
@@ -608,16 +682,13 @@ def dccGen(dcc_version, dados, declaracao) :
                     si_unit.text = informacoes_pertinentes['unit']
 
                 if 'unc' in informacoes_pertinentes :
-                    si_expandedUnc = etree.SubElement(si_real, etree.QName(nsmap['si'], 'expandedUnc'))
-                    si_uncertainty = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'uncertainty'))
-                    si_uncertainty.text = informacoes_pertinentes['unc']
-                    si_coveragefactor = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageFactor'))
-                    if 'k' in informacoes_pertinentes :
-                        si_coveragefactor.text = informacoes_pertinentes['k']
-                    else :
-                        si_coveragefactor.text = '2'
-                    si_coverageprob = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageProbability'))
-                    si_coverageprob.text = '0.9545'
+                    coverage_factor = informacoes_pertinentes.get('k') or '2'
+                    add_expanded_uncertainty(
+                        si_real,
+                        informacoes_pertinentes['unc'],
+                        coverage_factor,
+                        '0.9545',
+                    )
 
         # checar se tem unidade (formato valor unico - existente)
         elif 'unit' in informacoes_pertinentes :
@@ -629,17 +700,13 @@ def dccGen(dcc_version, dados, declaracao) :
             si_unit.text = informacoes_pertinentes['unit']
 
             if 'unc' in informacoes_pertinentes :
-                si_expandedUnc = etree.SubElement(si_real, etree.QName(nsmap['si'], 'expandedUnc'))
-                si_uncertainty = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'uncertainty'))
-                si_uncertainty.text = informacoes_pertinentes['unc']
-                si_coveragefactor = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageFactor'))
-                if 'k' in informacoes_pertinentes :
-                    si_coveragefactor.text = informacoes_pertinentes['k']
-                else :
-                    si_coveragefactor.text = '2'
-            
-                si_coverageprob = etree.SubElement(si_expandedUnc, etree.QName(nsmap['si'], 'coverageProbability'))
-                si_coverageprob.text = '0.9545'
+                coverage_factor = informacoes_pertinentes.get('k') or '2'
+                add_expanded_uncertainty(
+                    si_real,
+                    informacoes_pertinentes['unc'],
+                    coverage_factor,
+                    '0.9545',
+                )
         else : # caso contrario, texto
             text = etree.SubElement(data, etree.QName(nsmap['dcc'], 'text'))
             campo_texto(text, 'content', informacoes_pertinentes['text'])
@@ -766,14 +833,13 @@ def dccGen(dcc_version, dados, declaracao) :
         si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
         si_unitXMLList.text = mensurando_data[mensurando]['unit']
 
-        # lógica legada: incerteza no bloco SI (absoluta)
-        si_expandedUncXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'expandedUncXMLList'))
-        si_uncertaintyXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'uncertaintyXMLList'))
-        si_uncertaintyXMLList.text = ' '.join(unc[mensurando])
-        si_coverageFactorXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageFactorXMLList'))
-        si_coverageFactorXMLList.text = ' '.join(k[mensurando])
-        si_converageProbabilityXMLList = etree.SubElement(si_expandedUncXMLList, etree.QName(nsmap['si'], 'coverageProbabilityXMLList'))
-        si_converageProbabilityXMLList.text = '0.9545'
+        # incerteza expandida no bloco SI (D-SI 2.2.1)
+        add_expanded_uncertainty_list(
+            si_realListXMLList,
+            unc[mensurando],
+            k[mensurando],
+            '0.9545',
+        )
 
         # opcional: bloco dcc:relativeUncertainty completo (resultado + incerteza)
         if is_truthy(mensurando_data[mensurando].get('relative_uncertainty_in_dcc')):
@@ -1599,9 +1665,9 @@ def generate_dcc():
     ## TODO ##
     # implementar logica para tratamento de erros ao gerar o DCC
     declaracao = declaracoes(dados)  
-    dcc_version = resolve_dcc_version(dados)
 
     try :
+        dcc_version = resolve_dcc_version(dados)
         xml_content = dccGen(dcc_version, dados, declaracao)
     except ValueError as e :
         return {'error': str(e)}, 400

@@ -236,7 +236,7 @@ class TestNueffGeneration(unittest.TestCase):
             with self.assertRaises(ValueError):
                 gerar(dados)
 
-    def test_incerteza_expandida_inalterada(self):
+    def test_incerteza_expandida_em_expanded_mu(self):
         dados = base_dados()
         n = sum(1 for r in dados['resultados'] if r['mensurando'] == 'acdc')
         i = 0
@@ -248,7 +248,7 @@ class TestNueffGeneration(unittest.TestCase):
         xml = gerar(dados)
         tree = etree.fromstring(xml)
 
-        uncertainty = list(tree.iter(SI_NS + 'uncertaintyXMLList'))
+        uncertainty = list(tree.iter(SI_NS + 'valueExpandedMUXMLList'))
         coverage_factor = list(tree.iter(SI_NS + 'coverageFactorXMLList'))
         coverage_probability = list(tree.iter(SI_NS + 'coverageProbabilityXMLList'))
 
