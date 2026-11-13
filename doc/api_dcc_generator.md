@@ -187,7 +187,7 @@ devem ser mantidas exatamente como abaixo (incluindo acentos).
 | `caracteristicas_item` | string | sim | Características adicionais do item. |
 | `data_calibracao` | string | sim | Data da calibração, ISO 8601 (`YYYY-MM-DD`). |
 | `data_emissao` | string | não | Data de emissão (`YYYY-MM-DD`). Se omitida, o XML inclui a declaração "Ver data da assinatura eletrônica presente no certificado". |
-| `cmc` | boolean | sim | Indica se o certificado possui a declaração textual de CMC (MRA/CIPM). |
+| `cmc` | boolean | sim | Indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando `true`, o `dcc:statement` de CMC é emitido no formato estruturado `basic_isInCMC`. |
 | `cmc_padrao` | boolean | não | Valor de cobertura de CMC aplicado aos resultados que não informam `in_cmc`. Se omitido, o padrão é `false`. |
 | `cmc_declaracao` | objeto | não | Personaliza a declaração estruturada `basic_isInCMC`. Ver §2.13. |
 | `chefe_div` | string | sim | Nome do chefe da divisão. |
@@ -425,8 +425,8 @@ Array de strings. Cada item vira um statement "Observação N" no XML.
 O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o mecanismo definido pelo
 *Good Practice* DKD‑E 7‑2, §4.5, e pelo vocabulário `basic_isInCMC` do DKD/PTB:
 
-1. cria um `dcc:statement` com `id` estável e `refType="basic_isInCMC"` em
-   `administrativeData/statements`;
+1. adapta o `dcc:statement` de CMC já emitido quando `cmc=true`, dando-lhe `id` estável e
+   `refType="basic_isInCMC"` em `administrativeData/statements` — não há um segundo statement;
 2. em cada `dcc:quantity` de resultado, adiciona
    `dcc:measurementMetaData/dcc:metaData[@refId="<id>"]`;
 3. usa `dcc:valid` para um ponto único ou `dcc:validXMLList` para vários pontos, com um booleano por
@@ -442,14 +442,17 @@ O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o m
 
 **Ativação e valor padrão**
 
-- A marcação só é gerada quando pelo menos um resultado informa `in_cmc` **ou** quando `cmc_padrao`
-  é informado. Sem isso, o XML permanece idêntico ao comportamento anterior.
+- O `dcc:statement` de CMC é emitido quando `cmc=true` **ou** quando ao menos um resultado informa
+  `in_cmc` **ou** quando `cmc_padrao` é informado. Em todos os casos há um único statement de CMC.
+- Os vínculos por ponto (`dcc:measurementMetaData`) só são gerados quando há `in_cmc` ou
+  `cmc_padrao`. Com `cmc=true` e sem marcação, o statement fica apenas declarativo.
 - A ausência de marcação em um ponto vinculado significa `false`, conforme o vocabulário. Por isso,
   para indicar **apenas as exceções**, use `cmc_padrao: true` e marque com `in_cmc: false` os pontos
   fora da CMC.
 - `in_cmc` ausente com `cmc_padrao` ausente resulta em `false`.
-- A declaração estruturada é independente do campo `cmc`: `cmc` controla a declaração textual do
-  MRA/CIPM; `in_cmc` controla a cobertura ponto a ponto.
+- `cmc` controla a emissão do statement de CMC; `in_cmc` controla a cobertura ponto a ponto. Quando
+  `cmc=true`, a declaração textual do MRA/CIPM é preservada dentro de `dcc:declaration` no mesmo
+  statement.
 
 **Exemplo — todos cobertos, exceto dois pontos**
 
@@ -496,6 +499,9 @@ O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o m
   </dcc:description>
   <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
   <dcc:link>https://www.bipm.org/kcdb/</dcc:link>
+  <dcc:declaration>
+    <dcc:content lang="pt">Este certificado é consistente com as Capacidades de Medição e Calibração (CMCs)...</dcc:content>
+  </dcc:declaration>
   <dcc:respAuthority>
     <dcc:name><dcc:content lang="pt">BIPM</dcc:content></dcc:name>
     <dcc:location>
@@ -521,14 +527,14 @@ O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o m
 Quando o mensurando tem um único ponto, o gerador usa `<dcc:valid>true</dcc:valid>` (ou `false`) em
 vez de `validXMLList`.
 
-O namespace `basic` é declarado automaticamente em `administrativeData/refTypeDefinitions` quando a
-marcação está ativa e o usuário não o declarou em `refTypeDefinitions`.
+O namespace `basic` é declarado automaticamente em `administrativeData/refTypeDefinitions` quando o
+statement de CMC é emitido e o usuário não o declarou em `refTypeDefinitions`.
 
 **Critério metrológico:** um ponto só deve receber `true` quando (a) o valor está dentro da faixa
 coberta pela CMC aplicável e (b) a incerteza declarada é maior ou igual à incerteza da CMC,
 comparadas na mesma base estatística (mesmo `k` ou ambas convertidas para incerteza padrão). A
 marcação é uma afirmação sobre o resultado declarado, não sobre a adequação do instrumento ao uso.
-Referência: `Consideracoes_CMC_DCC_v1.0.md`.
+Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 
 > Não use `dcc:conformity` para indicar CMC: ele declara conformidade com requisito, não cobertura de
 > CMC. Também não coloque `dcc:valid` dentro do `dcc:statement`; o `valid` pertence aos vínculos

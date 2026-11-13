@@ -115,10 +115,18 @@ def metadados_cmc(root, ref_id='inCMC'):
 
 class TestResolveCmcConfig(unittest.TestCase):
 
-    def test_sem_marcacao_nao_ativa(self):
+    def test_sem_marcacao_nao_ativa_vinculos(self):
         config = resolve_cmc_config(carregar(EXEMPLO_JSON))
         self.assertFalse(config['enabled'])
         self.assertFalse(config['default'])
+        self.assertTrue(config['statement'])
+
+    def test_sem_cmc_sem_marcacao_nao_emite_statement(self):
+        dados = carregar(EXEMPLO_JSON)
+        dados['cmc'] = False
+        config = resolve_cmc_config(dados)
+        self.assertFalse(config['enabled'])
+        self.assertFalse(config['statement'])
 
     def test_in_cmc_ativa_marcacao(self):
         dados = carregar(EXEMPLO_JSON)
@@ -156,8 +164,18 @@ class TestResolveCmcConfig(unittest.TestCase):
 
 class TestGeracaoCmc(unittest.TestCase):
 
-    def test_sem_marcacao_mantem_comportamento(self):
+    def test_cmc_true_sem_in_cmc_emite_statement_estruturado(self):
         root = arvore(gerar(carregar(EXEMPLO_JSON)))
+        statement = statement_cmc(root)
+        self.assertIsNotNone(statement)
+        self.assertEqual(statement.get('id'), 'inCMC')
+        self.assertIsNotNone(statement.find(DCC_NS + 'declaration'))
+        self.assertEqual(metadados_cmc(root), [])
+
+    def test_sem_cmc_sem_marcacao_nao_emite_statement(self):
+        dados = carregar(EXEMPLO_JSON)
+        dados['cmc'] = False
+        root = arvore(gerar(dados))
         self.assertIsNone(statement_cmc(root))
         self.assertEqual(metadados_cmc(root), [])
 
@@ -186,6 +204,23 @@ class TestGeracaoCmc(unittest.TestCase):
         valid_list = meta.findtext(DCC_NS + 'validXMLList')
         self.assertIsNotNone(valid_list)
         self.assertEqual(valid_list.split(), ['true', 'true'] + ['false'] * (len(resultados) - 2))
+
+    def test_marcacao_reaproveita_statement_sem_duplicar(self):
+        dados = carregar(EXEMPLO_JSON)
+        dados['resultados'][0]['in_cmc'] = True
+
+        root = arvore(gerar(dados))
+        statements = list(root.iter(DCC_NS + 'statement'))
+
+        cmc_statements = [s for s in statements if s.get('refType') == 'basic_isInCMC']
+        self.assertEqual(len(cmc_statements), 1)
+
+        declaracoes_mra = [
+            s for s in statements
+            if (s.findtext(DCC_NS + 'declaration/' + DCC_NS + 'content') or '')
+            .find('Acordo de Reconhecimento') >= 0
+        ]
+        self.assertEqual(len(declaracoes_mra), 1)
 
     def test_cmc_padrao_aplica_a_pontos_sem_in_cmc(self):
         dados = carregar(EXEMPLO_JSON)

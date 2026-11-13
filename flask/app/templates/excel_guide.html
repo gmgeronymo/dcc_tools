@@ -934,7 +934,7 @@ acdc       | frequency | Frequência  | \kilo\hertz |
                                     </tr>
                                     <tr>
                                         <td><strong>in_cmc</strong> <span class="field-optional">(opcional)</span></td>
-                                        <td>Indica se o ponto de medição está coberto pela CMC do laboratório. Aceita <code>Sim</code>/<code>Não</code>, <code>true</code>/<code>false</code>, <code>1</code>/<code>0</code> ou <code>yes</code>/<code>no</code>. Célula vazia equivale a <code>false</code>. Preencher ao menos uma célula ativa a marcação estruturada no XML; se a coluna estiver totalmente vazia ou ausente, o XML é gerado sem marcação CMC.</td>
+                                        <td>Indica se o ponto de medição está coberto pela CMC do laboratório. Aceita <code>Sim</code>/<code>Não</code>, <code>true</code>/<code>false</code>, <code>1</code>/<code>0</code> ou <code>yes</code>/<code>no</code>. Célula vazia equivale a <code>false</code>. Preencher ao menos uma célula ativa a marcação por ponto no XML; se a coluna estiver totalmente vazia ou ausente, não há marcação por ponto (o statement de CMC continua sendo emitido quando <code>cmc=Sim</code>).</td>
                                         <td>Sim</td>
                                     </tr>
                                 </tbody>

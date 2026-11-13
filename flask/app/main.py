@@ -221,7 +221,8 @@ def is_truthy(value):
 #   2) dcc:measurementMetaData/dcc:metaData refId=... na dcc:quantity resultante;
 #   3) dcc:valid (ponto unico) ou dcc:validXMLList (um booleano por ponto).
 #
-# A entrada JSON usa:
+# O statement reaproveita a declaracao de CMC existente (cmc=True), sem criar
+# um segundo statement. A entrada JSON usa:
 #   - resultados[].in_cmc  (opcional): true/false por ponto;
 #   - cmc_padrao           (opcional): valor aplicado aos pontos sem in_cmc;
 #   - cmc_declaracao       (opcional): personaliza id, textos e autoridade.
@@ -297,9 +298,10 @@ def optional_bool(mapping, key, default):
 def resolve_cmc_config(dados):
     """Valida e resolve a configuracao da marcacao de CMC.
 
-    A marcacao so e ativada quando o usuario informa pelo menos um
-    'resultados[].in_cmc' ou o campo 'cmc_padrao'. Sem isso, o XML
-    permanece identico ao comportamento anterior.
+    O statement de CMC e emitido quando cmc=True ou quando o usuario
+    informa pelo menos um 'resultados[].in_cmc' ou o campo 'cmc_padrao'.
+    Os vinculos por ponto (measurementMetaData) so sao gerados nos dois
+    ultimos casos; sem eles, o statement permanece apenas declarativo.
     """
     resultados = dados.get('resultados', []) or []
     explicito = False
@@ -320,6 +322,7 @@ def resolve_cmc_config(dados):
         'descricao': CMC_STATEMENT_DEFAULTS['descricao'],
         'autoridade': dict(CMC_STATEMENT_DEFAULTS['autoridade']),
         'enabled': explicito or tem_padrao,
+        'statement': is_truthy(dados.get('cmc')) or explicito or tem_padrao,
         'default': cmc_padrao,
     }
 
@@ -409,7 +412,12 @@ def add_basic_ref_type_definition(ref_type_definitions):
 
 
 def add_cmc_statement(statements, dados, config, declaracao):
-    """Cria o dcc:statement estruturado da marcacao basic_isInCMC."""
+    """Adapta o statement de CMC para o formato estruturado basic_isInCMC.
+
+    O statement textual emitido quando cmc=True passa a ser o mesmo
+    statement usado pela marcacao: ganha id, refType e respAuthority, e
+    mantem a declaracao textual do MRA em dcc:declaration.
+    """
     statement = etree.SubElement(
         statements,
         etree.QName(nsmap['dcc'], 'statement'),
@@ -674,8 +682,8 @@ def dccGen(dcc_version, dados, declaracao) :
                 campo_texto(refTypeDefinition,'link',refTypeDef['link'])
 
     # a marcacao basic_isInCMC depende do namespace 'basic'; declara-o
-    # automaticamente quando o usuario nao o informou
-    if cmc_config['enabled'] and not has_basic_ref_type_definition(dados):
+    # automaticamente quando o statement de CMC for emitido
+    if cmc_config['statement'] and not has_basic_ref_type_definition(dados):
         if refTypeDefinitions is None:
             refTypeDefinitions = etree.SubElement(
                 administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
@@ -815,15 +823,11 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_texto(description,'content', dados['caracteristicas_item'])
 
     # declaracao cmc
-    # Quando ha marcacao por ponto (in_cmc), a declaracao passa a ser
-    # estruturada: statement com id e refType="basic_isInCMC", vinculado
-    # aos resultados via measurementMetaData/refId.
-    if cmc_config['enabled']:
+    # O statement de CMC existente (cmc=true) e adaptado para o formato
+    # estruturado basic_isInCMC. A marcacao por ponto adiciona os vinculos
+    # measurementMetaData/refId nas quantities de resultado.
+    if cmc_config['statement']:
         add_cmc_statement(statements, dados, cmc_config, declaracao)
-    elif (dados['cmc']) :
-        statement = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))
-        declaration = etree.SubElement(statement, etree.QName(nsmap['dcc'], 'declaration'))
-        campo_texto(declaration, 'content', declaracao['cmc'])
 
     # declaracao 17025
     statement = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))

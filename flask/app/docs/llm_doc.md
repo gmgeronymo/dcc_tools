@@ -1,6 +1,6 @@
 # DCC Tools — Guia de acesso à API para LLMs
 
-**Versão:** 2.1
+**Versão:** 2.2
 **Atualizado em:** 13/11/2026
 **Público:** usuários, desenvolvedores e assistentes de IA (ChatGPT, Claude, Gemini, Copilot, agentes de código).
 **Idioma:** português (pt-BR).
@@ -600,7 +600,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `caracteristicas_item` | string | sim | Características adicionais do item. |
 | `data_calibracao` | string | sim | Data da calibração (`YYYY-MM-DD`). |
 | `data_emissao` | string | não | Data de emissão (`YYYY-MM-DD`). Se omitida, o XML usa a declaração de assinatura eletrônica. |
-| `cmc` | boolean | sim | Indica se o certificado possui a declaração textual de CMC (MRA/CIPM). |
+| `cmc` | boolean | sim | Indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando `true`, o statement de CMC é emitido no formato estruturado `basic_isInCMC`. |
 | `cmc_padrao` | boolean | não | Cobertura de CMC aplicada aos resultados sem `in_cmc`. Ausente = `false`. |
 | `cmc_declaracao` | objeto | não | Personaliza a declaração `basic_isInCMC` (`id`, `nome`, `referencia`, `link`, `descricao`, `autoridade`). |
 | `chefe_div` | string | sim | Nome do chefe da divisão. |
@@ -772,9 +772,11 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 O DCC 3.3.0 não tem campo nativo de CMC. O DCC Tools implementa o mecanismo `basic_isInCMC` do
 DKD‑E 7‑2, §4.5:
 
-- um `dcc:statement` com `id` e `refType="basic_isInCMC"` em `administrativeData/statements`;
-- um `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` de resultado;
-- `dcc:valid` (ponto único) ou `dcc:validXMLList` (um booleano por ponto, na ordem dos valores).
+- adapta o `dcc:statement` de CMC já emitido quando `cmc=true`, incluindo `id` e
+  `refType="basic_isInCMC"` — não é criado um segundo statement;
+- adiciona um `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` de resultado quando
+  há marcação por ponto;
+- usa `dcc:valid` (ponto único) ou `dcc:validXMLList` (um booleano por ponto, na ordem dos valores).
 
 ### 11.1 Campos
 
@@ -784,11 +786,14 @@ DKD‑E 7‑2, §4.5:
 | `cmc_padrao` | raiz | boolean | Valor usado nos pontos sem `in_cmc`. Ausente = `false`. |
 | `cmc_declaracao` | raiz | objeto | Personaliza `id`, `nome`, `referencia`, `link`, `descricao` e `autoridade` (`nome`, `cidade`, `pais`). |
 
-A marcação só é gerada quando há pelo menos um `in_cmc` ou quando `cmc_padrao` é informado. A
-ausência de marcação em um ponto vinculado significa `false` (regra do vocabulário). Por isso, para
-indicar **somente os pontos sem CMC**, use `cmc_padrao: true` e marque `in_cmc: false` nas exceções.
+A marcação por ponto é gerada quando há pelo menos um `in_cmc` ou quando `cmc_padrao` é informado; o
+statement de CMC é emitido quando `cmc=true` ou quando há marcação. A ausência de marcação em um
+ponto vinculado significa `false` (regra do vocabulário). Por isso, para indicar **somente os pontos
+sem CMC**, use `cmc_padrao: true` e marque `in_cmc: false` nas exceções.
 
-O campo `cmc` continua controlando a declaração textual do MRA/CIPM; ele não substitui `in_cmc`.
+O campo `cmc` controla a emissão do statement de CMC; ele não substitui `in_cmc`. Quando
+`cmc=true`, a declaração textual do MRA/CIPM permanece dentro de `dcc:declaration` no mesmo
+statement.
 
 ### 11.2 Exemplo
 
@@ -812,6 +817,7 @@ XML resultante (trechos):
   <dcc:description><dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:valid ...</dcc:content></dcc:description>
   <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
   <dcc:link>https://www.bipm.org/kcdb/</dcc:link>
+  <dcc:declaration><dcc:content lang="pt">Este certificado é consistente com as CMCs...</dcc:content></dcc:declaration>
   <dcc:respAuthority>
     <dcc:name><dcc:content lang="pt">BIPM</dcc:content></dcc:name>
     <dcc:location><dcc:city>Paris</dcc:city><dcc:countryCode>FR</dcc:countryCode></dcc:location>
@@ -844,7 +850,7 @@ Um ponto só deve ser marcado com `true` quando **as duas condições** forem at
    (mesmo `k` ou ambas convertidas para incerteza padrão).
 
 Não use `dcc:conformity` para indicar CMC e não coloque `dcc:valid` dentro do `dcc:statement`.
-Referência: `Consideracoes_CMC_DCC_v1.0.md` (documento de apoio do GT-DCC).
+Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 
 ---
 
@@ -906,4 +912,5 @@ Referência: `Consideracoes_CMC_DCC_v1.0.md` (documento de apoio do GT-DCC).
 | 1.1 | 06/11/2026 | Ajuste para ambiente de intranet: baixar/anexar o `.md` em vez de depender da URL interna. |
 | 1.2 | 06/11/2026 | Nome do arquivo unificado para `llm_doc.md`, igual ao caminho de download. |
 | 2.0 | 12/11/2026 | Schema 3.3.0 como único suportado para geração; incerteza absoluta em `si:expandedMU`; `relative_uncertainty_in_dcc` exige `unc_relativa`; referências oficiais. |
+| 2.2 | 13/11/2026 | Reaproveita o statement de CMC existente (`cmc=true`) no formato `basic_isInCMC`, sem criar um segundo statement. |
 | 2.1 | 13/11/2026 | Marcação de pontos dentro/fora da CMC com `in_cmc`, `cmc_padrao` e `cmc_declaracao` (`basic_isInCMC`, `dcc:valid`/`dcc:validXMLList`). |

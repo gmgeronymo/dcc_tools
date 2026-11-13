@@ -327,10 +327,10 @@ Content-Type: application/json</div>
                                     </tr>
                                     <tr>
                                         <td>cmc</td>
-                                        <td>Booleano que indica se o certificado possui a declaração textual de CMC (MRA/CIPM)</td>
+                                        <td>Booleano que indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando <code>true</code>, o statement de CMC é emitido no formato estruturado <code>basic_isInCMC</code></td>
                                         <td><span class="required">Obrigatória</span></td>
                                         <td>"cmc": true</td>
-                                        <td>Controla apenas a declaração textual do MRA; a cobertura ponto a ponto usa <code>in_cmc</code>.</td>
+                                        <td>O statement de CMC é único; <code>in_cmc</code> adiciona a cobertura ponto a ponto.</td>
                                     </tr>
                                     <tr>
                                         <td>cmc_padrao</td>
@@ -1139,11 +1139,12 @@ Content-Type: application/json</div>
                             <div id="cmc-marking" class="mt-4">
                                 <h5>Marcação de pontos dentro/fora da CMC (<code>in_cmc</code>)</h5>
                                 <p>O DCC 3.3.0 não possui campo nativo de CMC. A API implementa o mecanismo
-                                    <code>basic_isInCMC</code> (DKD-E 7-2, §4.5): cria um
-                                    <code>dcc:statement</code> com <code>id</code> e
+                                    <code>basic_isInCMC</code> (DKD-E 7-2, §4.5): o
+                                    <code>dcc:statement</code> de CMC já emitido quando <code>cmc=true</code>
+                                    é adaptado com <code>id</code> e
                                     <code>refType="basic_isInCMC"</code> em
-                                    <code>administrativeData/statements</code> e vincula cada
-                                    <code>dcc:quantity</code> de resultado por
+                                    <code>administrativeData/statements</code>, sem criar um segundo
+                                    statement. Cada <code>dcc:quantity</code> de resultado é vinculada por
                                     <code>dcc:measurementMetaData/dcc:metaData[@refId]</code>, usando
                                     <code>dcc:valid</code> (ponto único) ou <code>dcc:validXMLList</code>
                                     (um booleano por ponto, na ordem de <code>si:valueXMLList</code>).</p>
@@ -1151,10 +1152,10 @@ Content-Type: application/json</div>
                                 <ul>
                                     <li><code>in_cmc</code> por resultado: <code>true</code> = ponto coberto pela CMC; <code>false</code> = fora.</li>
                                     <li><code>cmc_padrao</code>: valor aplicado aos resultados sem <code>in_cmc</code>. Ausente = <code>false</code>.</li>
-                                    <li>A marcação só é gerada se houver ao menos um <code>in_cmc</code> ou se <code>cmc_padrao</code> for informado.</li>
+                                    <li>Os vínculos por ponto são gerados se houver ao menos um <code>in_cmc</code> ou se <code>cmc_padrao</code> for informado. O statement de CMC é emitido quando <code>cmc=true</code> ou quando há marcação.</li>
                                     <li>Para indicar <strong>somente as exceções</strong>, use <code>"cmc_padrao": true</code> e <code>"in_cmc": false</code> nos pontos fora da CMC.</li>
                                     <li><code>cmc_declaracao</code> personaliza <code>id</code>, <code>nome</code>, <code>referencia</code>, <code>link</code>, <code>descricao</code> e <code>autoridade</code>.</li>
-                                    <li>O namespace <code>basic</code> é declarado automaticamente em <code>refTypeDefinitions</code> quando a marcação está ativa.</li>
+                                    <li>O namespace <code>basic</code> é declarado automaticamente em <code>refTypeDefinitions</code> quando o statement de CMC é emitido.</li>
                                 </ul>
 
                                 <h6 class="mt-3">Exemplo</h6>
@@ -1172,6 +1173,7 @@ Content-Type: application/json</div>
   &lt;dcc:description&gt;&lt;dcc:content lang="pt"&gt;Todos os resultados são acompanhados por um elemento dcc:valid ...&lt;/dcc:content&gt;&lt;/dcc:description&gt;
   &lt;dcc:reference&gt;CIPM-MRA — Apêndice C / KCDB&lt;/dcc:reference&gt;
   &lt;dcc:link&gt;https://www.bipm.org/kcdb/&lt;/dcc:link&gt;
+  &lt;dcc:declaration&gt;&lt;dcc:content lang="pt"&gt;Este certificado é consistente com as CMCs...&lt;/dcc:content&gt;&lt;/dcc:declaration&gt;
   &lt;dcc:respAuthority&gt;
     &lt;dcc:name&gt;&lt;dcc:content lang="pt"&gt;BIPM&lt;/dcc:content&gt;&lt;/dcc:name&gt;
     &lt;dcc:location&gt;&lt;dcc:city&gt;Paris&lt;/dcc:city&gt;&lt;dcc:countryCode&gt;FR&lt;/dcc:countryCode&gt;&lt;/dcc:location&gt;
@@ -1193,8 +1195,8 @@ Content-Type: application/json</div>
                                     (b) a incerteza declarada for maior ou igual à incerteza da CMC,
                                     comparadas na mesma base estatística (mesmo <code>k</code> ou ambas
                                     convertidas para incerteza padrão). Não use <code>dcc:conformity</code>
-                                    para indicar CMC. Referência:
-                                    <code>Consideracoes_CMC_DCC_v1.0.md</code>.</p>
+                                    para indicar CMC. Referência: DKD-E 7-2, §4.5, e vocabulário de
+                                    <code>refType</code> do DKD/PTB.</p>
                             </div>
                         </div>
                     </div>

@@ -339,15 +339,16 @@ testar a navegação.
 - `cmc_padrao` (raiz, booleano opcional) é aplicado aos resultados sem `in_cmc`. Ausente = `false`.
 - `cmc_declaracao` (raiz, objeto opcional) personaliza `id`, `nome`, `referencia`, `link`,
   `descricao` e `autoridade` (`nome`, `cidade`, `pais`) do `dcc:statement`.
-- A marcação só é gerada quando há ao menos um `in_cmc` ou quando `cmc_padrao` é informado. Sem
-  isso, o XML permanece idêntico ao comportamento anterior.
+- A marcação por ponto só é gerada quando há ao menos um `in_cmc` ou quando `cmc_padrao` é
+  informado.
+- O `dcc:statement` de CMC já emitido quando `cmc=true` é adaptado para o formato estruturado
+  (`id` + `refType="basic_isInCMC"`), sem criar um segundo statement.
 - Estrutura no XML 3.3.0: `dcc:statement[@refType="basic_isInCMC"]` +
   `dcc:measurementMetaData/dcc:metaData[@refId=...]` +
   `dcc:valid` (ponto único) ou `dcc:validXMLList` (vários pontos, alinhado a
   `si:valueXMLList`). Não usar `dcc:conformity` para CMC.
-- Quando a marcação está ativa e `cmc=true`, a declaração textual do MRA é embutida como
-  `dcc:declaration` dentro do `statement`; sem marcação, o comportamento anterior é preservado.
-- `basic` é adicionado automaticamente a `refTypeDefinitions` quando ainda não existir.
+- A declaração textual do MRA é preservada como `dcc:declaration` dentro do mesmo statement.
+- `basic` é adicionado automaticamente a `refTypeDefinitions` quando o statement de CMC é emitido.
 - A referência completa está em `doc/api_dcc_generator.md` §2.13 e em `/dcc/api_doc#cmc-marking`.
 
 ---
