@@ -208,6 +208,7 @@ Responsável por quase toda a lógica da aplicação:
 | Incerteza | `format_two_sig_scientific`, `add_expanded_uncertainty`, `add_expanded_uncertainty_list`, `validate_relative_uncertainty` |
 | `nueff` | `is_positive_infinite`, `serialize_nueff`, `validate_nueff` |
 | CMC | `parse_bool`, `optional_bool`, `resolve_cmc_config`, `add_cmc_metadata`, `has_basic_ref_type_definition`, `add_basic_ref_type_definition`, `add_cmc_statement` |
+| Rastreabilidade | `resolve_traceability_hash` |
 | Excel | `excel_to_json` |
 | PDF/A-3 | `attach_stream`, `attach_xml_to_pdfa3b`, `sha256sum` |
 | XSLT | `transform_xml_to_html` |
@@ -351,6 +352,18 @@ testar a navegação.
 - `basic` é adicionado automaticamente a `refTypeDefinitions` quando o statement de CMC é emitido.
 - A referência completa está em `doc/api_dcc_generator.md` §2.13 e em `/dcc/api_doc#cmc-marking`.
 
+### Certificado do padrão que também é DCC (rastreabilidade)
+
+- Cada item de `tabela_rastreabilidade` pode informar `hash_sha256` (64 caracteres hexadecimais) e,
+  opcionalmente, `hash_procedure`.
+- Quando presente, `dcc:certificate/dcc:value` recebe o hash normalizado em minúsculas e
+  `dcc:procedure` recebe `hash_procedure` (padrão `sha256`).
+- Para digest de assinatura XML, use `c14n-sha256` ou `enveloped-c14n-sha256` em `hash_procedure`.
+- Quando ausente ou vazio, usa `analogue` em `procedure` e `value`, conforme o vocabulário DCC.
+- O hash deve ser calculado sobre os bytes do arquivo XML do DCC referenciado.
+- Validado por `resolve_traceability_hash`; hash inválido retorna `400`.
+- Referência: `doc/api_dcc_generator.md` §2.6 e `/dcc/api_doc#traceability`.
+
 ---
 
 ## 8. Segurança e tratamento de erros
@@ -411,6 +424,7 @@ python -m unittest test_auth.py -v
 python -m unittest test_nueff.py -v
 python -m unittest test_validation.py -v
 python -m unittest test_cmc.py -v
+python -m unittest test_traceability.py -v
 ```
 
 Ou todos:
@@ -551,6 +565,9 @@ Antes de considerar a tarefa concluída:
 - **Unidades D-SI**: barras invertidas exigem escape no JSON (`"\\degreecelsius"`).
 - **`nueff`**: se presente, deve existir para todos os resultados do mesmo mensurando; não aceite
   `NaN`, `0`, negativos ou `-inf`.
+- **Rastreabilidade DCC**: `tabela_rastreabilidade[].hash_sha256` deve ter 64 hexadecimais e
+  representa o SHA-256 do arquivo XML do padrão, não do PDF. Sem o campo, o XML usa
+  `analogue`/`analogue`.
 - **`/dcc/validate_xml`**: retorna HTML, não JSON. Para automação, verifique o status e faça parsing
   do HTML ou valide localmente com lxml.
 - **`/dcc/upload_json` e `/dcc/upload_xls`**: são conveniências web; a chamada interna para

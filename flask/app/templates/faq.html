@@ -157,6 +157,13 @@
 
                     <div class="card">
                         <div class="card-body">
+			    <p><strong>Como referenciar um certificado de padrão que também é um DCC?</strong></p>
+			    <p>Na linha correspondente de <code>tabela_rastreabilidade</code>, informe o campo opcional <code>hash_sha256</code> com o SHA-256 do arquivo XML do DCC (64 caracteres hexadecimais). O gerador preenche <code>dcc:procedure</code> com <code>sha256</code> e <code>dcc:value</code> com esse hash; para digest proveniente de assinatura XML, use o campo opcional <code>hash_procedure</code> (ex.: <code>enveloped-c14n-sha256</code>). Se o campo for omitido ou estiver vazio, o certificado do padrão é tratado como analógico e o XML usa <code>analogue</code> em <code>dcc:procedure</code> e <code>dcc:value</code>.</p>
+			</div>
+		    </div>
+
+                    <div class="card">
+                        <div class="card-body">
 			    <p><strong>O que mudou no formato da incerteza expandida?</strong></p>
 			    <p>A incerteza absoluta passou a ser emitida no formato D-SI 2.2.1: <code>si:measurementUncertaintyUnivariate/si:expandedMU</code> (valor único) ou <code>si:measurementUncertaintyUnivariateXMLList/si:expandedMUXMLList</code> (listas). O elemento legado <code>si:expandedUnc</code> continua sendo aceito na leitura de certificados antigos, mas não é mais gerado.</p>
 			</div>

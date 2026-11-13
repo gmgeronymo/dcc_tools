@@ -18,6 +18,7 @@ Principais funcionalidades:
 - Documentação de acesso à API para LLMs, em Markdown, com instruções e prompts para baixar e anexar ao assistente (`/dcc/llm_doc` e `/dcc/llm_doc.md`)
 - Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
 - Marcação estruturada de pontos dentro/fora da CMC do laboratório (`in_cmc`, `cmc_padrao` e `cmc_declaracao`; `basic_isInCMC` no XML)
+- Referência a certificados de padrão que também são DCC, com hash SHA-256 (`tabela_rastreabilidade[].hash_sha256`)
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 - Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
 
@@ -161,6 +162,7 @@ Main capabilities:
 - LLM-oriented API access guide in Markdown, with instructions and prompts to download and attach to the assistant (`/dcc/llm_doc` and `/dcc/llm_doc.md`)
 - Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
 - Structured marking of measurement points inside/outside the laboratory CMC (`in_cmc`, `cmc_padrao`, and `cmc_declaracao`; `basic_isInCMC` in the XML)
+- Reference to standard certificates that are also DCCs, using a SHA-256 hash (`tabela_rastreabilidade[].hash_sha256`)
 - User registration with API-KEY and protection of generation/upload functions
 - Password change and e-mail password recovery (`@inmetro.gov.br`)
 

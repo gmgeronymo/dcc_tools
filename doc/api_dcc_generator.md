@@ -301,7 +301,13 @@ formatos: valor único, intervalo ou texto.
 
 ```json
 "tabela_rastreabilidade": [
-  { "name": "Conversor Térmico PMJTC", "origem": "PTB", "certificado": "PTB 27812/2020", "cod_id": "PR 394" }
+  {
+    "name": "Conversor Térmico PMJTC",
+    "origem": "PTB",
+    "certificado": "PTB 27812/2020",
+    "cod_id": "PR 394",
+    "hash_sha256": "e14f080fcc4a8b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef012345"
+  }
 ]
 ```
 
@@ -309,8 +315,35 @@ formatos: valor único, intervalo ou texto.
 | --- | --- | --- |
 | `name` | string | Nome do padrão. |
 | `origem` | string | Origem do padrão. |
-| `certificado` | string | Número do certificado do padrão. |
+| `certificado` | string | Número do certificado do padrão (para DCC, o `uniqueIdentifier`). |
 | `cod_id` | string | Código de identificação do padrão. |
+| `hash_sha256` | string | Opcional. Hash SHA-256 do arquivo XML do DCC do padrão, com 64 caracteres hexadecimais. Quando informado, o gerador preenche `dcc:value` com o hash e `dcc:procedure` com `sha256` (ou com `hash_procedure`). Quando omitido ou vazio, usa `analogue` em ambos. |
+| `hash_procedure` | string | Opcional. Procedimento gravado em `dcc:procedure`. Padrão `sha256`. Para digest proveniente de assinatura XML, use `c14n-sha256` ou `enveloped-c14n-sha256`. Só tem efeito quando `hash_sha256` é informado. |
+
+**Certificado do padrão que também é DCC**
+
+O elemento `dcc:certificate` (tipo `dcc:hashType`) identifica o certificado do padrão. O PTB
+recomenda que `dcc:procedure` informe o método de transformação e o algoritmo de hash, separados
+por hífen, e que `dcc:value` contenha o digest. Para o hash do arquivo XML inteiro, use `sha256`;
+para digest extraído de assinatura XML, inclua a canonicalização/transformação, por exemplo
+`c14n-sha256` ou `enveloped-c14n-sha256`. Para certificados analógicos, use `analogue` nos dois
+campos.
+
+O cliente deve calcular o SHA-256 sobre os bytes do arquivo XML do DCC referenciado e enviar o
+digest hexadecimal em `hash_sha256`. O gerador normaliza o valor para minúsculas e emite:
+
+```xml
+<dcc:certificate>
+  <dcc:referral>
+    <dcc:content lang="pt">PTB</dcc:content>
+  </dcc:referral>
+  <dcc:referralID>PTB 27812/2020</dcc:referralID>
+  <dcc:procedure>sha256</dcc:procedure>
+  <dcc:value>e14f080fcc4a8b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef012345</dcc:value>
+</dcc:certificate>
+```
+
+Referências: DCC 3.3.0, `dcc:hashType`; DCC Wiki — <https://wiki.dcc.ptb.de/en/dcchashType>.
 
 ### 2.7 `declaracao_incerteza` (obrigatória)
 
@@ -694,6 +727,8 @@ A rota `/dcc/generate` retorna:
 | `400` | `relative_uncertainty_in_dcc=true` com `unc_relativa=false` | `{"error": "relative_uncertainty_in_dcc=true exige unc_relativa=true..."}` |
 | `400` | `in_cmc` ou `cmc_padrao` com valor não booleano | `{"error": "Valor inválido para 'in_cmc': ... Use true/false (ou Sim/Não)."}` |
 | `400` | `cmc_declaracao` inválida (tipo ou `id`) | `{"error": "O campo 'cmc_declaracao' deve ser um objeto."}` / `{"error": "Identificador inválido em 'cmc_declaracao.id': ..."}` |
+| `400` | `tabela_rastreabilidade[].hash_sha256` inválido | `{"error": "Valor inválido para 'tabela_rastreabilidade[].hash_sha256': ..."}` |
+| `400` | `tabela_rastreabilidade[].hash_procedure` inválido | `{"error": "Valor inválido para 'tabela_rastreabilidade[].hash_procedure': ..."}` |
 | `500` | Erro inesperado na geração | `{"error": "Erro ao gerar o DCC: ..."}` |
 
 Mensagens de erro de `nueff` (exemplos):
@@ -750,6 +785,9 @@ Rotas de ferramentas abertas: `/dcc/upload_xml_hr` (visualizar DCC) e `/dcc/vali
   agrupe os resultados por `mensurando` em `resultados`.
 - A conversão da incerteza relativa para absoluta (ppm → absoluta) ocorre apenas quando
   `mensurando[].unc_relativa` é `true`.
+- `tabela_rastreabilidade[].hash_sha256` identifica certificados de padrão que também são DCC:
+  informe o SHA-256 do arquivo XML (64 hexadecimais); o gerador escreve `sha256` (ou `hash_procedure`) em
+  `dcc:procedure` e o digest em `dcc:value`. Sem o campo, usa `analogue`/`analogue`.
 - `relative_uncertainty_in_dcc=true` só é aceito com `unc_relativa=true`; a combinação contrária
   retorna `400`.
 
@@ -761,6 +799,8 @@ Rotas de ferramentas abertas: `/dcc/upload_xml_hr` (visualizar DCC) e `/dcc/vali
   <https://wiki.dcc.ptb.de/dccrelativeUncertainty>
 - `dcc:quantityType` (PTB DCC Wiki):
   <https://wiki.dcc.ptb.de/en/dccquantityType>
+- `dcc:hashType` / `dcc:certificate` / `dcc:previousReport` (PTB DCC Wiki):
+  <https://wiki.dcc.ptb.de/en/dcchashType>
 - D-SI 2.2.1 (schema usado pelo DCC 3.3.0):
   <https://ptb.de/si/v2.2.1/SI_Format.xsd>
 - DCC 3.3.0:

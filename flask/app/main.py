@@ -163,6 +163,50 @@ def sha256sum(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
+
+TRACEABILITY_SHA256_RE = re.compile(r'^[0-9a-fA-F]{64}$')
+TRACEABILITY_HASH_PROCEDURE_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]*$')
+TRACEABILITY_DEFAULT_HASH_PROCEDURE = 'sha256'
+
+
+def resolve_traceability_hash(rastreabilidade):
+    """Resolve os campos procedure/value do certificado de rastreabilidade.
+
+    Quando 'hash_sha256' e informado, o certificado do padrao e um DCC e e
+    identificado pelo SHA-256 do seu arquivo XML. O campo opcional
+    'hash_procedure' permite registrar a transformacao usada antes do hash
+    (ex.: c14n-sha256 ou enveloped-c14n-sha256), conforme o DCC/PTB. Sem ele,
+    usa 'sha256', que corresponde ao hash do arquivo inteiro.
+
+    Caso contrario, usa 'analogue'/'analogue', conforme o vocabulario do
+    DCC para certificados analogicos.
+    """
+    hash_sha256 = rastreabilidade.get('hash_sha256')
+    if hash_sha256 is None or str(hash_sha256).strip() == '':
+        return 'analogue', 'analogue'
+
+    hash_sha256 = str(hash_sha256).strip()
+    if not TRACEABILITY_SHA256_RE.match(hash_sha256):
+        raise ValueError(
+            "Valor inválido para 'tabela_rastreabilidade[].hash_sha256': %r. "
+            "Informe o hash SHA-256 em hexadecimal com 64 caracteres."
+            % (hash_sha256,)
+        )
+
+    procedure = rastreabilidade.get('hash_procedure')
+    if procedure is None or str(procedure).strip() == '':
+        procedure = TRACEABILITY_DEFAULT_HASH_PROCEDURE
+    else:
+        procedure = str(procedure).strip()
+        if not TRACEABILITY_HASH_PROCEDURE_RE.match(procedure):
+            raise ValueError(
+                "Valor inválido para 'tabela_rastreabilidade[].hash_procedure': "
+                "%r. Use apenas letras, números, ponto, hífen ou sublinhado."
+                % (procedure,)
+            )
+
+    return procedure, hash_sha256.lower()
+
 ## funcoes DCC
 
 ## texto das declaracoes do certificado de calibracao
@@ -889,8 +933,9 @@ def dccGen(dcc_version, dados, declaracao) :
             referral = etree.SubElement(certificate, etree.QName(nsmap['dcc'], 'referral'))
             campo_texto(referral,'content',rastreabilidade['origem'])
             campo_texto(certificate,'referralID',rastreabilidade['certificado'])
-            campo_texto(certificate,'procedure','analog')
-            campo_texto(certificate,'value','analog')
+            procedure, value = resolve_traceability_hash(rastreabilidade)
+            campo_texto(certificate,'procedure', procedure)
+            campo_texto(certificate,'value', value)
             identifications = etree.SubElement(measuringEquipment, etree.QName(nsmap['dcc'], 'identifications'))
             identification = etree.SubElement(identifications, etree.QName(nsmap['dcc'], 'identification'))
             campo_texto(identification, 'issuer', 'calibrationLaboratory')
@@ -1158,7 +1203,9 @@ def excel_to_json(excel_path):
         'k': str,
         'faixa': str,
         'voltage': str,
-        'frequency': str
+        'frequency': str,
+        'hash_sha256': str,
+        'hash_procedure': str
     },
     engine='openpyxl'
 )
@@ -1213,7 +1260,7 @@ def excel_to_json(excel_path):
         # Declarations
         "declaracao_rastreabilidade": str(sheets["Declarações"].iloc[0,1]),
         "tabela_rastreabilidade": [
-            {k: str(v) for k, v in row.items()}
+            {k: str(v) for k, v in row.items() if pd.notnull(v)}
             for _, row in sheets["Rastreabilidade"].iterrows()
         ],
         "declaracao_incerteza": str(sheets["Declarações"].iloc[1,1]),

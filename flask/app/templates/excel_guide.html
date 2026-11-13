@@ -675,13 +675,23 @@ Declaração de Incerteza            | As incertezas expandidas de medição (U)
                                         <td>Código de identificação interno do padrão</td>
                                         <td>PR 394</td>
                                     </tr>
+                                    <tr>
+                                        <td><strong>hash_sha256</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>SHA-256 do arquivo XML do DCC do padrão (64 caracteres hexadecimais), quando o certificado do padrão também é um DCC. Célula vazia = certificado analógico (<code>analogue</code>).</td>
+                                        <td>e14f080fcc4a8b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef012345</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>hash_procedure</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>Procedimento gravado em <code>dcc:procedure</code>. Padrão <code>sha256</code>; para digest de assinatura XML use <code>c14n-sha256</code> ou <code>enveloped-c14n-sha256</code>.</td>
+                                        <td>enveloped-c14n-sha256</td>
+                                    </tr>
                                 </tbody>
                             </table>
 
                             <div class="example-box">
-name                        | origem | certificado    | cod_id
-Conversor Térmico PMJTC    | PTB    | PTB 27812/2020 | PR 394
-Resistor Padrão            | Inmetro| DIMCI 1263/2024 | Lampe PR 465
+name                        | origem | certificado    | cod_id       | hash_sha256                                                      | hash_procedure
+Conversor Térmico PMJTC    | PTB    | PTB 27812/2020 | PR 394       | e14f080fcc4a8b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef012345 | enveloped-c14n-sha256
+Resistor Padrão            | Inmetro| DIMCI 1263/2024 | Lampe PR 465 |                                                                  |
                             </div>
                         </div>
                     </div>

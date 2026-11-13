@@ -183,8 +183,8 @@
                 <h2 class="h5 section-title">8) Rastreabilidade e Observacoes (opcional)</h2>
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label">tabela_rastreabilidade (um item por linha: name|origem|certificado|cod_id)</label>
-                        <textarea class="form-control" name="tabela_rastreabilidade" rows="3" placeholder="Conversor Térmico|PTB|PTB 27812/2020|PR 394"></textarea>
+                        <label class="form-label">tabela_rastreabilidade (um item por linha: name|origem|certificado|cod_id|hash_sha256|hash_procedure)</label>
+                        <textarea class="form-control" name="tabela_rastreabilidade" rows="3" placeholder="Conversor Térmico|PTB|PTB 27812/2020|PR 394|e14f... (SHA-256 opcional)|enveloped-c14n-sha256 (opcional)"></textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label">observacoes (uma por linha)</label>
@@ -402,9 +402,12 @@ function buildPayload() {
     if (eqs.length) data.metodo_medicao_equation = eqs;
 
     const rast = parseLines(f.tabela_rastreabilidade.value).map((line) => {
-        const [name, origem, certificado, cod_id] = line.split('|').map((x) => (x || '').trim());
+        const [name, origem, certificado, cod_id, hash_sha256, hash_procedure] = line.split('|').map((x) => (x || '').trim());
         if (!name || !origem || !certificado || !cod_id) return null;
-        return { name, origem, certificado, cod_id };
+        const item = { name, origem, certificado, cod_id };
+        if (hash_sha256) item.hash_sha256 = hash_sha256;
+        if (hash_procedure) item.hash_procedure = hash_procedure;
+        return item;
     }).filter(Boolean);
     if (rast.length) data.tabela_rastreabilidade = rast;
 

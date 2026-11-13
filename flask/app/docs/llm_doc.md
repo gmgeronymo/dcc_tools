@@ -1,6 +1,6 @@
 # DCC Tools — Guia de acesso à API para LLMs
 
-**Versão:** 2.2
+**Versão:** 2.3
 **Atualizado em:** 13/11/2026
 **Público:** usuários, desenvolvedores e assistentes de IA (ChatGPT, Claude, Gemini, Copilot, agentes de código).
 **Idioma:** português (pt-BR).
@@ -619,7 +619,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `cliente` | objeto | sim | `nome`, `email`, `cidade`, `pais`, `cep`, `uf`, `endereco`, `numero`. |
 | `informacoes_pertinentes` | array | sim (pode ser vazio) | Condições ambientais: `name`, `value` ou `value_min`/`value_max` ou `text`, `unc`, `k`, `unit`, `refType`. |
 | `declaracao_rastreabilidade` | string | sim | Texto da declaração de rastreabilidade. |
-| `tabela_rastreabilidade` | array | não | `name`, `origem`, `certificado`, `cod_id`. |
+| `tabela_rastreabilidade` | array | não | `name`, `origem`, `certificado`, `cod_id`, `hash_sha256` e `hash_procedure` opcionais. |
 | `declaracao_incerteza` | string | sim | Texto da declaração de incerteza. |
 | `metodo_medicao` | array de strings | sim | Uma ou mais descrições do método. |
 | `metodo_medicao_equation` | array de strings | não | Equações em LaTeX, alinhadas por índice a `metodo_medicao`. |
@@ -707,6 +707,32 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
   contrária retorna **400**, pois o bloco `dcc:relativeUncertainty` só representa incerteza relativa.
 - A documentação completa, campo a campo, está em `/dcc/api_doc`.
 - Referência oficial: <https://wiki.dcc.ptb.de/dccrelativeUncertainty>.
+
+### 8.5 Rastreabilidade com certificado do padrão que também é DCC
+
+Cada item de `tabela_rastreabilidade` pode informar o hash SHA-256 do arquivo XML do DCC do padrão:
+
+```json
+{
+  "name": "Resistor Padrão",
+  "origem": "Inmetro",
+  "certificado": "DIMCI 1263/2024",
+  "cod_id": "Lampe PR 465",
+  "hash_sha256": "e14f080fcc4a8b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef012345"
+}
+```
+
+Regras:
+
+- `hash_sha256` é opcional e deve ter exatamente 64 caracteres hexadecimais.
+- O hash é calculado sobre os **bytes do arquivo XML** do DCC referenciado.
+- Quando informado, o XML gerado usa `<dcc:procedure>sha256</dcc:procedure>` e
+  `<dcc:value>{hash}</dcc:value>` dentro do `dcc:certificate`.
+- `hash_procedure` é opcional e sobrescreve o valor de `dcc:procedure`. Use `c14n-sha256` ou
+  `enveloped-c14n-sha256` quando o digest vier de uma assinatura XML.
+- Sem `hash_sha256` (ou com string vazia), o gerador mantém `analogue` em `dcc:procedure` e
+  `dcc:value`, representando certificado analógico.
+- O campo `certificado` deve conter o identificador do certificado (para DCC, o `uniqueIdentifier`).
 
 ---
 
@@ -861,7 +887,7 @@ Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 | `401` com XML `<autenticacaoNecessaria>` | API-KEY ausente, inválida ou revogada. | Confira o cabeçalho `X-API-Key` e gere/consulte a chave em `/dcc/perfil`. |
 | `400` `{"error": "No JSON provided"}` | Corpo vazio ou `Content-Type` errado. | Envie JSON e defina `Content-Type: application/json`. |
 | `400` `{"error": "Invalid JSON: ..."}` | JSON malformado. | Valide o JSON; lembre-se de escapar `\` nas unidades D-SI. |
-| `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido ou `in_cmc` não booleano). | Leia a mensagem e ajuste o campo indicado. |
+| `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido, `in_cmc` não booleano, `hash_sha256` ou `hash_procedure` inválido). | Leia a mensagem e ajuste o campo indicado. |
 | `500` `{"error": "Erro ao gerar o DCC: ..."}` | Campo obrigatório ausente, tipo inesperado ou falha interna. | Confira a seção 8 e os campos obrigatórios; se persistir, contate o administrador com o payload e o horário. |
 | `/dcc/validate_xml` retorna HTML com erros | XML inválido, `schemaLocation` ausente ou schema em host não confiável. | Confira o XML e o `xsi:schemaLocation`; o schema precisa estar em `ptb.de`/`w3.org` (ou na allowlist). |
 | `/dcc/upload_json` retorna texto simples | Comportamento esperado dessa rota de conveniência. | Prefira `/dcc/generate` para respostas JSON/XML consistentes. |
@@ -912,5 +938,6 @@ Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 | 1.1 | 06/11/2026 | Ajuste para ambiente de intranet: baixar/anexar o `.md` em vez de depender da URL interna. |
 | 1.2 | 06/11/2026 | Nome do arquivo unificado para `llm_doc.md`, igual ao caminho de download. |
 | 2.0 | 12/11/2026 | Schema 3.3.0 como único suportado para geração; incerteza absoluta em `si:expandedMU`; `relative_uncertainty_in_dcc` exige `unc_relativa`; referências oficiais. |
+| 2.3 | 13/11/2026 | Referência a certificado do padrão que também é DCC via `tabela_rastreabilidade[].hash_sha256` e `hash_procedure`, com `sha256` em `dcc:procedure` e o digest em `dcc:value`. |
 | 2.2 | 13/11/2026 | Reaproveita o statement de CMC existente (`cmc=true`) no formato `basic_isInCMC`, sem criar um segundo statement. |
 | 2.1 | 13/11/2026 | Marcação de pontos dentro/fora da CMC com `in_cmc`, `cmc_padrao` e `cmc_declaracao` (`basic_isInCMC`, `dcc:valid`/`dcc:validXMLList`). |
