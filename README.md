@@ -13,11 +13,13 @@ Principais funcionalidades:
 - Gerar DCC XML via upload de planilha Excel (`/dcc/upload_xls`)
 - Embutir XML em PDF/A-3 (`/dcc/pdf_attach`)
 - Validar XML DCC contra schema (`/dcc/validate_xml`)
-- Visualizar DCC em formato legível por humanos (`/dcc/visualizar_dcc`)
+- Visualizar DCC em formato legível por humanos (`/dcc/visualizar_dcc`), com capa no modelo NIE-Dimci-014 e indicação de pontos dentro/fora da CMC
 - Interface web com documentação, exemplos, FAQ e publicações (`/dcc/`)
 - Documentação de acesso à API para LLMs, em Markdown, com instruções e prompts para baixar e anexar ao assistente (`/dcc/llm_doc` e `/dcc/llm_doc.md`)
 - Suporte opcional aos graus de liberdade efetivos (`νeff`, campo `nueff`) nos resultados
 - Marcação estruturada de pontos dentro/fora da CMC do laboratório (`in_cmc`, `cmc_padrao` e `cmc_declaracao`; `basic_isInCMC` no XML)
+- Referência a uma ou mais entradas do KCDB (`cmc_id`), com link permanente do BIPM no `dcc:statement`
+- Declaração estruturada do valor nominal do item (`valor_nominal`; `basic_nominalValue` no XML, conforme DKD-E 1-1)
 - Referência a certificados de padrão que também são DCC, com hash SHA-256 (`tabela_rastreabilidade[].hash_sha256`)
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 - Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
@@ -157,11 +159,13 @@ Main capabilities:
 - Generate DCC XML from Excel template upload (`/dcc/upload_xls`)
 - Embed XML into PDF/A-3 (`/dcc/pdf_attach`)
 - Validate DCC XML against schema (`/dcc/validate_xml`)
-- Render human-readable DCC from XML (`/dcc/visualizar_dcc`)
+- Render human-readable DCC from XML (`/dcc/visualizar_dcc`), with a cover based on the NIE-Dimci-014 model and CMC inside/outside indication per point
 - Web UI with documentation, examples, FAQ, and publications (`/dcc/`)
 - LLM-oriented API access guide in Markdown, with instructions and prompts to download and attach to the assistant (`/dcc/llm_doc` and `/dcc/llm_doc.md`)
 - Optional support for effective degrees of freedom (`νeff`, field `nueff`) in results
 - Structured marking of measurement points inside/outside the laboratory CMC (`in_cmc`, `cmc_padrao`, and `cmc_declaracao`; `basic_isInCMC` in the XML)
+- Reference to one or more KCDB entries (`cmc_id`), with the BIPM permanent link in `dcc:statement`
+- Structured declaration of the item nominal value (`valor_nominal`; `basic_nominalValue` in the XML, per DKD-E 1-1)
 - Reference to standard certificates that are also DCCs, using a SHA-256 hash (`tabela_rastreabilidade[].hash_sha256`)
 - User registration with API-KEY and protection of generation/upload functions
 - Password change and e-mail password recovery (`@inmetro.gov.br`)

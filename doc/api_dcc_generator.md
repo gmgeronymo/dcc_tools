@@ -184,7 +184,9 @@ devem ser mantidas exatamente como abaixo (incluindo acentos).
 | `modelo` | string | sim | Modelo do item. |
 | `num_serie` | string | sim | Número de série. |
 | `cod_identificacao` | string | sim | Código de identificação interno. |
-| `caracteristicas_item` | string | sim | Características adicionais do item. |
+| `caracteristicas_item` | string | não | Características adicionais do item. Opcional: se omitido/vazio, o statement "Características do Item" não é emitido. Pode ser omitido quando `valor_nominal` é informado. |
+| `valor_nominal` | objeto ou string | não | Valor nominal estruturado do item em `dcc:itemQuantities/dcc:itemQuantity` com `refType="basic_nominalValue"`. Formato recomendado: `{"valor": "100", "unidade": "\\ohm", "nome": "Valor nominal", "descricao": "..."}`. Também aceita o formato legado `valor_nominal` escalar + `valnom_unit`. Ver §2.14. |
+| `valnom_unit` | string | não | Unidade do valor nominal no formato legado (usada quando `valor_nominal` é escalar). Prefira `valor_nominal.unidade`. |
 | `data_calibracao` | string | sim | Data da calibração, ISO 8601 (`YYYY-MM-DD`). |
 | `data_emissao` | string | não | Data de emissão (`YYYY-MM-DD`). Se omitida, o XML inclui a declaração "Ver data da assinatura eletrônica presente no certificado". |
 | `cmc` | boolean | sim | Indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando `true`, o `dcc:statement` de CMC é emitido no formato estruturado `basic_isInCMC`. |
@@ -202,6 +204,10 @@ devem ser mantidas exatamente como abaixo (incluindo acentos).
 > A versão de schema é resolvida na ordem: `dcc_version` → `schema_version` → `3.3.0`.
 > `3.2.0` e valores desconhecidos retornam **400**. Certificados 3.2.0 já emitidos
 > continuam válidos para validação e visualização.
+>
+> `caracteristicas_item` é opcional. Recomenda-se informar `caracteristicas_item` **ou**
+> `valor_nominal` para manter a seção "Características do Item" na visualização. Se ambos forem
+> omitidos, o XML continua válido, mas a seção não é exibida.
 
 ### 2.2 `software` (opcional)
 
@@ -229,6 +235,12 @@ Array com definições de RefTypes adicionais.
     "description": "The 'temperature' namespace contains RefTypes for temperature quantities.",
     "namespace": "temperature",
     "link": "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=117"
+  },
+  {
+    "name": "Namespace for RefTypes of Electromagnetism",
+    "description": "The 'electromagnetic' namespace contains RefTypes for electromagnetic quantities.",
+    "namespace": "electromagnetic",
+    "link": "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=389"
   }
 ]
 ```
@@ -239,6 +251,11 @@ Array com definições de RefTypes adicionais.
 | `description` | string | Descrição do namespace. |
 | `namespace` | string | Identificador do namespace. |
 | `link` | string | URL da definição do namespace. |
+
+> **Definição do namespace:** o `dcc_tools` não infere nem adiciona definições de refType.
+> Se o payload usar um `refType` do namespace `electromagnetic`, o cliente deve enviar também
+> a entrada correspondente em `refTypeDefinitions` (por exemplo, `namespace: "electromagnetic"` e
+> o link do vocabulário). Se o cliente não enviar a definição, ela não é usada.
 
 ### 2.4 `cliente` (obrigatório)
 
@@ -404,7 +421,8 @@ Array com os parâmetros adicionais (colunas de índice) que categorizam os resu
 ```json
 "indices": [
   { "mensurando": "acdc", "label": "faixa", "name": "Faixa", "unit": "\\volt" },
-  { "mensurando": "acdc", "label": "frequency", "name": "Frequência", "unit": "\\kilo\\hertz" }
+  { "mensurando": "acdc", "label": "frequency", "name": "Frequência", "unit": "\\kilo\\hertz" },
+  { "mensurando": "rstdc", "label": "current", "name": "Corrente", "unit": "\\ampere", "refType": "electromagnetic_measuringCurrent" }
 ]
 ```
 
@@ -415,6 +433,11 @@ Array com os parâmetros adicionais (colunas de índice) que categorizam os resu
 | `name` | string | sim | Nome legível do índice. |
 | `unit` | string | não | Unidade do índice (D-SI). Sem `unit`, o índice é tratado como rótulo (label). |
 | `refType` | string | não | RefType do índice. |
+
+> **Corrente de medição:** o gerador não aplica `refType` automaticamente ao índice `current`.
+> Se o cliente quiser identificar a corrente de medição, deve enviar
+> `refType: "electromagnetic_measuringCurrent"` no índice e a definição do namespace
+> `electromagnetic` em `refTypeDefinitions`.
 
 ### 2.11 `resultados` (obrigatório)
 
@@ -471,7 +494,7 @@ O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o m
 | --- | --- | --- | --- |
 | `in_cmc` | cada item de `resultados` | boolean | Cobertura de CMC daquele ponto. Aceita `true`/`false`, `1`/`0`, `yes`/`no` ou `Sim`/`Não`. |
 | `cmc_padrao` | raiz | boolean | Valor aplicado aos resultados sem `in_cmc`. Ausente = `false`. |
-| `cmc_declaracao` | raiz | objeto | Personaliza `id`, `nome`, `referencia`, `link`, `descricao` e `autoridade` (`nome`, `cidade`, `pais`). |
+| `cmc_declaracao` | raiz | objeto | Personaliza `id`, `nome`, `referencia`, `link`, `descricao`, `autoridade` (`nome`, `cidade`, `pais`) e, opcionalmente, `cmc_id` (texto ou lista) para referenciar a CMC no KCDB. Ver §2.13.1. |
 
 **Ativação e valor padrão**
 
@@ -518,6 +541,49 @@ O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o m
     { "mensurando": "acdc", "value": "10", "unc": "1", "k": "2", "in_cmc": true }
   ]
 }
+```
+
+**Referência à CMC no KCDB (`cmc_id`)**
+
+O statement pode referenciar uma ou mais entradas do KCDB. Informe apenas o(s) identificador(es)
+em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
+
+```json
+{
+  "cmc": true,
+  "cmc_padrao": true,
+  "cmc_declaracao": {
+    "cmc_id": ["SIM-EM-BR-000008UK-2", "EURAMET-EM-CH-00000GFB-7"]
+  },
+  "resultados": [
+    { "mensurando": "acdc", "value": "10", "unc": "1", "k": "2", "in_cmc": true }
+  ]
+}
+```
+
+Regras:
+
+- O sufixo `-X` (dígito) indica a **versão** da CMC e é removido: `SIM-EM-BR-000008UK-2` →
+  `SIM-EM-BR-000008UK` no XML e no link.
+- O identificador é normalizado para maiúsculas e validado no formato `RMO-Área-País-ID`.
+- O link permanente é sempre derivado do ID (não há campo para enviar links):
+  `https://si-digital-framework.org/kcdb-cmc/<ID>`.
+- Um `dcc:reference` e um `dcc:link` são emitidos por ID, na ordem informada.
+- Os IDs exigem `cmc=true`, `in_cmc` ou `cmc_padrao`; caso contrário a geração retorna `400`.
+- Sem `cmc_id`, o comportamento anterior é mantido (referência e link genéricos).
+
+XML gerado (trecho) com um CMC ID:
+
+```xml
+<dcc:statement id="inCMC" refType="basic_isInCMC">
+  <dcc:name><dcc:content lang="pt">CIPM-MRA</dcc:content></dcc:name>
+  <dcc:description><dcc:content lang="pt">...</dcc:content></dcc:description>
+  <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
+  <dcc:reference>SIM-EM-BR-000008UK</dcc:reference>
+  <dcc:link>https://si-digital-framework.org/kcdb-cmc/SIM-EM-BR-000008UK</dcc:link>
+  <dcc:declaration><dcc:content lang="pt">...</dcc:content></dcc:declaration>
+  <dcc:respAuthority>...</dcc:respAuthority>
+</dcc:statement>
 ```
 
 **XML gerado (trecho)**
@@ -573,6 +639,78 @@ Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 > CMC. Também não coloque `dcc:valid` dentro do `dcc:statement`; o `valid` pertence aos vínculos
 > (`metaData`).
 
+**Visualização human-readable.** Em `POST /dcc/visualizar_dcc`, as tabelas de resultados com
+`measurementMetaData` recebem a coluna **CMC** (`Sim`/`Não`) alinhada a cada ponto. Quando há pontos
+`false`, a última seção (**Observações**) recebe uma observação numerada, após as observações do
+certificado, informando que esses pontos não estão cobertos pela CMC do laboratório no âmbito do
+CIPM MRA, embora a rastreabilidade esteja garantida da mesma forma que sustenta a dos demais pontos.
+Certificados sem marcação não mostram a coluna nem a observação. Valores `inf` (por exemplo, em
+`nueff`) são exibidos como `∞`.
+
+### 2.14 Valor nominal estruturado do item (`valor_nominal`)
+
+O DCC 3.3.0 permite registrar quantidades do item em
+`administrativeData/items/item/itemQuantities/itemQuantity`. Seguindo o DKD-E 1-1, o valor nominal
+(valor de placa/impresso) é declarado com `refType="basic_nominalValue"`.
+
+**Formato recomendado**
+
+```json
+"valor_nominal": {
+  "valor": "100",
+  "unidade": "\\kilo\\ohm",
+  "nome": "Valor nominal",
+  "descricao": "Valor impresso no item"
+}
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | --- | --- |
+| `valor` | string/número | sim | Valor nominal. |
+| `unidade` | string | sim | Unidade D-SI (ex.: `\\ohm`). |
+| `nome` | string | não | Rótulo do itemQuantity; padrão `Valor nominal`. |
+| `descricao` | string | não | Descrição adicional. |
+
+**Formato legado (compatibilidade)**
+
+```json
+"valor_nominal": "100",
+"valnom_unit": "\\kilo\\ohm"
+```
+
+**XML gerado**
+
+```xml
+<dcc:item>
+  <!-- ... -->
+  <dcc:identifications>...</dcc:identifications>
+  <dcc:itemQuantities>
+    <dcc:itemQuantity refType="basic_nominalValue">
+      <dcc:name>
+        <dcc:content lang="pt">Valor nominal</dcc:content>
+      </dcc:name>
+      <dcc:description>
+        <dcc:content lang="pt">Valor impresso no item</dcc:content>
+      </dcc:description>
+      <si:real>
+        <si:value>100</si:value>
+        <si:unit>\kilo\ohm</si:unit>
+      </si:real>
+    </dcc:itemQuantity>
+  </dcc:itemQuantities>
+</dcc:item>
+```
+
+- O campo é opcional; sem ele, nenhum `dcc:itemQuantities` é gerado.
+- `caracteristicas_item` também é opcional: se omitido/vazio, o statement "Características do Item"
+  não é emitido; a visualização ainda exibe o valor nominal em uma seção própria.
+- O namespace `basic` é declarado automaticamente em `refTypeDefinitions` quando o valor nominal
+  (ou a marcação CMC) é emitido e o usuário não o declarou.
+- A visualização human-readable exibe o valor em **Características do Item** como
+  `Valor nominal: 100 kΩ`.
+- O valor nominal não recebe incerteza de medição; ele documenta o valor de placa/impresso.
+- Referência: DKD-E 1-1 (Normalwiderstände), seção 3.4.
+
 ---
 
 ## 3. Exemplo mínimo completo
@@ -591,6 +729,10 @@ Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
   "num_serie": "6515002",
   "cod_identificacao": "PT-030",
   "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
+  "valor_nominal": {
+    "valor": "100",
+    "unidade": "\\kilo\\ohm"
+  },
   "data_calibracao": "2024-08-07",
   "cmc": true,
   "chefe_div": "Edson Afonso",
@@ -726,7 +868,7 @@ A rota `/dcc/generate` retorna:
 | `400` | Versão de schema não suportada (`3.2.0` ou desconhecida) | `{"error": "O schema DCC 3.2.0 não é mais suportado..."}` |
 | `400` | `relative_uncertainty_in_dcc=true` com `unc_relativa=false` | `{"error": "relative_uncertainty_in_dcc=true exige unc_relativa=true..."}` |
 | `400` | `in_cmc` ou `cmc_padrao` com valor não booleano | `{"error": "Valor inválido para 'in_cmc': ... Use true/false (ou Sim/Não)."}` |
-| `400` | `cmc_declaracao` inválida (tipo ou `id`) | `{"error": "O campo 'cmc_declaracao' deve ser um objeto."}` / `{"error": "Identificador inválido em 'cmc_declaracao.id': ..."}` |
+| `400` | `cmc_declaracao` inválida (tipo, `id` ou `cmc_id`) | `{"error": "O campo 'cmc_declaracao' deve ser um objeto."}` / `{"error": "CMC ID inválido em 'cmc_declaracao': ..."}` / `{"error": "'cmc_declaracao.cmc_id' exige cmc=True, in_cmc ou cmc_padrao."}` |
 | `400` | `tabela_rastreabilidade[].hash_sha256` inválido | `{"error": "Valor inválido para 'tabela_rastreabilidade[].hash_sha256': ..."}` |
 | `400` | `tabela_rastreabilidade[].hash_procedure` inválido | `{"error": "Valor inválido para 'tabela_rastreabilidade[].hash_procedure': ..."}` |
 | `500` | Erro inesperado na geração | `{"error": "Erro ao gerar o DCC: ..."}` |
@@ -751,7 +893,7 @@ Além do gerador, a aplicação expõe:
 | `/dcc/upload_xls` | GET/POST | API-KEY ou sessão web | Upload de planilha `.xlsx`; converte para JSON e gera o XML. |
 | `/dcc/pdf_attach` | POST | API-KEY ou sessão web | Anexa um XML DCC a um PDF (PDF/A-3), recebendo `pdf_file` e `xml_file` (multipart). |
 | `/dcc/validate_xml` | GET/POST | aberta | Valida um XML DCC contra o schema informado no próprio XML; o download do schema é restrito a hosts confiáveis (`DCC_ALLOWED_SCHEMA_HOSTS`). |
-| `/dcc/visualizar_dcc` | POST | aberta | Converte XML em HTML legível (upload de `xml_file`). |
+| `/dcc/visualizar_dcc` | POST | aberta | Converte XML em HTML legível (upload de `xml_file`), com capa no modelo NIE-Dimci-014 e coluna CMC (`Sim`/`Não`) por ponto quando houver marcação `basic_isInCMC`. |
 | `/dcc/register` | POST | aberta | Cadastro de usuário (usuário, senha, e-mail `@inmetro.gov.br`); devolve a API-KEY. |
 | `/dcc/login` | GET/POST | aberta | Login na interface web com usuário e senha. |
 | `/dcc/logout` | GET | — | Encerra a sessão da interface web. |

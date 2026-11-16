@@ -13,6 +13,14 @@
   "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
   "data_calibracao": "2024-08-07",
   "cmc": true,
+  "refTypeDefinitions": [
+    {
+      "name": "Namespace for RefTypes of Electromagnetism",
+      "description": "The 'electromagnetic' namespace contains RefTypes for electromagnetic quantities.",
+      "namespace": "electromagnetic",
+      "link": "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=389"
+    }
+  ],
   "chefe_div": "Edson Afonso",
   "chefe_lab": "Gean Marcos Geronymo",
   "tecnico_executor": "Gean Marcos Geronymo",
@@ -108,7 +116,8 @@
       "mensurando": "rstdc",
       "label": "current",
       "name": "Corrente",
-      "unit": "\\ampere"
+      "unit": "\\ampere",
+      "refType": "electromagnetic_measuringCurrent"
     }
   ],
   "resultados": [

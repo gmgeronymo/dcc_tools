@@ -35,6 +35,7 @@ nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb
 # schema
 schemaLocation = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation")
 
+
 def lambda_handler(event, context):
     
     # recebe os dados de entrada por json
@@ -58,8 +59,14 @@ def lambda_handler(event, context):
     
     dcc_version = '3.2.0'
     
-    dcc = dccGen(dcc_version, dados, declaracao)
-    
+    try:
+        dcc = dccGen(dcc_version, dados, declaracao)
+    except ValueError as e:
+        return {
+            'statusCode': 400,
+            'headers': {'Content-Type': 'application/json'},
+            'body': json.dumps({'error': str(e)})
+        }
     
     return {
         'statusCode': 200,

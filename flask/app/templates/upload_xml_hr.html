@@ -7,7 +7,9 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <h1 class="h3 mb-2">Visualizar DCC (Human Readable)</h1>
-            <p class="text-muted">Envie um XML DCC para gerar a visualização em HTML.</p>
+            <p class="text-muted">Envie um XML DCC para gerar a visualização em HTML, com capa no modelo do
+                certificado Dimci. Quando o XML tiver marcação de CMC, as tabelas de resultados exibem a
+                coluna CMC (Sim/Não) e uma observação numerada informa os pontos não cobertos.</p>
 
             <form action="{{ url_for('visualizar_dcc') }}" method="post" enctype="multipart/form-data">
                 <div class="mb-3">

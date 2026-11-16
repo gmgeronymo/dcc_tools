@@ -94,8 +94,11 @@
         <p class="lead">Use a API do DCC Tools com ChatGPT, Claude, Gemini, Copilot ou agentes de código.
             Como o serviço roda em uma intranet, <strong>baixe o guia em Markdown ou copie o conteúdo</strong>
             e anexe ao seu assistente. A URL interna não é acessível pela LLM.</p>
-        <p class="small mt-2 mb-0 opacity-75">Guia v2.3 — inclui a marcação de pontos dentro/fora da CMC
-            (<code>in_cmc</code>, <code>basic_isInCMC</code>) e referências a certificados DCC na rastreabilidade.</p>
+        <p class="small mt-2 mb-0 opacity-75">Guia v2.9 — inclui marcação CMC
+            (<code>in_cmc</code>, <code>basic_isInCMC</code>), referência à CMC no KCDB
+            (<code>cmc_id</code>), pass-through de refTypes, visualização com capa NIE-Dimci-014 e
+            coluna CMC (Sim/Não) e valor nominal estruturado do item
+            (<code>basic_nominalValue</code>).</p>
         <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
             <a class="btn btn-light btn-lg" href="{{ url_for('llm_doc_md') }}" download>
                 <i class="fas fa-download me-2"></i>Baixar guia .md
@@ -279,10 +282,13 @@ Restrições: [linguagem, versão do schema, formato de saída]</pre>
             <ul class="mb-0">
                 <li>Autenticação por API-KEY e cadastro de usuário.</li>
                 <li>Contrato de <code>POST /dcc/generate</code> (JSON → XML), incluindo erros e versões de schema.</li>
-                <li>Upload de JSON e Excel, validação de XML, visualização e anexação em PDF/A-3.</li>
+                <li>Upload de JSON e Excel, validação de XML, visualização (capa no modelo
+                    NIE-Dimci-014, coluna CMC com Sim/Não e observação numerada) e anexação em PDF/A-3.</li>
                 <li>Modelo de dados do certificado, unidades D-SI e graus de liberdade efetivos (<code>nueff</code>).</li>
                 <li>Marcação de pontos dentro/fora da CMC (<code>in_cmc</code>, <code>cmc_padrao</code>,
                     <code>cmc_declaracao</code>) com <code>basic_isInCMC</code>.</li>
+                <li>Valor nominal estruturado do item (<code>valor_nominal</code>,
+                    <code>basic_nominalValue</code>, DKD-E 1-1).</li>
                 <li>Rastreabilidade com certificado do padrão que também é DCC
                     (<code>tabela_rastreabilidade[].hash_sha256</code>).</li>
                 <li>Boas práticas para agentes, solução de problemas e prompts prontos.</li>

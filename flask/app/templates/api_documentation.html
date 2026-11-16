@@ -133,6 +133,7 @@
                         <li><a href="#indices">Índices</a></li>
                         <li><a href="#results">Resultados</a></li>
                         <li><a href="#cmc-marking">Marcação CMC</a></li>
+                        <li><a href="#nominal-value">Valor Nominal</a></li>
 			<li><a href="#obs">Observações</a></li>
                         <li><a href="#full-example">Exemplo Completo</a></li>
                     </ul>
@@ -306,10 +307,17 @@ Content-Type: application/json</div>
                                     </tr>
                                     <tr>
                                         <td>caracteristicas_item</td>
-                                        <td>String com características do item</td>
-                                        <td><span class="required">Obrigatória</span></td>
+                                        <td>String com características do item. Opcional: se omitida/vazia, o statement "Características do Item" não é emitido. Pode ser omitida quando <code>valor_nominal</code> é informado.</td>
+                                        <td><span class="optional">Opcional</span></td>
                                         <td>"caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC"</td>
                                         <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>valor_nominal</td>
+                                        <td>Valor nominal estruturado do item (<code>dcc:itemQuantities/dcc:itemQuantity</code> com <code>refType="basic_nominalValue"</code>)</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"valor_nominal": {"valor": "100", "unidade": "\\kilo\\ohm"}</td>
+                                        <td>Subchaves: <code>valor</code>, <code>unidade</code>, <code>nome</code>, <code>descricao</code>. Também aceita o formato legado <code>valor_nominal</code> + <code>valnom_unit</code>. Ver <a href="#nominal-value">Valor Nominal</a>.</td>
                                     </tr>
                                     <tr>
                                         <td>data_calibracao</td>
@@ -497,6 +505,7 @@ Content-Type: application/json</div>
                                     </tr>
                                 </tbody>
                             </table>
+                            <p class="mt-3"><strong>Namespace <code>electromagnetic</code>:</strong> o gerador não infere nem adiciona definições. Se o payload usar um refType desse namespace, o cliente deve enviar a definição correspondente em <code>refTypeDefinitions</code>. Se não enviar, a definição não é usada.</p>
                         </div>
                     </div>
                 </div>
@@ -1052,11 +1061,10 @@ Content-Type: application/json</div>
                                     </tr>
                                 </tbody>
                             </table>
+                            <p class="mt-3"><strong>Corrente de medição:</strong> o gerador não aplica refType automaticamente. Se o cliente quiser identificar a corrente, deve preencher <code>refType: "electromagnetic_measuringCurrent"</code> no índice e enviar a definição do namespace <code>electromagnetic</code> em <code>refTypeDefinitions</code>.</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Resultados -->
                 <div class="page-section" id="results">
                     <h2 class="section-title">Resultados</h2>
                     <div class="card">
@@ -1216,7 +1224,109 @@ Content-Type: application/json</div>
                                     convertidas para incerteza padrão). Não use <code>dcc:conformity</code>
                                     para indicar CMC. Referência: DKD-E 7-2, §4.5, e vocabulário de
                                     <code>refType</code> do DKD/PTB.</p>
+
+                                <p class="mt-3"><strong>Na visualização:</strong> em
+                                    <code>POST /dcc/visualizar_dcc</code>, as tabelas de resultados com
+                                    <code>measurementMetaData</code> exibem a coluna <strong>CMC</strong>
+                                    (<code>Sim</code>/<code>Não</code>) alinhada aos pontos. Se houver
+                                    pontos <code>false</code>, a seção <strong>Observações</strong> recebe
+                                    uma observação numerada, após as observações do certificado,
+                                    informando que esses pontos não estão cobertos pela CMC, embora a
+                                    rastreabilidade esteja garantida da mesma forma que sustenta a dos
+                                    demais pontos. Certificados sem marcação não exibem a coluna nem a
+                                    observação. Valores <code>inf</code> (por exemplo, em
+                                    <code>nueff</code>) são exibidos como <code>∞</code>.</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Valor Nominal -->
+                <div class="page-section" id="nominal-value">
+                    <h2 class="section-title">Valor Nominal do Item</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>O DCC 3.3.0 permite registrar quantidades do item em
+                                <code>administrativeData/items/item/itemQuantities/itemQuantity</code>.
+                                Seguindo o DKD-E 1-1, o valor nominal (valor de placa/impresso) é
+                                declarado com <code>refType="basic_nominalValue"</code>.</p>
+
+                            <h5 class="mt-4">Formato recomendado</h5>
+                            <div class="example-box">"valor_nominal": {
+    "valor": "100",
+    "unidade": "\\kilo\\ohm",
+    "nome": "Valor nominal",
+    "descricao": "Valor impresso no item"
+}</div>
+
+                            <table class="table table-sm mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Campo</th>
+                                        <th>Tipo</th>
+                                        <th>Obrigatório</th>
+                                        <th>Descrição</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>valor</code></td>
+                                        <td>string/número</td>
+                                        <td><span class="required">Obrigatório</span></td>
+                                        <td>Valor nominal.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>unidade</code></td>
+                                        <td>string</td>
+                                        <td><span class="required">Obrigatório</span></td>
+                                        <td>Unidade D-SI (ex.: <code>\\ohm</code>).</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>nome</code></td>
+                                        <td>string</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>Rótulo do itemQuantity; padrão <code>Valor nominal</code>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>descricao</code></td>
+                                        <td>string</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>Descrição adicional.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h5 class="mt-4">Formato legado (compatibilidade)</h5>
+                            <div class="example-box">"valor_nominal": "100",
+"valnom_unit": "\\kilo\\ohm"</div>
+
+                            <h5 class="mt-4">XML gerado (trecho)</h5>
+                            <div class="example-box">&lt;dcc:item&gt;
+  &lt;!-- ... --&gt;
+  &lt;dcc:identifications&gt;...&lt;/dcc:identifications&gt;
+  &lt;dcc:itemQuantities&gt;
+    &lt;dcc:itemQuantity refType="basic_nominalValue"&gt;
+      &lt;dcc:name&gt;&lt;dcc:content lang="pt"&gt;Valor nominal&lt;/dcc:content&gt;&lt;/dcc:name&gt;
+      &lt;dcc:description&gt;&lt;dcc:content lang="pt"&gt;Valor impresso no item&lt;/dcc:content&gt;&lt;/dcc:description&gt;
+      &lt;si:real&gt;
+        &lt;si:value&gt;100&lt;/si:value&gt;
+        &lt;si:unit&gt;\kilo\ohm&lt;/si:unit&gt;
+      &lt;/si:real&gt;
+    &lt;/dcc:itemQuantity&gt;
+  &lt;/dcc:itemQuantities&gt;
+&lt;/dcc:item&gt;</div>
+
+                            <ul class="mt-3">
+                                <li>Campo opcional; sem ele não há <code>itemQuantities</code>.</li>
+                                <li>O namespace <code>basic</code> é declarado automaticamente em
+                                    <code>refTypeDefinitions</code> quando o valor nominal (ou a marcação CMC)
+                                    é emitido.</li>
+                                <li>A visualização exibe o valor em <strong>Características do Item</strong>
+                                    como <code>Valor nominal: 100 kΩ</code>.</li>
+                                <li>O valor nominal não recebe incerteza de medição; ele documenta o valor
+                                    de placa/impresso.</li>
+                                <li>Referência: DKD-E 1-1 (Normalwiderstände), seção 3.4.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -1259,6 +1369,12 @@ Content-Type: application/json</div>
     "num_serie": "6515002",
     "cod_identificacao": "PT-030",
     "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
+    "valor_nominal": {
+        "valor": "100",
+        "unidade": "\\kilo\\ohm",
+        "nome": "Valor nominal",
+        "descricao": "Valor impresso no item"
+    },
     "data_calibracao": "2024-08-07",
     "data_emissao": "2024-08-07",
     "cmc": true,

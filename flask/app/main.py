@@ -275,6 +275,12 @@ def is_truthy(value):
 CMC_REF_TYPE = 'basic_isInCMC'
 CMC_ID_PATTERN = re.compile(r'^[A-Za-z_][A-Za-z0-9._-]*$')
 
+# CMC IDs do KCDB (BIPM). O identificador base segue RMO-Area-Pais-ID; o
+# sufixo "-X" (digito) e a versao da CMC e nao e usado no XML nem no link.
+KCDB_CMC_BASE_URL = 'https://si-digital-framework.org/kcdb-cmc/'
+KCDB_CMC_ID_PATTERN = re.compile(r'^[A-Z]{2,10}-[A-Z]{1,5}-[A-Z]{2,4}-[A-Z0-9]{8}$')
+KCDB_CMC_VERSION_SUFFIX = re.compile(r'-\d$')
+
 CMC_STATEMENT_DEFAULTS = {
     'id': 'inCMC',
     'nome': 'CIPM-MRA',
@@ -339,6 +345,74 @@ def optional_bool(mapping, key, default):
     return parse_bool(value, key), True
 
 
+def normalize_kcdb_cmc_id(value):
+    """Normaliza um CMC ID do KCDB para o identificador base.
+
+    O sufixo "-X" (digito) indica a versao da CMC e e removido, conforme o
+    uso no certificado e no link permanente do BIPM. O identificador e
+    normalizado para maiusculas.
+    """
+    original = value
+    cmc_id = str(value).strip().upper()
+    cmc_id = KCDB_CMC_VERSION_SUFFIX.sub('', cmc_id)
+
+    if not KCDB_CMC_ID_PATTERN.match(cmc_id):
+        raise ValueError(
+            "CMC ID inválido em 'cmc_declaracao': %r. Use o formato "
+            "RMO-Área-País-ID (o sufixo de versão -X é opcional)."
+            % (original,)
+        )
+
+    return cmc_id
+
+
+def resolve_cmc_ids(declaracao):
+    """Le e normaliza o(s) CMC ID(s) informados em cmc_declaracao.cmc_id.
+
+    Aceita um texto unico ou uma lista de textos; remove duplicidades
+    preservando a ordem.
+    """
+    if not isinstance(declaracao, dict):
+        return []
+
+    if 'cmc_ids' in declaracao:
+        raise ValueError(
+            "Use 'cmc_declaracao.cmc_id' (texto ou lista) em vez de 'cmc_ids'."
+        )
+
+    bruto = declaracao.get('cmc_id')
+
+    if bruto is None:
+        return []
+
+    if isinstance(bruto, str):
+        valores = [bruto]
+    elif isinstance(bruto, (list, tuple)):
+        valores = list(bruto)
+    else:
+        raise ValueError(
+            "O campo 'cmc_declaracao.cmc_id' deve ser um texto ou uma lista "
+            "de textos."
+        )
+
+    ids = []
+    vistos = set()
+
+    for valor in valores:
+        if valor is None or str(valor).strip() == '':
+            continue
+        if isinstance(valor, (list, tuple, dict)):
+            raise ValueError(
+                "Cada item de 'cmc_declaracao.cmc_id' deve ser um texto."
+            )
+        cmc_id = normalize_kcdb_cmc_id(valor)
+        if cmc_id not in vistos:
+            vistos.add(cmc_id)
+            ids.append(cmc_id)
+
+    return ids
+
+
 def resolve_cmc_config(dados):
     """Valida e resolve a configuracao da marcacao de CMC.
 
@@ -368,6 +442,8 @@ def resolve_cmc_config(dados):
         'enabled': explicito or tem_padrao,
         'statement': is_truthy(dados.get('cmc')) or explicito or tem_padrao,
         'default': cmc_padrao,
+        'cmc_ids': [],
+        'links': [],
     }
 
     declaracao = dados.get('cmc_declaracao')
@@ -390,6 +466,16 @@ def resolve_cmc_config(dados):
                 valor = autoridade.get(chave)
                 if valor is not None and str(valor).strip() != '':
                     config['autoridade'][chave] = str(valor).strip()
+
+        cmc_ids = resolve_cmc_ids(declaracao)
+        if cmc_ids:
+            if not (config['enabled'] or config['statement']):
+                raise ValueError(
+                    "'cmc_declaracao.cmc_id' exige cmc=True, in_cmc ou "
+                    "cmc_padrao."
+                )
+            config['cmc_ids'] = cmc_ids
+            config['links'] = [KCDB_CMC_BASE_URL + cmc_id for cmc_id in cmc_ids]
 
     if not CMC_ID_PATTERN.match(config['id']):
         raise ValueError(
@@ -423,14 +509,20 @@ def add_cmc_metadata(parent, ref_id, statuses):
         valid_list.text = ' '.join(bools)
 
 
-def has_basic_ref_type_definition(dados):
-    """Indica se o usuario ja declarou o namespace 'basic'."""
+def has_ref_type_definition(dados, namespace):
+    """Indica se o payload declarou um namespace de refType."""
+    namespace = str(namespace).strip().lower()
     for definicao in dados.get('refTypeDefinitions', []) or []:
         if not isinstance(definicao, dict):
             continue
-        if str(definicao.get('namespace', '')).strip().lower() == 'basic':
+        if str(definicao.get('namespace', '')).strip().lower() == namespace:
             return True
     return False
+
+
+def has_basic_ref_type_definition(dados):
+    """Indica se o usuario ja declarou o namespace 'basic'."""
+    return has_ref_type_definition(dados, 'basic')
 
 
 def add_basic_ref_type_definition(ref_type_definitions):
@@ -474,7 +566,13 @@ def add_cmc_statement(statements, dados, config, declaracao):
     campo_texto(description, 'content', config['descricao'])
 
     campo_texto(statement, 'reference', config['referencia'])
-    campo_texto(statement, 'link', config['link'])
+
+    for cmc_id in config.get('cmc_ids', []):
+        campo_texto(statement, 'reference', cmc_id)
+
+    links = config.get('links') or [config['link']]
+    for link in links:
+        campo_texto(statement, 'link', link)
 
     # Mantem a declaracao textual do MRA quando o certificado tem CMC.
     # A ordem do XSD exige 'declaration' antes de 'respAuthority'.
@@ -491,6 +589,104 @@ def add_cmc_statement(statements, dados, config, declaracao):
         resp_authority, etree.QName(nsmap['dcc'], 'location'))
     campo_texto(location, 'city', config['autoridade']['cidade'])
     campo_texto(location, 'countryCode', config['autoridade']['pais'])
+
+
+# ---------------------------------------------------------------------------
+# Valor nominal do item (dcc:itemQuantity com basic_nominalValue)
+#
+# O DCC 3.3.0 permite declarar quantidades do item em
+# dcc:item/dcc:itemQuantities/dcc:itemQuantity. O DKD-E 1-1 usa
+# refType="basic_nominalValue" para registrar o valor nominal (valor de
+# placa/impresso) de forma estruturada. O campo e opcional.
+# ---------------------------------------------------------------------------
+
+NOMINAL_VALUE_REF_TYPE = 'basic_nominalValue'
+NOMINAL_VALUE_DEFAULT_NAME = 'Valor nominal'
+
+
+def resolve_nominal_value(dados):
+    """Resolve o valor nominal estruturado do item.
+
+    Formato recomendado:
+        "valor_nominal": {
+            "valor": "100",
+            "unidade": "\\ohm",
+            "nome": "Valor nominal",       # opcional
+            "descricao": "..."             # opcional
+        }
+
+    Por compatibilidade com o gerador legado (aws_lambda), aceita tambem:
+        "valor_nominal": "100",
+        "valnom_unit": "\\ohm"
+
+    Retorna None quando o campo nao e informado.
+    """
+    raw = dados.get('valor_nominal')
+    if raw is None:
+        return None
+    if isinstance(raw, str) and not raw.strip():
+        return None
+    if isinstance(raw, (list, tuple, bool)):
+        raise ValueError(
+            "O campo 'valor_nominal' deve ser um objeto com 'valor' e "
+            "'unidade'."
+        )
+
+    if isinstance(raw, dict):
+        valor = raw.get('valor')
+        unidade = raw.get('unidade', raw.get('unit'))
+        nome = raw.get('nome')
+        descricao = raw.get('descricao')
+    else:
+        valor = raw
+        unidade = dados.get('valnom_unit', dados.get('unidade'))
+        nome = None
+        descricao = None
+
+    if valor is None or str(valor).strip() == '':
+        raise ValueError(
+            "O campo 'valor_nominal.valor' é obrigatório quando "
+            "'valor_nominal' é informado."
+        )
+    if unidade is None or str(unidade).strip() == '':
+        raise ValueError(
+            "O campo 'valor_nominal.unidade' é obrigatório quando "
+            "'valor_nominal' é informado."
+        )
+
+    nome = str(nome).strip() if nome is not None else ''
+    descricao = str(descricao).strip() if descricao is not None else ''
+
+    return {
+        'valor': str(valor).strip(),
+        'unidade': str(unidade).strip(),
+        'nome': nome or NOMINAL_VALUE_DEFAULT_NAME,
+        'descricao': descricao or None,
+    }
+
+
+def add_nominal_value(item, config):
+    """Adiciona dcc:itemQuantities/dcc:itemQuantity com basic_nominalValue."""
+    item_quantities = etree.SubElement(
+        item, etree.QName(nsmap['dcc'], 'itemQuantities'))
+    item_quantity = etree.SubElement(
+        item_quantities,
+        etree.QName(nsmap['dcc'], 'itemQuantity'),
+        refType=NOMINAL_VALUE_REF_TYPE)
+
+    campo_name(item_quantity, config['nome'])
+
+    if config.get('descricao'):
+        description = etree.SubElement(
+            item_quantity, etree.QName(nsmap['dcc'], 'description'))
+        campo_texto(description, 'content', config['descricao'])
+
+    si_real = etree.SubElement(
+        item_quantity, etree.QName(nsmap['si'], 'real'))
+    si_value = etree.SubElement(si_real, etree.QName(nsmap['si'], 'value'))
+    si_value.text = config['valor']
+    si_unit = etree.SubElement(si_real, etree.QName(nsmap['si'], 'unit'))
+    si_unit.text = config['unidade']
 
 
 def validate_relative_uncertainty(dados):
@@ -660,6 +856,9 @@ def dccGen(dcc_version, dados, declaracao) :
     # marcacao de pontos dentro/fora da CMC (opcional)
     cmc_config = resolve_cmc_config(dados)
 
+    # valor nominal estruturado do item (opcional)
+    nominal_config = resolve_nominal_value(dados)
+
     dcc = etree.Element(
         etree.QName(nsmap['dcc'], 'digitalCalibrationCertificate'),
         {schemaLocation: 'https://ptb.de/dcc '+schema_url, 'schemaVersion' : dcc_version},
@@ -725,9 +924,9 @@ def dccGen(dcc_version, dados, declaracao) :
                 # link
                 campo_texto(refTypeDefinition,'link',refTypeDef['link'])
 
-    # a marcacao basic_isInCMC depende do namespace 'basic'; declara-o
-    # automaticamente quando o statement de CMC for emitido
-    if cmc_config['statement'] and not has_basic_ref_type_definition(dados):
+    # os refTypes basic_isInCMC e basic_nominalValue dependem do namespace
+    # 'basic'; declara-o automaticamente quando um deles for emitido
+    if (cmc_config['statement'] or nominal_config) and not has_basic_ref_type_definition(dados):
         if refTypeDefinitions is None:
             refTypeDefinitions = etree.SubElement(
                 administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
@@ -791,6 +990,10 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_texto(item_codid,'issuer','customer')
     campo_texto(item_codid,'value',dados['cod_identificacao'])
     campo_name(item_codid,'Código de Identificação')
+
+    # valor nominal estruturado do item (opcional, DKD-E 1-1)
+    if nominal_config:
+        add_nominal_value(item, nominal_config)
 
     # calibrationLaboratory block
     calibrationLaboratory = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'calibrationLaboratory'))
@@ -859,12 +1062,19 @@ def dccGen(dcc_version, dados, declaracao) :
         issueDateText = 'Ver data da assinatura eletrônica presente no certificado'
         campo_texto(description,'content', issueDateText)
 
-    # caracteristicas do item - presente no modelo de certificado da Dimci
-    # receber no campo caracteristicas_item
-    caracteristicas_item = etree.SubElement(statements, etree.QName(nsmap['dcc'], 'statement'))
-    campo_name(caracteristicas_item, 'Características do Item')
-    description = etree.SubElement(caracteristicas_item, etree.QName(nsmap['dcc'], 'description'))
-    campo_texto(description,'content', dados['caracteristicas_item'])
+    # caracteristicas do item (opcional) - presente no modelo de certificado
+    # da Dimci. Se ausente/vazio, o statement nao e emitido; o valor nominal
+    # estruturado (quando informado) continua sendo exibido na visualizacao.
+    caracteristicas_item_texto = dados.get('caracteristicas_item')
+    if (caracteristicas_item_texto is not None
+            and str(caracteristicas_item_texto).strip() != ''):
+        caracteristicas_item = etree.SubElement(
+            statements, etree.QName(nsmap['dcc'], 'statement'))
+        campo_name(caracteristicas_item, 'Características do Item')
+        description = etree.SubElement(
+            caracteristicas_item, etree.QName(nsmap['dcc'], 'description'))
+        campo_texto(
+            description, 'content', str(caracteristicas_item_texto).strip())
 
     # declaracao cmc
     # O statement de CMC existente (cmc=true) e adaptado para o formato
@@ -1226,7 +1436,11 @@ def excel_to_json(excel_path):
         "modelo": sheets["Metadados Principais"].iloc[8,1],
         "num_serie": sheets["Metadados Principais"].iloc[9,1],
         "cod_identificacao": sheets["Metadados Principais"].iloc[10,1],
-        "caracteristicas_item": sheets["Metadados Principais"].iloc[11,1],
+        "caracteristicas_item": (
+            str(sheets["Metadados Principais"].iloc[11,1])
+            if pd.notnull(sheets["Metadados Principais"].iloc[11,1])
+            else None
+        ),
         "data_calibracao": sheets["Metadados Principais"].iloc[12,1],
         "data_emissao": str(sheets["Metadados Principais"].iloc[13,1]),
         "cmc": sheets["Metadados Principais"].iloc[14,1] == "Sim",
@@ -1341,7 +1555,6 @@ def excel_to_json(excel_path):
 
     if data['desc_chefe_lab'] == 'nan' :
         del data['desc_chefe_lab']
-
 
     # Save JSON
     #with open(json_path, 'w', encoding='utf-8') as f:
@@ -2023,7 +2236,7 @@ def visualizar_dcc():
             return jsonify({'error': f'Erro ao processar arquivo. {str(e)}'}), 500
     
     else:
-        return jsonify({'error': f'Somente arquivos XML são aceitos.: {str(e)}'}), 500
+        return jsonify({'error': 'Somente arquivos XML são aceitos.'}), 400
 
 
 # validacao do XML

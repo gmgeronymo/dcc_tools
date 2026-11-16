@@ -23,6 +23,14 @@
       "version": "v2.3-103-14bfd50"
     }
   ],
+  "refTypeDefinitions": [
+    {
+      "name": "Namespace for RefTypes of Electromagnetism",
+      "description": "The 'electromagnetic' namespace contains RefTypes for electromagnetic quantities.",
+      "namespace": "electromagnetic",
+      "link": "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=389"
+    }
+  ],
   "cliente": {
     "nome": "Inmetro/Dimci/Diele/Lampe",
     "email": "lampe@inmetro.gov.br",
@@ -107,7 +115,8 @@
       "mensurando": "rstdc",
       "label": "current",
       "name": "Corrente Aplicada",
-      "unit": "\\milli\\ampere"
+      "unit": "\\milli\\ampere",
+      "refType": "electromagnetic_measuringCurrent"
     },
     {
       "mensurando": "rstac",

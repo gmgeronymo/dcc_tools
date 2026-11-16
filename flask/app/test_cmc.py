@@ -385,5 +385,104 @@ class TestRotaGenerateCmc(unittest.TestCase):
         self.assertIsNotNone(statement_cmc(root))
 
 
+class TestCmcIdKcdb(unittest.TestCase):
+    """CMC ID do KCDB: referencia e link permanente no statement."""
+
+    CMC_ID = 'SIM-EM-BR-000008UK-2'
+    CMC_BASE = 'SIM-EM-BR-000008UK'
+    CMC_LINK = 'https://si-digital-framework.org/kcdb-cmc/SIM-EM-BR-000008UK'
+
+    def _dados(self, cmc_id, **extra):
+        dados = carregar(EXEMPLO_JSON)
+        declaracao = {'cmc_id': cmc_id}
+        declaracao.update(extra)
+        dados['cmc_declaracao'] = declaracao
+        return dados
+
+    def test_resolve_id_com_versao_remove_sufixo(self):
+        config = resolve_cmc_config(self._dados(self.CMC_ID))
+        self.assertEqual(config['cmc_ids'], [self.CMC_BASE])
+        self.assertEqual(config['links'], [self.CMC_LINK])
+
+    def test_id_sem_versao_tambem_e_aceito(self):
+        config = resolve_cmc_config(self._dados(self.CMC_BASE))
+        self.assertEqual(config['cmc_ids'], [self.CMC_BASE])
+
+    def test_id_minusculo_e_normalizado(self):
+        config = resolve_cmc_config(self._dados(self.CMC_ID.lower()))
+        self.assertEqual(config['cmc_ids'], [self.CMC_BASE])
+
+    def test_cmc_id_aceita_lista(self):
+        segundo = 'EURAMET-EM-CH-00000GFB-7'
+        config = resolve_cmc_config(self._dados([self.CMC_ID, segundo]))
+        self.assertEqual(config['cmc_ids'], [self.CMC_BASE, 'EURAMET-EM-CH-00000GFB'])
+        self.assertEqual(config['links'], [
+            self.CMC_LINK,
+            'https://si-digital-framework.org/kcdb-cmc/EURAMET-EM-CH-00000GFB',
+        ])
+
+    def test_id_duplicado_nao_repete(self):
+        config = resolve_cmc_config(self._dados([self.CMC_ID, self.CMC_BASE]))
+        self.assertEqual(config['cmc_ids'], [self.CMC_BASE])
+
+    def test_id_invalido_gera_erro(self):
+        with self.assertRaises(ValueError):
+            resolve_cmc_config(self._dados('SIM-EM-BR'))
+
+    def test_cmc_id_com_tipo_invalido_gera_erro(self):
+        with self.assertRaises(ValueError):
+            resolve_cmc_config(self._dados({'id': self.CMC_ID}))
+
+    def test_id_sem_marcacao_gera_erro(self):
+        dados = self._dados(self.CMC_ID)
+        dados['cmc'] = False
+        with self.assertRaises(ValueError):
+            resolve_cmc_config(dados)
+
+    def test_sem_cmc_id_mantem_link_generico(self):
+        config = resolve_cmc_config(carregar(EXEMPLO_JSON))
+        self.assertEqual(config['cmc_ids'], [])
+        self.assertEqual(config['links'], [])
+
+    def test_statement_tem_reference_do_cmc_id_e_link(self):
+        root = arvore(gerar(self._dados(self.CMC_ID)))
+        statement = statement_cmc(root)
+        referencias = [r.text for r in statement.findall(DCC_NS + 'reference')]
+        links = [l.text for l in statement.findall(DCC_NS + 'link')]
+        self.assertIn(self.CMC_BASE, referencias)
+        self.assertEqual(links, [self.CMC_LINK])
+        self.assertIsNone(statement.find(DCC_NS + 'valid'))
+
+    def test_statement_com_lista_de_ids(self):
+        segundo = 'EURAMET-EM-CH-00000GFB-7'
+        root = arvore(gerar(self._dados([self.CMC_ID, segundo])))
+        statement = statement_cmc(root)
+        referencias = [r.text for r in statement.findall(DCC_NS + 'reference')]
+        links = [l.text for l in statement.findall(DCC_NS + 'link')]
+        self.assertIn(self.CMC_BASE, referencias)
+        self.assertIn('EURAMET-EM-CH-00000GFB', referencias)
+        self.assertEqual(len(links), 2)
+        self.assertTrue(all(l.startswith('https://si-digital-framework.org/kcdb-cmc/') for l in links))
+
+    def test_campo_antigo_cmc_ids_gera_erro(self):
+        dados = carregar(EXEMPLO_JSON)
+        dados['cmc_declaracao'] = {'cmc_ids': [self.CMC_ID]}
+        with self.assertRaises(ValueError):
+            resolve_cmc_config(dados)
+
+    def test_statement_sem_norm_e_sem_date(self):
+        root = arvore(gerar(self._dados(self.CMC_ID)))
+        statement = statement_cmc(root)
+        self.assertIsNone(statement.find(DCC_NS + 'norm'))
+        self.assertIsNone(statement.find(DCC_NS + 'date'))
+
+    def test_cmc_id_nao_altera_id_interno(self):
+        dados = self._dados(self.CMC_ID, id='outroId')
+        root = arvore(gerar(dados))
+        statement = statement_cmc(root)
+        self.assertEqual(statement.get('id'), 'outroId')
+        self.assertIn(self.CMC_BASE, [r.text for r in statement.findall(DCC_NS + 'reference')])
+
+
 if __name__ == '__main__':
     unittest.main()

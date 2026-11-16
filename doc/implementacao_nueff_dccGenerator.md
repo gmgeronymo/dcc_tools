@@ -69,7 +69,8 @@ Exemplo:
 <dcc:charsXMLList>58.4 62.1 inf 25.7 inf 103.6</dcc:charsXMLList>
 ```
 
-`inf` é a convenção da aplicação para representar `νeff = +∞`.
+`inf` é a convenção da aplicação para representar `νeff = +∞`. Na visualização human-readable
+(`/dcc/visualizar_dcc`), esse valor é exibido como `∞`.
 
 **Não utilizar `NaN`.**
 

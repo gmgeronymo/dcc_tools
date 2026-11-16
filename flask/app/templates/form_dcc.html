@@ -45,7 +45,12 @@
                     <div class="col-md-4"><label class="form-label required">modelo</label><input class="form-control" name="modelo" required></div>
                     <div class="col-md-4"><label class="form-label required">num_serie</label><input class="form-control" name="num_serie" required></div>
                     <div class="col-md-4"><label class="form-label required">cod_identificacao</label><input class="form-control" name="cod_identificacao" required></div>
-                    <div class="col-md-8"><label class="form-label required">caracteristicas_item</label><input class="form-control" name="caracteristicas_item" required></div>
+                    <div class="col-md-8"><label class="form-label">caracteristicas_item <span class="text-muted">(opcional)</span></label><input class="form-control" name="caracteristicas_item"></div>
+                    <div class="col-12"><hr class="my-2"><small class="text-muted">Valor nominal estruturado (opcional; gera <code>dcc:itemQuantity</code> com <code>basic_nominalValue</code>). Se informado, <code>caracteristicas_item</code> pode ser omitido.</small></div>
+                    <div class="col-md-4"><label class="form-label">valor_nominal.valor</label><input class="form-control" name="valor_nominal_valor" placeholder="100"></div>
+                    <div class="col-md-4"><label class="form-label">valor_nominal.unidade</label><input class="form-control" name="valor_nominal_unidade" placeholder="\kilo\ohm"></div>
+                    <div class="col-md-4"><label class="form-label">valor_nominal.nome <span class="text-muted">(opcional)</span></label><input class="form-control" name="valor_nominal_nome" placeholder="Valor nominal"></div>
+                    <div class="col-md-12"><label class="form-label">valor_nominal.descricao <span class="text-muted">(opcional)</span></label><input class="form-control" name="valor_nominal_descricao" placeholder="Valor impresso no item"></div>
                     <div class="col-md-3"><label class="form-label required">data_calibracao</label><input type="date" class="form-control" name="data_calibracao" required></div>
                     <div class="col-md-3"><label class="form-label">data_emissao</label><input type="date" class="form-control" name="data_emissao"></div>
                     <div class="col-md-3">
@@ -159,6 +164,7 @@
                         <tbody></tbody>
                     </table>
                 </div>
+                <p class="muted-help">O <code>refType</code> do índice é opcional e deve ser enviado pelo cliente; o gerador não infere nem adiciona definições automaticamente.</p>
             </div>
         </div>
 
@@ -352,6 +358,19 @@ function parseLines(text) {
     return text.split('\n').map((x) => x.trim()).filter(Boolean);
 }
 
+function buildValorNominal(f) {
+    const valor = f.valor_nominal_valor.value.trim();
+    const unidade = f.valor_nominal_unidade.value.trim();
+    const nome = f.valor_nominal_nome.value.trim();
+    const descricao = f.valor_nominal_descricao.value.trim();
+    if (!valor && !unidade && !nome && !descricao) return null;
+
+    const valorNominal = { valor: valor, unidade: unidade };
+    if (nome) valorNominal.nome = nome;
+    if (descricao) valorNominal.descricao = descricao;
+    return valorNominal;
+}
+
 function buildPayload() {
     const f = document.getElementById('dccForm');
     const data = {
@@ -397,6 +416,9 @@ function buildPayload() {
     if (f.desc_chefe_div.value) data.desc_chefe_div = f.desc_chefe_div.value;
     if (f.desc_chefe_lab.value) data.desc_chefe_lab = f.desc_chefe_lab.value;
     if (f.cmc_padrao.value !== '') data.cmc_padrao = f.cmc_padrao.value === 'true';
+
+    const valorNominal = buildValorNominal(f);
+    if (valorNominal) data.valor_nominal = valorNominal;
 
     const eqs = parseLines(f.metodo_medicao_equation.value);
     if (eqs.length) data.metodo_medicao_equation = eqs;
@@ -522,7 +544,11 @@ function loadSample() {
     f.modelo.value = '792A';
     f.num_serie.value = '6515002';
     f.cod_identificacao.value = 'PT-030';
-    f.caracteristicas_item.value = 'Função: Transferência Térmica de Tensão AC-DC';
+    f.caracteristicas_item.value = '';
+    f.valor_nominal_valor.value = '100';
+    f.valor_nominal_unidade.value = '\\kilo\\ohm';
+    f.valor_nominal_nome.value = 'Valor nominal';
+    f.valor_nominal_descricao.value = 'Valor impresso no item';
     f.data_calibracao.value = '2024-08-07';
     f.cmc.value = 'true';
     f.chefe_div.value = 'Edson Afonso';

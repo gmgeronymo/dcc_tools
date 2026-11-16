@@ -245,6 +245,9 @@
                     <div class="card">
                         <div class="card-body">
                             <p>A aba <span class="sheet-name">Metadados Principais</span> contém os dados gerais do certificado de calibração. Todos os campos desta aba são obrigatórios, exceto quando indicado.</p>
+                            <p class="text-muted small">O valor nominal estruturado do item
+                                (<code>valor_nominal</code>, <code>basic_nominalValue</code>) está disponível
+                                na API JSON; a planilha atual não possui campo para ele.</p>
 
                             <table>
                                 <thead>
@@ -311,8 +314,8 @@
                                         <td>PT-030</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Características Item</strong></td>
-                                        <td>Descrição adicional das características do item</td>
+                                        <td><strong>Características Item</strong> <span class="field-optional">(opcional)</span></td>
+                                        <td>Descrição adicional das características do item. Se em branco, o statement "Características do Item" não é emitido. Pode ser deixada em branco quando o valor nominal estruturado for informado pela API JSON.</td>
                                         <td>Função: Transferência Térmica de Tensão AC-DC</td>
                                     </tr>
                                     <tr>
@@ -873,7 +876,7 @@ rstdc | Resistência em Corrente Contínua | \m       | \ohm                    
                                     </tr>
                                     <tr>
                                         <td><strong>refType</strong></td>
-                                        <td>Identificador padronizado (opcional)</td>
+                                        <td>Identificador padronizado (opcional), enviado pelo cliente. Para corrente de medição, use <code>electromagnetic_measuringCurrent</code>.</td>
                                         <td>teste_range</td>
                                     </tr>
                                 </tbody>
@@ -884,7 +887,10 @@ mensurando | label     | name        | unit    | refType
 acdc       | faixa     | Faixa       | \volt   |
 acdc       | voltage   | Tensão      | \volt   |
 acdc       | frequency | Frequência  | \kilo\hertz |
+rstdc      | current   | Corrente    | \ampere | electromagnetic_measuringCurrent
                             </div>
+
+                            <p><strong>Corrente de medição:</strong> o fluxo Excel não infere refType. Para usar <code>electromagnetic_measuringCurrent</code>, preencha a coluna <code>refType</code> do índice e envie a definição do namespace <code>electromagnetic</code> em <code>refTypeDefinitions</code> ao usar a API diretamente.</p>
                         </div>
                     </div>
                 </div>

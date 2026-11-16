@@ -81,7 +81,9 @@ XML             ──POST /dcc/visualizar_dcc──▶  HTML legível
 │       │   ├── form_dcc.html
 │       │   ├── upload_*.html, validate_xml.html
 │       │   └── login.html, register.html, perfil.html, ...
-│       └── test_auth.py, test_nueff.py, test_validation.py
+│       └── test_auth.py, test_nueff.py, test_validation.py, test_cmc.py,
+│           test_traceability.py, test_uncertainty.py, test_visualizacao.py,
+│           test_nominal.py, test_ref_types.py
 │
 └── aws_lambda/                   # implementações legadas/referência em AWS Lambda
     ├── dccGenerator/
@@ -303,6 +305,13 @@ testar a navegação.
 | GET/POST | `/dcc/validate_xml` | validação; resposta é HTML, não JSON |
 | POST | `/dcc/visualizar_dcc` | XML → HTML via XSLT |
 
+> A visualização human-readable (`flask/app/static/examples/xslt/hr_template.xsl`) segue o modelo de
+> capa do certificado Dimci (NIE-Dimci-014) e, quando o XML tem marcação `basic_isInCMC`, inclui a
+> coluna CMC (`Sim`/`Não`) nas tabelas de resultados e uma observação numerada, após as observações
+> do certificado, sobre os pontos não cobertos pela CMC. Valores `inf` de `nueff` são exibidos como
+> `∞`. Mantenha `test_visualizacao.py` atualizado ao alterar o XSLT.
+> A barra de ações ("Imprimir / Salvar em PDF") usa `.no-print` e não é impressa.
+
 > Rotas protegidas usam `@auth.require_auth`. Requisições de API sem autenticação recebem XML
 > `<autenticacaoNecessaria>` com status `401`; navegadores são redirecionados para
 > `/dcc/login?auth_required=1`.
@@ -350,7 +359,35 @@ testar a navegação.
   `si:valueXMLList`). Não usar `dcc:conformity` para CMC.
 - A declaração textual do MRA é preservada como `dcc:declaration` dentro do mesmo statement.
 - `basic` é adicionado automaticamente a `refTypeDefinitions` quando o statement de CMC é emitido.
+- `cmc_declaracao.cmc_id` (texto ou lista) referencia entradas do KCDB. O ID é normalizado para
+  maiúsculas, o sufixo de versão (`-N`) é removido e o link permanente é derivado
+  (`https://si-digital-framework.org/kcdb-cmc/<ID>`). Exige `cmc=true` ou marcação por ponto.
 - A referência completa está em `doc/api_dcc_generator.md` §2.13 e em `/dcc/api_doc#cmc-marking`.
+
+### refTypes (pass-through)
+
+- O gerador **não infere** `refType` e **não adiciona** definições além de `basic` (automático para
+  CMC e valor nominal). O cliente envia `refTypeDefinitions` e `refType` em `indices`/`mensurando`,
+  que são repassados ao XML.
+- Os exemplos em `static/examples/` incluem `electromagnetic_measuringCurrent` quando aplicável.
+- Referência: `test_ref_types.py` e `doc/api_dcc_generator.md`.
+
+### Valor nominal do item (`valor_nominal`)
+
+- `valor_nominal` (raiz, objeto opcional) declara o valor nominal (valor de placa/impresso) do item
+  de forma estruturada, seguindo o DKD-E 1-1.
+- Formato recomendado: `{"valor": "100", "unidade": "\\kilo\\ohm", "nome": "Valor nominal",
+  "descricao": "..."}`. `valor` e `unidade` são obrigatórios.
+- Também aceita o formato legado `valor_nominal` escalar + `valnom_unit` (compatibilidade com o
+  gerador em `aws_lambda/`).
+- XML 3.3.0: `dcc:item/dcc:itemQuantities/dcc:itemQuantity[@refType="basic_nominalValue"]` com
+  `dcc:name`, `dcc:description` opcional e `si:real/si:value` + `si:unit`.
+- `basic` é adicionado automaticamente a `refTypeDefinitions` quando `valor_nominal` ou a marcação
+  CMC é emitida, sem duplicar a definição.
+- A visualização human-readable exibe o valor em **Características do Item**.
+- `caracteristicas_item` é opcional. Se omitido/vazio, o statement "Características do Item" não é
+  emitido; o valor nominal estruturado pode ser usado isoladamente.
+- A referência completa está em `doc/api_dcc_generator.md` §2.14 e em `/dcc/api_doc#nominal-value`.
 
 ### Certificado do padrão que também é DCC (rastreabilidade)
 
@@ -423,7 +460,10 @@ cd flask/app
 python -m unittest test_auth.py -v
 python -m unittest test_nueff.py -v
 python -m unittest test_validation.py -v
+python -m unittest test_visualizacao.py -v
+python -m unittest test_nominal.py -v
 python -m unittest test_cmc.py -v
+python -m unittest test_ref_types.py -v
 python -m unittest test_traceability.py -v
 ```
 

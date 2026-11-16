@@ -30,6 +30,12 @@
 			"description" : "The 'temperature' namespace contains RefTypes for temperature quantities.",
 			"namespace" : "temperature",
 			"link" : "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=117"
+		},
+		{
+			"name" : "Namespace for RefTypes of Electromagnetism",
+			"description" : "The 'electromagnetic' namespace contains RefTypes for electromagnetic quantities.",
+			"namespace" : "electromagnetic",
+			"link" : "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=389"
 		}
 	],
   "cliente": {
@@ -123,7 +129,8 @@
       "mensurando": "rstdc",
       "label": "current",
       "name": "Corrente",
-      "unit": "\\ampere"
+      "unit": "\\ampere",
+      "refType": "electromagnetic_measuringCurrent"
     }
   ],
   "resultados": [
