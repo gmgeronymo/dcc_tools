@@ -247,7 +247,8 @@
                             <p>A aba <span class="sheet-name">Metadados Principais</span> contém os dados gerais do certificado de calibração. Todos os campos desta aba são obrigatórios, exceto quando indicado.</p>
                             <p class="text-muted small">O valor nominal estruturado do item
                                 (<code>valor_nominal</code>, <code>basic_nominalValue</code>) está disponível
-                                na API JSON; a planilha atual não possui campo para ele.</p>
+                                na API JSON (exige declarar o namespace <code>basic</code> em
+                                <code>refTypeDefinitions</code>); a planilha atual não possui campo para ele.</p>
 
                             <table>
                                 <thead>
@@ -623,7 +624,7 @@ Informação textual |       | Texto descritivo da condição...    |
                                     </tr>
                                     <tr>
                                         <td><strong>Declaração de Incerteza</strong></td>
-                                        <td>Texto padronizado que descreve como a incerteza de medição foi calculada. Deve mencionar o GUM e o fator de abrangência utilizado.</td>
+                                        <td>Texto padronizado que descreve como a incerteza de medição foi calculada. Deve mencionar o GUM e o fator de abrangência utilizado. Na API JSON, a referência normativa pode ser enviada também em <code>declaracao_incerteza_norm</code> (ex.: <code>JCGM 100:2008</code>), emitida como <code>dcc:norm</code>; a planilha não possui coluna para esse campo.</td>
                                     </tr>
                                 </tbody>
                             </table>

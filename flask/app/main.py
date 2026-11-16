@@ -525,40 +525,21 @@ def has_basic_ref_type_definition(dados):
     return has_ref_type_definition(dados, 'basic')
 
 
-def add_basic_ref_type_definition(ref_type_definitions):
-    """Declara o namespace 'basic' para o refType basic_isInCMC."""
-    ref_type_definition = etree.SubElement(
-        ref_type_definitions, etree.QName(nsmap['dcc'], 'refTypeDefinition'))
-
-    campo_name(ref_type_definition, 'Namespace for Cross-Community RefTypes', 'en')
-
-    description = etree.SubElement(
-        ref_type_definition, etree.QName(nsmap['dcc'], 'description'))
-    campo_texto(
-        description,
-        'content',
-        "The 'basic' namespace contains RefTypes common for multiple communities.",
-        'en')
-
-    campo_texto(ref_type_definition, 'namespace', 'basic')
-    campo_texto(
-        ref_type_definition,
-        'link',
-        'https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2')
-
-
 def add_cmc_statement(statements, dados, config, declaracao):
     """Adapta o statement de CMC para o formato estruturado basic_isInCMC.
 
     O statement textual emitido quando cmc=True passa a ser o mesmo
-    statement usado pela marcacao: ganha id, refType e respAuthority, e
-    mantem a declaracao textual do MRA em dcc:declaration.
+    statement usado pela marcacao: ganha id e respAuthority, e mantem a
+    declaracao textual do MRA em dcc:declaration. O refType basic_isInCMC
+    so e aplicado quando o cliente declara o namespace 'basic'.
     """
+    attrs = {'id': config['id']}
+    if has_basic_ref_type_definition(dados):
+        attrs['refType'] = CMC_REF_TYPE
     statement = etree.SubElement(
         statements,
         etree.QName(nsmap['dcc'], 'statement'),
-        id=config['id'],
-        refType=CMC_REF_TYPE)
+        **attrs)
 
     campo_name(statement, config['nome'])
 
@@ -665,6 +646,20 @@ def resolve_nominal_value(dados):
     }
 
 
+def validate_nominal_ref_type(dados, nominal_config):
+    """Exige o namespace 'basic' quando o valor nominal e informado.
+
+    O valor nominal estruturado usa refType="basic_nominalValue". Como o
+    gerador nao declara o namespace 'basic' automaticamente, o cliente
+    precisa envia-lo em refTypeDefinitions.
+    """
+    if nominal_config and not has_basic_ref_type_definition(dados):
+        raise ValueError(
+            "O campo 'valor_nominal' exige que o namespace 'basic' seja "
+            "declarado em 'refTypeDefinitions'."
+        )
+
+
 def add_nominal_value(item, config):
     """Adiciona dcc:itemQuantities/dcc:itemQuantity com basic_nominalValue."""
     item_quantities = etree.SubElement(
@@ -687,6 +682,39 @@ def add_nominal_value(item, config):
     si_value.text = config['valor']
     si_unit = etree.SubElement(si_real, etree.QName(nsmap['si'], 'unit'))
     si_unit.text = config['unidade']
+
+
+def resolve_uncertainty_norm(dados):
+    """Resolve as referencias normativas da declaracao da incerteza.
+
+    Campo opcional 'declaracao_incerteza_norm': texto ou lista de textos.
+    Cada valor gera um dcc:norm no usedMethod da declaracao da incerteza,
+    na ordem informada. Valores vazios sao ignorados.
+    """
+    raw = dados.get('declaracao_incerteza_norm')
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        valores = [raw]
+    elif isinstance(raw, (list, tuple)):
+        valores = list(raw)
+    else:
+        raise ValueError(
+            "O campo 'declaracao_incerteza_norm' deve ser um texto ou uma "
+            "lista de textos."
+        )
+
+    normas = []
+    for valor in valores:
+        if not isinstance(valor, str):
+            raise ValueError(
+                "O campo 'declaracao_incerteza_norm' deve conter apenas "
+                "textos."
+            )
+        texto = valor.strip()
+        if texto:
+            normas.append(texto)
+    return normas
 
 
 def validate_relative_uncertainty(dados):
@@ -853,11 +881,15 @@ def dccGen(dcc_version, dados, declaracao) :
 
     validate_relative_uncertainty(dados)
 
+    # referencias normativas da declaracao da incerteza (opcional)
+    uncertainty_norms = resolve_uncertainty_norm(dados)
+
     # marcacao de pontos dentro/fora da CMC (opcional)
     cmc_config = resolve_cmc_config(dados)
 
     # valor nominal estruturado do item (opcional)
     nominal_config = resolve_nominal_value(dados)
+    validate_nominal_ref_type(dados, nominal_config)
 
     dcc = etree.Element(
         etree.QName(nsmap['dcc'], 'digitalCalibrationCertificate'),
@@ -924,13 +956,9 @@ def dccGen(dcc_version, dados, declaracao) :
                 # link
                 campo_texto(refTypeDefinition,'link',refTypeDef['link'])
 
-    # os refTypes basic_isInCMC e basic_nominalValue dependem do namespace
-    # 'basic'; declara-o automaticamente quando um deles for emitido
-    if (cmc_config['statement'] or nominal_config) and not has_basic_ref_type_definition(dados):
-        if refTypeDefinitions is None:
-            refTypeDefinitions = etree.SubElement(
-                administrativeData, etree.QName(nsmap['dcc'], 'refTypeDefinitions'))
-        add_basic_ref_type_definition(refTypeDefinitions)
+    # os refTypes basic_* (basic_isInCMC, basic_nominalValue) dependem do
+    # namespace 'basic'. O gerador nao o declara automaticamente: o cliente
+    # deve envia-lo em refTypeDefinitions quando quiser usa-los.
 
     # coreData block
     coreData = etree.SubElement(administrativeData, etree.QName(nsmap['dcc'], 'coreData'))
@@ -1106,11 +1134,14 @@ def dccGen(dcc_version, dados, declaracao) :
     campo_name(measurementResult,'Resultados e Declaração da Incerteza de Medição')
     # metodos
     usedMethods = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'usedMethods'))
+    # quando o cliente declara o namespace 'basic', os blocos de metodo e de
+    # incerteza recebem os refTypes harmonizados correspondentes
+    basic_ref_types = has_basic_ref_type_definition(dados)
 
     # metodo de medicao
     for i, metodo_medicao in enumerate(declaracao['metodo_medicao']) :
-        #usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_calibrationMethod")
-        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
+        method_attrs = {'refType': 'basic_calibrationMethod'} if basic_ref_types else {}
+        usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), **method_attrs)
         campo_name(usedMethod,'Método de Medição')
         description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
       
@@ -1123,11 +1154,19 @@ def dccGen(dcc_version, dados, declaracao) :
                 campo_texto(formula, 'latex', dados['metodo_medicao_equation'][i])
 
     # incerteza
-    #usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), refType="basic_methodMeasurementUncertainty")
-    usedMethod = etree.SubElement(usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'))
+    uncertainty_attrs = (
+        {'refType': 'basic_methodMeasurementUncertainty'}
+        if basic_ref_types else {}
+    )
+    usedMethod = etree.SubElement(
+        usedMethods, etree.QName(nsmap['dcc'], 'usedMethod'), **uncertainty_attrs)
     campo_name(usedMethod,'Declaração da Incerteza de Medição')
     description = etree.SubElement(usedMethod, etree.QName(nsmap['dcc'], 'description'))
     campo_texto(description,'content',declaracao['incerteza'])
+
+    # referencias normativas opcionais (dcc:norm), na ordem informada
+    for norma in uncertainty_norms:
+        campo_texto(usedMethod, 'norm', norma)
 
     # measuring equipments - rastreabilidade?
     measuringEquipments = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'measuringEquipments'))

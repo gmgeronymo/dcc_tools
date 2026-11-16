@@ -45,6 +45,13 @@ from main import (  # noqa: E402
 
 DCC_NS = '{https://ptb.de/dcc}'
 
+BASIC_DEFINITION = {
+    'name': 'Namespace for Cross-Community RefTypes',
+    'description': "The 'basic' namespace contains RefTypes common for multiple communities.",
+    'namespace': 'basic',
+    'link': 'https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2',
+}
+
 EXEMPLO_JSON = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'static',
@@ -79,8 +86,21 @@ def preprocessar(dados):
     return dados
 
 
-def gerar(dados):
+def adicionar_basic(dados):
+    definicoes = dados.setdefault('refTypeDefinitions', [])
+    if any(
+            isinstance(definicao, dict)
+            and definicao.get('namespace') == 'basic'
+            for definicao in definicoes):
+        return dados
+    definicoes.append(dict(BASIC_DEFINITION))
+    return dados
+
+
+def gerar(dados, basic=True):
     dados = preprocessar(dados)
+    if basic:
+        adicionar_basic(dados)
     declaracao = declaracoes(dados)
     versao = resolve_dcc_version(dados)
     return dccGen(versao, dados, declaracao)
@@ -290,16 +310,46 @@ class TestGeracaoCmc(unittest.TestCase):
         self.assertEqual(len(meta), 1)
         self.assertEqual(meta[0].findtext(DCC_NS + 'valid'), 'true')
 
-    def test_namespace_basic_declarado_automaticamente(self):
+    def test_namespace_basic_nao_e_declarado_automaticamente(self):
         dados = carregar(EXEMPLO_JSON)
         dados['resultados'][0]['in_cmc'] = True
 
-        root = arvore(gerar(dados))
+        root = arvore(gerar(dados, basic=False))
         definicoes = [
             d for d in root.iter(DCC_NS + 'refTypeDefinition')
             if d.findtext(DCC_NS + 'namespace') == 'basic'
         ]
-        self.assertEqual(len(definicoes), 1)
+        self.assertEqual(len(definicoes), 0)
+
+    def test_sem_basic_statement_nao_tem_refType(self):
+        dados = carregar(EXEMPLO_PONTO_UNICO)
+        dados['resultados'][0]['in_cmc'] = True
+
+        root = arvore(gerar(dados, basic=False))
+        statements = [
+            s for s in root.iter(DCC_NS + 'statement') if s.get('id') == 'inCMC'
+        ]
+        self.assertEqual(len(statements), 1)
+        self.assertIsNone(statements[0].get('refType'))
+
+        meta = metadados_cmc(root)
+        self.assertEqual(len(meta), 1)
+        self.assertEqual(meta[0].findtext(DCC_NS + 'valid'), 'true')
+
+    def test_com_basic_statement_tem_refType(self):
+        dados = carregar(EXEMPLO_PONTO_UNICO)
+        dados['resultados'][0]['in_cmc'] = True
+
+        root = arvore(gerar(dados))
+        statement = statement_cmc(root)
+        self.assertIsNotNone(statement)
+        self.assertEqual(statement.get('id'), 'inCMC')
+        self.assertEqual(
+            len([
+                d for d in root.iter(DCC_NS + 'refTypeDefinition')
+                if d.findtext(DCC_NS + 'namespace') == 'basic'
+            ]), 1,
+        )
 
     def test_namespace_basic_nao_duplicado(self):
         dados = carregar(EXEMPLO_JSON)
@@ -374,7 +424,7 @@ class TestRotaGenerateCmc(unittest.TestCase):
         self.assertIn('in_cmc', resp.get_json()['error'])
 
     def test_marcacao_gera_xml_200(self):
-        dados = carregar(EXEMPLO_PONTO_UNICO)
+        dados = adicionar_basic(carregar(EXEMPLO_PONTO_UNICO))
         dados['resultados'][0]['in_cmc'] = False
         resp = self.client.post(
             '/dcc/generate', json=dados,

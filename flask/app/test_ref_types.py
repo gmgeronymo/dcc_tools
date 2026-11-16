@@ -122,6 +122,33 @@ def remover_definicao_electromagnetic(dados):
     return dados
 
 
+DEFINICAO_BASIC = {
+    'name': 'Namespace for Cross-Community RefTypes',
+    'description': "The 'basic' namespace contains RefTypes common for multiple communities.",
+    'namespace': 'basic',
+    'link': 'https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2',
+}
+
+
+def adicionar_definicao_basic(dados):
+    dados.setdefault('refTypeDefinitions', []).append(dict(DEFINICAO_BASIC))
+    return dados
+
+
+def remover_definicao_basic(dados):
+    dados['refTypeDefinitions'] = [
+        definicao for definicao in dados.get('refTypeDefinitions', []) or []
+        if definicao.get('namespace') != 'basic'
+    ]
+    return dados
+
+
+def used_methods(root):
+    return [
+        method for method in root.iter(DCC_NS + 'usedMethod')
+    ]
+
+
 class TestRefTypePassThrough(unittest.TestCase):
 
     def test_exemplo_tem_refType_e_definicao(self):
@@ -190,6 +217,42 @@ class TestRefTypePassThrough(unittest.TestCase):
             encontradas[0].findtext(DCC_NS + 'name/' + DCC_NS + 'content'),
             'Definicao do cliente',
         )
+
+    def test_sem_basic_metodos_nao_recebem_refType(self):
+        dados = remover_definicao_basic(carregar())
+        dados.pop('cmc', None)
+
+        root = arvore(gerar(dados))
+        metodos = used_methods(root)
+
+        self.assertEqual(len(metodos), 2)
+        for metodo in metodos:
+            self.assertIsNone(metodo.get('refType'))
+        self.assertEqual(len(definicoes(root, 'basic')), 0)
+
+    def test_com_basic_metodos_recebem_refType(self):
+        dados = adicionar_definicao_basic(remover_definicao_basic(carregar()))
+
+        root = arvore(gerar(dados))
+        metodos = used_methods(root)
+
+        self.assertEqual(len(metodos), 2)
+        self.assertEqual(
+            metodos[0].get('refType'),
+            'basic_calibrationMethod',
+        )
+        self.assertEqual(
+            metodos[-1].get('refType'),
+            'basic_methodMeasurementUncertainty',
+        )
+        self.assertEqual(len(definicoes(root, 'basic')), 1)
+
+    def test_basic_declarado_uma_vez_nao_duplica_definicao(self):
+        dados = adicionar_definicao_basic(carregar())
+
+        root = arvore(gerar(dados))
+
+        self.assertEqual(len(definicoes(root, 'basic')), 1)
 
     def test_excel_nao_infere_refType_nem_definicao(self):
         dados = excel_to_json(EXEMPLO_XLSX)

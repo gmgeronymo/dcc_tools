@@ -233,7 +233,7 @@ Em `flask/app/main.py`:
 - `CMC_STATEMENT_DEFAULTS` — nome, referência, link, descrição e autoridade;
 - `resolve_cmc_config(dados)` — resolve `cmc`, `cmc_padrao`, `resultados[].in_cmc` e `cmc_declaracao`;
 - `add_cmc_metadata(parent, ref_id, statuses)` — gera `measurementMetaData` com `valid`/`validXMLList`;
-- `add_cmc_statement(statements, dados, config, declaracao)` — gera o `statement` com `id`, `refType`, `reference`, `link`, `declaration` e `respAuthority`;
+- `add_cmc_statement(statements, dados, config, declaracao)` — gera o `statement` com `id`, `refType` (somente quando o cliente declara o namespace `basic`), `reference`, `link`, `declaration` e `respAuthority`;
 - `dccGen` integra a configuração ao XML.
 
 Em `flask/app/test_cmc.py` já há testes para:

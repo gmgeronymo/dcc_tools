@@ -418,7 +418,17 @@ function buildPayload() {
     if (f.cmc_padrao.value !== '') data.cmc_padrao = f.cmc_padrao.value === 'true';
 
     const valorNominal = buildValorNominal(f);
-    if (valorNominal) data.valor_nominal = valorNominal;
+    if (valorNominal) {
+        data.valor_nominal = valorNominal;
+        // valor_nominal usa refType="basic_nominalValue"; a API exige que o
+        // namespace 'basic' seja declarado em refTypeDefinitions.
+        data.refTypeDefinitions = [{
+            name: 'Namespace for Cross-Community RefTypes',
+            description: "The 'basic' namespace contains RefTypes common for multiple communities.",
+            namespace: 'basic',
+            link: 'https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2'
+        }];
+    }
 
     const eqs = parseLines(f.metodo_medicao_equation.value);
     if (eqs.length) data.metodo_medicao_equation = eqs;

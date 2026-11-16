@@ -1,7 +1,7 @@
 # DCC Tools — Guia de acesso à API para LLMs
 
-**Versão:** 2.8
-**Atualizado em:** 13/11/2026
+**Versão:** 2.12
+**Atualizado em:** 16/11/2026
 **Público:** usuários, desenvolvedores e assistentes de IA (ChatGPT, Claude, Gemini, Copilot, agentes de código).
 **Idioma:** português (pt-BR).
 
@@ -615,11 +615,11 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `num_serie` | string | sim | Número de série. |
 | `cod_identificacao` | string | sim | Código de identificação interno. |
 | `caracteristicas_item` | string | não | Características adicionais do item. Opcional: se omitido/vazio, o statement "Características do Item" não é emitido. Pode ser omitido quando `valor_nominal` é informado. |
-| `valor_nominal` | objeto ou string | não | Valor nominal estruturado do item (`basic_nominalValue`). Formato: `{"valor": "100", "unidade": "\\ohm", "nome": "Valor nominal", "descricao": "..."}`. Também aceita o formato legado `valor_nominal` + `valnom_unit`. Ver §11.5. |
+| `valor_nominal` | objeto ou string | não | Valor nominal estruturado do item (`basic_nominalValue`). Formato: `{"valor": "100", "unidade": "\\ohm", "nome": "Valor nominal", "descricao": "..."}`. Também aceita o formato legado `valor_nominal` + `valnom_unit`. **Exige o namespace `basic` em `refTypeDefinitions`** (senão retorna 400). Ver §11.5. |
 | `valnom_unit` | string | não | Unidade do valor nominal no formato legado (quando `valor_nominal` é escalar). Prefira `valor_nominal.unidade`. |
 | `data_calibracao` | string | sim | Data da calibração (`YYYY-MM-DD`). |
 | `data_emissao` | string | não | Data de emissão (`YYYY-MM-DD`). Se omitida, o XML usa a declaração de assinatura eletrônica. |
-| `cmc` | boolean | sim | Indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando `true`, o statement de CMC é emitido no formato estruturado `basic_isInCMC`. |
+| `cmc` | boolean | sim | Indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando `true`, o statement de CMC é emitido no formato estruturado (com `refType="basic_isInCMC"` apenas quando o namespace `basic` é declarado). |
 | `cmc_padrao` | boolean | não | Cobertura de CMC aplicada aos resultados sem `in_cmc`. Ausente = `false`. |
 | `cmc_declaracao` | objeto | não | Personaliza a declaração `basic_isInCMC` (`id`, `nome`, `referencia`, `link`, `descricao`, `autoridade`). |
 | `chefe_div` | string | sim | Nome do chefe da divisão. |
@@ -644,6 +644,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `declaracao_rastreabilidade` | string | sim | Texto da declaração de rastreabilidade. |
 | `tabela_rastreabilidade` | array | não | `name`, `origem`, `certificado`, `cod_id`, `hash_sha256` e `hash_procedure` opcionais. |
 | `declaracao_incerteza` | string | sim | Texto da declaração de incerteza. |
+| `declaracao_incerteza_norm` | string ou array de strings | não | Referências normativas da avaliação da incerteza, emitidas como `dcc:norm` no `usedMethod` da declaração da incerteza (ex.: `"JCGM 100:2008"`). |
 | `metodo_medicao` | array de strings | sim | Uma ou mais descrições do método. |
 | `metodo_medicao_equation` | array de strings | não | Equações em LaTeX, alinhadas por índice a `metodo_medicao`. |
 | `mensurando` | array | sim (≥ 1) | `label`, `name`, `col_name`, `unit`, `unc_relativa`, `refType`, `relative_uncertainty_in_dcc`, `relative_unc_unit`. |
@@ -656,6 +657,48 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 > **Corrente de medição:** o gerador não infere refType. Para identificar a corrente de medição,
 > o cliente deve enviar `refType: "electromagnetic_measuringCurrent"` no índice `current` e a
 > definição do namespace `electromagnetic` em `refTypeDefinitions`.
+
+> **Namespace `basic`:** para declarar o namespace harmonizado `basic`, envie:
+>
+> ```json
+> "refTypeDefinitions": [
+>   {
+>     "name": "Namespace for Cross-Community RefTypes",
+>     "description": "The 'basic' namespace contains RefTypes common for multiple communities.",
+>     "namespace": "basic",
+>     "link": "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2"
+>   }
+> ]
+> ```
+>
+> Quando o namespace `basic` é declarado **pelo cliente**, o gerador marca os métodos do
+> `measurementResult`:
+>
+> - cada item de `metodo_medicao` → `dcc:usedMethod refType="basic_calibrationMethod"`;
+> - o bloco da declaração da incerteza → `dcc:usedMethod refType="basic_methodMeasurementUncertainty"`.
+>
+> O gerador **não** declara o namespace `basic` automaticamente. Sem a declaração, os `usedMethod`
+> ficam sem `refType`, o statement de CMC fica sem `refType="basic_isInCMC"` e o campo
+> `valor_nominal` retorna **400**.
+
+> **Referência normativa da incerteza (`declaracao_incerteza_norm`):** campo opcional que aceita
+> texto ou lista de textos. Cada valor vira um `dcc:norm` no `dcc:usedMethod` "Declaração da
+> Incerteza de Medição", após `dcc:description`:
+>
+> ```json
+> "declaracao_incerteza_norm": "JCGM 100:2008"
+> ```
+>
+> ```xml
+> <dcc:usedMethod>
+>   <dcc:name><dcc:content lang="pt">Declaração da Incerteza de Medição</dcc:content></dcc:name>
+>   <dcc:description><dcc:content lang="pt">...</dcc:content></dcc:description>
+>   <dcc:norm>JCGM 100:2008</dcc:norm>
+> </dcc:usedMethod>
+> ```
+>
+> Se omitido/vazio, nenhum `dcc:norm` é emitido. Tipos diferentes de texto/lista de textos retornam
+> **400**.
 
 ### 8.3 Exemplo mínimo completo
 
@@ -673,6 +716,14 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
   "num_serie": "6515002",
   "cod_identificacao": "PT-030",
   "caracteristicas_item": "Função: Transferência Térmica de Tensão AC-DC",
+  "refTypeDefinitions": [
+    {
+      "name": "Namespace for Cross-Community RefTypes",
+      "description": "The 'basic' namespace contains RefTypes common for multiple communities.",
+      "namespace": "basic",
+      "link": "https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2"
+    }
+  ],
   "valor_nominal": {
     "valor": "100",
     "unidade": "\\kilo\\ohm"
@@ -700,6 +751,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
   ],
   "declaracao_rastreabilidade": "Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI).",
   "declaracao_incerteza": "As incertezas expandidas de medição (U) são declaradas para p=95,45%.",
+  "declaracao_incerteza_norm": "JCGM 100:2008",
   "metodo_medicao": ["As entradas de tensão foram conectadas em paralelo."],
   "mensurando": [
     {
@@ -829,8 +881,8 @@ No XML, é adicionada uma `dcc:quantity` com `dcc:charsXMLList` ao final da mesm
 O DCC 3.3.0 não tem campo nativo de CMC. O DCC Tools implementa o mecanismo `basic_isInCMC` do
 DKD‑E 7‑2, §4.5:
 
-- adapta o `dcc:statement` de CMC já emitido quando `cmc=true`, incluindo `id` e
-  `refType="basic_isInCMC"` — não é criado um segundo statement;
+- adapta o `dcc:statement` de CMC já emitido quando `cmc=true`, incluindo `id` e, quando o cliente
+  declara o namespace `basic`, `refType="basic_isInCMC"` — não é criado um segundo statement;
 - adiciona um `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` de resultado quando
   há marcação por ponto;
 - usa `dcc:valid` (ponto único) ou `dcc:validXMLList` (um booleano por ponto, na ordem dos valores).
@@ -894,9 +946,10 @@ XML resultante (trechos):
 </dcc:quantity>
 ```
 
-Com um único ponto, o XML usa `<dcc:valid>true</dcc:valid>` (ou `false`). O namespace `basic` é
-declarado automaticamente em `refTypeDefinitions` quando a marcação está ativa e o usuário não o
-declarou.
+Com um único ponto, o XML usa `<dcc:valid>true</dcc:valid>` (ou `false`). O namespace `basic` não é
+declarado automaticamente: para o statement receber `refType="basic_isInCMC"`, envie a definição do
+namespace `basic` em `refTypeDefinitions` (ver §8.2). Sem a declaração, o statement mantém `id`,
+`reference`, `link` e `declaration`, e a marcação por ponto continua funcionando.
 
 ### 11.3 Critério metrológico
 
@@ -941,6 +994,9 @@ Formato recomendado:
 }
 ```
 
+> O `valor_nominal` exige que o namespace `basic` seja declarado em `refTypeDefinitions`; caso
+> contrário, a API retorna **400**. Sem `valor_nominal`, o namespace `basic` continua opcional.
+
 | Campo | Tipo | Obrigatório | Descrição |
 | --- | --- | --- | --- |
 | `valor` | string/número | sim | Valor nominal. |
@@ -981,8 +1037,8 @@ XML gerado:
 - O campo é opcional; sem ele, nenhum `dcc:itemQuantities` é gerado.
 - `caracteristicas_item` também é opcional: se omitido/vazio, o statement "Características do Item"
   não é emitido; a visualização ainda exibe o valor nominal em uma seção própria.
-- O namespace `basic` é declarado automaticamente em `refTypeDefinitions` quando o valor nominal
-  (ou a marcação CMC) é emitido e o usuário não o declarou.
+- O namespace `basic` **não** é declarado automaticamente. Envie a definição do namespace `basic`
+  em `refTypeDefinitions`; caso contrário, `valor_nominal` retorna **400**.
 - A visualização human-readable exibe o valor em **Características do Item** como
   `Valor nominal: 100 kΩ`.
 - O valor nominal não recebe incerteza de medição; ele documenta o valor de placa/impresso.
@@ -1021,7 +1077,7 @@ em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
 | `401` com XML `<autenticacaoNecessaria>` | API-KEY ausente, inválida ou revogada. | Confira o cabeçalho `X-API-Key` e gere/consulte a chave em `/dcc/perfil`. |
 | `400` `{"error": "No JSON provided"}` | Corpo vazio ou `Content-Type` errado. | Envie JSON e defina `Content-Type: application/json`. |
 | `400` `{"error": "Invalid JSON: ..."}` | JSON malformado. | Valide o JSON; lembre-se de escapar `\` nas unidades D-SI. |
-| `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido, `in_cmc` não booleano, `hash_sha256` ou `hash_procedure` inválido). | Leia a mensagem e ajuste o campo indicado. |
+| `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido, `in_cmc` não booleano, `hash_sha256`/`hash_procedure` inválido, `valor_nominal` sem o namespace `basic`, `declaracao_incerteza_norm` com tipo inválido). | Leia a mensagem e ajuste o campo indicado. |
 | `500` `{"error": "Erro ao gerar o DCC: ..."}` | Campo obrigatório ausente, tipo inesperado ou falha interna. | Confira a seção 8 e os campos obrigatórios; se persistir, contate o administrador com o payload e o horário. |
 | `/dcc/validate_xml` retorna HTML com erros | XML inválido, `schemaLocation` ausente ou schema em host não confiável. | Confira o XML e o `xsi:schemaLocation`; o schema precisa estar em `ptb.de`/`w3.org` (ou na allowlist). |
 | `/dcc/upload_json` retorna texto simples | Comportamento esperado dessa rota de conveniência. | Prefira `/dcc/generate` para respostas JSON/XML consistentes. |
@@ -1081,3 +1137,6 @@ em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
 | 2.7 | 13/11/2026 | `caracteristicas_item` passa a ser opcional; quando omitido/vazio, o statement "Características do Item" não é emitido e o valor nominal estruturado pode ser usado isoladamente. |
 | 2.8 | 13/11/2026 | Referência à CMC no KCDB por `cmc_id` (texto ou lista), com link permanente derivado. |
 | 2.9 | 13/11/2026 | Índice `current` aceita `refType="electromagnetic_measuringCurrent"` enviado pelo cliente; o gerador não infere refType nem adiciona definições. |
+| 2.10 | 16/11/2026 | Exemplo de definição do namespace `basic` em `refTypeDefinitions`; quando ele é declarado pelo cliente, os `usedMethod` recebem `refType="basic_calibrationMethod"` (métodos) e `refType="basic_methodMeasurementUncertainty"` (incerteza). |
+| 2.11 | 16/11/2026 | O namespace `basic` deixa de ser declarado automaticamente: o `refType="basic_isInCMC"` só é emitido quando o cliente declara `basic` e `valor_nominal` sem essa declaração retorna 400. |
+| 2.12 | 16/11/2026 | Campo opcional `declaracao_incerteza_norm` (texto ou lista) emitido como `dcc:norm` no `usedMethod` da declaração da incerteza (ex.: `JCGM 100:2008`). |

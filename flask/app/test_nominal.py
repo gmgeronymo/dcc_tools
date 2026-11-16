@@ -32,7 +32,9 @@ os.environ.setdefault('DCC_EMAIL_ENABLED', 'false')
 
 from lxml import etree  # noqa: E402
 
+import auth  # noqa: E402
 from main import (  # noqa: E402
+    app,
     declaracoes,
     dccGen,
     resolve_dcc_version,
@@ -46,6 +48,24 @@ EXEMPLO_PONTO_UNICO = os.path.join(EXAMPLES_DIR, 'CC_DIMCI_0496_2025.json')
 
 DCC_NS = '{https://ptb.de/dcc}'
 SI_NS = '{https://ptb.de/si}'
+
+BASIC_DEFINITION = {
+    'name': 'Namespace for Cross-Community RefTypes',
+    'description': "The 'basic' namespace contains RefTypes common for multiple communities.",
+    'namespace': 'basic',
+    'link': 'https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2',
+}
+
+
+def adicionar_basic(dados):
+    definicoes = dados.setdefault('refTypeDefinitions', [])
+    if any(
+            isinstance(definicao, dict)
+            and definicao.get('namespace') == 'basic'
+            for definicao in definicoes):
+        return dados
+    definicoes.append(dict(BASIC_DEFINITION))
+    return dados
 
 
 def carregar(caminho):
@@ -68,8 +88,10 @@ def preprocessar(dados):
     return dados
 
 
-def gerar(dados):
+def gerar(dados, basic=True):
     dados = preprocessar(dados)
+    if basic:
+        adicionar_basic(dados)
     declaracao = declaracoes(dados)
     versao = resolve_dcc_version(dados)
     return dccGen(versao, dados, declaracao)
@@ -167,7 +189,7 @@ class TestGeracaoNominal(unittest.TestCase):
             '\\kilo\\ohm',
         )
 
-    def test_declara_namespace_basic(self):
+    def test_declara_namespace_basic_informado_pelo_usuario(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)
         dados['valor_nominal'] = {'valor': '100', 'unidade': '\\ohm'}
 
@@ -177,6 +199,20 @@ class TestGeracaoNominal(unittest.TestCase):
             + DCC_NS + 'namespace="basic"]')
 
         self.assertEqual(len(definicoes), 1)
+
+    def test_valor_nominal_sem_basic_gera_erro(self):
+        dados = carregar(EXEMPLO_PONTO_UNICO)
+        dados['valor_nominal'] = {'valor': '100', 'unidade': '\\ohm'}
+
+        with self.assertRaises(ValueError):
+            gerar(dados, basic=False)
+
+    def test_sem_valor_nominal_nao_exige_basic(self):
+        root = etree.fromstring(
+            gerar(carregar(EXEMPLO_PONTO_UNICO), basic=False))
+
+        self.assertIsNone(
+            root.find('.//' + DCC_NS + 'item/' + DCC_NS + 'itemQuantities'))
 
     def test_sem_valor_nominal_nao_emite_item_quantities(self):
         root = etree.fromstring(gerar(carregar(EXEMPLO_PONTO_UNICO)))
@@ -274,6 +310,51 @@ class TestVisualizacaoNominal(unittest.TestCase):
 
         self.assertIn('Características do Item', html)
         self.assertIn('Valor nominal: ', html)
+
+
+class TestRotaGenerateNominal(unittest.TestCase):
+
+    def setUp(self):
+        caminho = auth._db_path()
+        for path in (caminho, caminho + '-wal', caminho + '-shm'):
+            if os.path.exists(path):
+                os.remove(path)
+        auth.init_db()
+        app.config['TESTING'] = True
+        self.client = app.test_client()
+
+    def _api_key(self, username='nominal_user'):
+        resp = self.client.post('/dcc/register', json={
+            'username': username,
+            'password': 'senha12345',
+            'email': '%s@inmetro.gov.br' % username,
+        })
+        self.assertEqual(resp.status_code, 201)
+        return resp.get_json()['api_key']
+
+    def test_valor_nominal_sem_basic_retorna_400(self):
+        dados = carregar(EXEMPLO_PONTO_UNICO)
+        dados['valor_nominal'] = {'valor': '100', 'unidade': '\\ohm'}
+
+        resp = self.client.post(
+            '/dcc/generate', json=dados,
+            headers={'X-API-Key': self._api_key()})
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('basic', resp.get_json()['error'])
+
+    def test_valor_nominal_com_basic_retorna_200(self):
+        dados = adicionar_basic(carregar(EXEMPLO_PONTO_UNICO))
+        dados['valor_nominal'] = {'valor': '100', 'unidade': '\\ohm'}
+
+        resp = self.client.post(
+            '/dcc/generate', json=dados,
+            headers={'X-API-Key': self._api_key('nominal_user_2')})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.mimetype, 'text/xml')
+        root = etree.fromstring(resp.data)
+        self.assertIsNotNone(root.find('.//' + DCC_NS + 'itemQuantity'))
 
 
 if __name__ == '__main__':
