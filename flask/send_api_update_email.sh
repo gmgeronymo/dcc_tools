@@ -228,6 +228,26 @@ gmgeronymo@inmetro.gov.br
 """).strip()
 
 
+def ask_confirmation(prompt):
+    """Le a confirmacao do terminal, mesmo quando o script vem por stdin/heredoc."""
+    try:
+        tty_in = open('/dev/tty', 'r')
+        tty_out = open('/dev/tty', 'w')
+    except OSError as exc:
+        print()
+        print('ERRO: não foi possível abrir o terminal interativo (/dev/tty): %s' % exc)
+        print('Execute o script em um terminal interativo ou use --dry-run.')
+        return ''
+
+    try:
+        tty_out.write(prompt)
+        tty_out.flush()
+        return tty_in.readline()
+    finally:
+        tty_in.close()
+        tty_out.close()
+
+
 def main():
     dry_run = '--dry-run' in sys.argv[1:]
 
@@ -271,12 +291,9 @@ def main():
         print('(ou no ambiente do container) antes de executar o script.')
         return 1
 
-    try:
-        answer = input(
-            'Confirma o envio para %d destinatário(s)? [s/N] ' % len(recipients)
-        )
-    except EOFError:
-        answer = ''
+    answer = ask_confirmation(
+        'Confirma o envio para %d destinatário(s)? [s/N] ' % len(recipients)
+    )
 
     if answer.strip().lower() not in ('s', 'sim', 'y', 'yes'):
         print('Envio cancelado.')
