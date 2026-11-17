@@ -420,8 +420,9 @@ function buildPayload() {
     const valorNominal = buildValorNominal(f);
     if (valorNominal) {
         data.valor_nominal = valorNominal;
-        // valor_nominal usa refType="basic_nominalValue"; a API exige que o
-        // namespace 'basic' seja declarado em refTypeDefinitions.
+        // valor_nominal usa refType="basic_nominalValue"; o namespace basic e
+        // incluido automaticamente pelo gerador. Enviamos a definicao para
+        // manter o payload autocontido (o gerador nao duplica).
         data.refTypeDefinitions = [{
             name: 'Namespace for Cross-Community RefTypes',
             description: "The 'basic' namespace contains RefTypes common for multiple communities.",

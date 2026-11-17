@@ -94,15 +94,14 @@
         <p class="lead">Use a API do DCC Tools com ChatGPT, Claude, Gemini, Copilot ou agentes de código.
             Como o serviço roda em uma intranet, <strong>baixe o guia em Markdown ou copie o conteúdo</strong>
             e anexe ao seu assistente. A URL interna não é acessível pela LLM.</p>
-        <p class="small mt-2 mb-0 opacity-75">Guia v2.12 — inclui marcação CMC
+        <p class="small mt-2 mb-0 opacity-75">Guia v2.13 — inclui marcação CMC
             (<code>in_cmc</code>, <code>basic_isInCMC</code>), referência à CMC no KCDB
-            (<code>cmc_id</code>), pass-through de refTypes e exemplo do namespace
-            <code>basic</code> (métodos com <code>basic_calibrationMethod</code> e
-            <code>basic_methodMeasurementUncertainty</code>; sem declaração de <code>basic</code>,
-            CMC fica sem <code>refType</code> e <code>valor_nominal</code> retorna 400),
-            referência normativa da incerteza (<code>declaracao_incerteza_norm</code> →
-            <code>dcc:norm</code>), visualização com capa NIE-Dimci-014 e coluna CMC (Sim/Não) e
-            valor nominal estruturado do item (<code>basic_nominalValue</code>).</p>
+            (<code>cmc_id</code>), pass-through de refTypes e namespace <code>basic</code> como
+            padrão (declarado automaticamente, sem duplicar; métodos, identificações, CMC, valor
+            nominal e declaração 17025 recebem RefTypes <code>basic_*</code>), referência
+            normativa da incerteza (<code>declaracao_incerteza_norm</code> → <code>dcc:norm</code>),
+            visualização com capa NIE-Dimci-014 e coluna CMC (Sim/Não) e valor nominal estruturado
+            do item (<code>basic_nominalValue</code>).</p>
         <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
             <a class="btn btn-light btn-lg" href="{{ url_for('llm_doc_md') }}" download>
                 <i class="fas fa-download me-2"></i>Baixar guia .md
@@ -292,8 +291,11 @@ Restrições: [linguagem, versão do schema, formato de saída]</pre>
                 <li>Marcação de pontos dentro/fora da CMC (<code>in_cmc</code>, <code>cmc_padrao</code>,
                     <code>cmc_declaracao</code>) com <code>basic_isInCMC</code>.</li>
                 <li>Valor nominal estruturado do item (<code>valor_nominal</code>,
-                    <code>basic_nominalValue</code>, DKD-E 1-1), que exige o namespace <code>basic</code>
-                    em <code>refTypeDefinitions</code>.</li>
+                    <code>basic_nominalValue</code>, DKD-E 1-1).</li>
+                <li>RefTypes básicos automáticos: identificações do item
+                    (<code>basic_serialNumber</code>, <code>basic_identificationNumber</code>),
+                    número do certificado (<code>basic_certificateNumber</code>) e escopo dos
+                    resultados (<code>basic_resultScope</code>).</li>
                 <li>Referência normativa da declaração da incerteza
                     (<code>declaracao_incerteza_norm</code> → <code>dcc:norm</code>, ex.:
                     <code>JCGM 100:2008</code>).</li>

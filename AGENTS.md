@@ -209,7 +209,7 @@ Responsável por quase toda a lógica da aplicação:
 | Geração XML | `dccGen`, `declaracoes`, `resolve_dcc_version`, `campo_name`, `campo_texto`, `campo_conteudo_multilingue` |
 | Incerteza | `format_two_sig_scientific`, `add_expanded_uncertainty`, `add_expanded_uncertainty_list`, `resolve_uncertainty_norm`, `validate_relative_uncertainty` |
 | `nueff` | `is_positive_infinite`, `serialize_nueff`, `validate_nueff` |
-| CMC | `parse_bool`, `optional_bool`, `resolve_cmc_config`, `add_cmc_metadata`, `has_basic_ref_type_definition`, `add_cmc_statement` |
+| CMC | `parse_bool`, `optional_bool`, `resolve_cmc_config`, `add_cmc_metadata`, `has_basic_ref_type_definition`, `add_basic_ref_type_definition`, `add_cmc_statement` |
 | Rastreabilidade | `resolve_traceability_hash` |
 | Excel | `excel_to_json` |
 | PDF/A-3 | `attach_stream`, `attach_xml_to_pdfa3b`, `sha256sum` |
@@ -355,36 +355,38 @@ testar a navegação.
 - A marcação por ponto só é gerada quando há ao menos um `in_cmc` ou quando `cmc_padrao` é
   informado.
 - O `dcc:statement` de CMC já emitido quando `cmc=true` é adaptado para o formato estruturado
-  (`id`, com `refType="basic_isInCMC"` apenas quando o cliente declara o namespace `basic`), sem
-  criar um segundo statement.
-- Estrutura no XML 3.3.0: `dcc:statement[@id=...]` +
+  (`id` + `refType="basic_isInCMC"`), sem criar um segundo statement.
+- Estrutura no XML 3.3.0: `dcc:statement[@refType="basic_isInCMC"]` +
   `dcc:measurementMetaData/dcc:metaData[@refId=...]` +
   `dcc:valid` (ponto único) ou `dcc:validXMLList` (vários pontos, alinhado a
   `si:valueXMLList`). Não usar `dcc:conformity` para CMC.
 - A declaração textual do MRA é preservada como `dcc:declaration` dentro do mesmo statement.
-- O namespace `basic` **não** é adicionado automaticamente: o cliente deve declará-lo em
-  `refTypeDefinitions` para que o statement receba `refType="basic_isInCMC"`. Sem a declaração, o
-  statement mantém `id`/`reference`/`link`/`declaration` e a marcação por ponto continua.
+- O namespace `basic` é declarado automaticamente pelo gerador (sem duplicar quando o cliente já o
+  enviou); por isso o statement de CMC sempre recebe `refType="basic_isInCMC"`.
 - `cmc_declaracao.cmc_id` (texto ou lista) referencia entradas do KCDB. O ID é normalizado para
   maiúsculas, o sufixo de versão (`-N`) é removido e o link permanente é derivado
   (`https://si-digital-framework.org/kcdb-cmc/<ID>`). Exige `cmc=true` ou marcação por ponto.
 - A referência completa está em `doc/api_dcc_generator.md` §2.13 e em `/dcc/api_doc#cmc-marking`.
 
-### refTypes (pass-through)
+### refTypes (pass-through e padrões)
 
-- O gerador **não infere** `refType` e **não adiciona** definições de refType. O cliente envia
-  `refTypeDefinitions` e `refType` em `indices`/`mensurando`, que são repassados ao XML.
-- Quando o cliente declara explicitamente o namespace `basic` em `refTypeDefinitions`, os métodos do
-  `measurementResult` recebem RefTypes harmonizados: cada item de `metodo_medicao` vira
-  `dcc:usedMethod[@refType="basic_calibrationMethod"]` e o bloco da declaração da incerteza vira
-  `dcc:usedMethod[@refType="basic_methodMeasurementUncertainty"]`. O statement de CMC também recebe
-  `refType="basic_isInCMC"`.
-- O namespace `basic` não é adicionado automaticamente. Sem a declaração, os `usedMethod` e o
-  statement de CMC ficam sem `refType` e `valor_nominal` retorna `400`.
-- A definição manual do namespace `basic` usa `namespace: "basic"` e o link
-  `https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2`; o gerador não duplica a definição.
+- O gerador **não infere** `refType` em `indices`/`mensurando`; o cliente envia `refType`, que é
+  repassado ao XML.
+- O namespace `basic` é **padrão**: o gerador o declara automaticamente em `refTypeDefinitions` e
+  não duplica quando o cliente já o enviou. RefTypes `basic_*` emitidos automaticamente:
+  - `basic_calibrationMethod` — cada item de `metodo_medicao`;
+  - `basic_methodMeasurementUncertainty` — bloco da declaração da incerteza;
+  - `basic_isInCMC` — statement de CMC;
+  - `basic_nominalValue` — valor nominal do item;
+  - `basic_serialNumber` — `dcc:identification` do número de série (issuer `manufacturer`);
+  - `basic_identificationNumber` — `dcc:identification` do código de identificação (issuer
+    `customer`);
+  - `basic_certificateNumber` — `dcc:identification` do número do certificado em `dcc:coreData`
+    (issuer `calibrationLaboratory`, `value` = `num_certif`);
+  - `basic_resultScope` — `dcc:statement` da declaração ABNT NBR ISO/IEC 17025.
+- RefTypes de outros namespaces (ex.: `electromagnetic`) exigem a definição correspondente em
+  `refTypeDefinitions`; o gerador não infere nem adiciona esses namespaces.
 - Os exemplos em `static/examples/` incluem `electromagnetic_measuringCurrent` quando aplicável.
-- Referência: `test_ref_types.py` e `doc/api_dcc_generator.md` §2.3.
 
 ### Valor nominal do item (`valor_nominal`)
 
@@ -396,8 +398,8 @@ testar a navegação.
   gerador em `aws_lambda/`).
 - XML 3.3.0: `dcc:item/dcc:itemQuantities/dcc:itemQuantity[@refType="basic_nominalValue"]` com
   `dcc:name`, `dcc:description` opcional e `si:real/si:value` + `si:unit`.
-- `valor_nominal` exige que o namespace `basic` seja declarado em `refTypeDefinitions`; caso
-  contrário, a API retorna `400`. O gerador não adiciona a definição automaticamente.
+- O namespace `basic` é declarado automaticamente; o valor nominal usa
+  `refType="basic_nominalValue"` sem exigir declaração do cliente.
 - A visualização human-readable exibe o valor em **Características do Item**.
 - `caracteristicas_item` é opcional. Se omitido/vazio, o statement "Características do Item" não é
   emitido; o valor nominal estruturado pode ser usado isoladamente.

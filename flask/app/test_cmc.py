@@ -310,7 +310,7 @@ class TestGeracaoCmc(unittest.TestCase):
         self.assertEqual(len(meta), 1)
         self.assertEqual(meta[0].findtext(DCC_NS + 'valid'), 'true')
 
-    def test_namespace_basic_nao_e_declarado_automaticamente(self):
+    def test_namespace_basic_declarado_automaticamente(self):
         dados = carregar(EXEMPLO_JSON)
         dados['resultados'][0]['in_cmc'] = True
 
@@ -319,18 +319,16 @@ class TestGeracaoCmc(unittest.TestCase):
             d for d in root.iter(DCC_NS + 'refTypeDefinition')
             if d.findtext(DCC_NS + 'namespace') == 'basic'
         ]
-        self.assertEqual(len(definicoes), 0)
+        self.assertEqual(len(definicoes), 1)
 
-    def test_sem_basic_statement_nao_tem_refType(self):
+    def test_sem_basic_no_payload_statement_recebe_refType(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)
         dados['resultados'][0]['in_cmc'] = True
 
         root = arvore(gerar(dados, basic=False))
-        statements = [
-            s for s in root.iter(DCC_NS + 'statement') if s.get('id') == 'inCMC'
-        ]
-        self.assertEqual(len(statements), 1)
-        self.assertIsNone(statements[0].get('refType'))
+        statement = statement_cmc(root)
+        self.assertIsNotNone(statement)
+        self.assertEqual(statement.get('id'), 'inCMC')
 
         meta = metadados_cmc(root)
         self.assertEqual(len(meta), 1)

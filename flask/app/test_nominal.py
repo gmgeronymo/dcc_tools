@@ -200,19 +200,19 @@ class TestGeracaoNominal(unittest.TestCase):
 
         self.assertEqual(len(definicoes), 1)
 
-    def test_valor_nominal_sem_basic_gera_erro(self):
+    def test_valor_nominal_sem_basic_declarado_automaticamente(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)
         dados['valor_nominal'] = {'valor': '100', 'unidade': '\\ohm'}
 
-        with self.assertRaises(ValueError):
-            gerar(dados, basic=False)
+        root = etree.fromstring(gerar(dados, basic=False))
 
-    def test_sem_valor_nominal_nao_exige_basic(self):
-        root = etree.fromstring(
-            gerar(carregar(EXEMPLO_PONTO_UNICO), basic=False))
-
-        self.assertIsNone(
-            root.find('.//' + DCC_NS + 'item/' + DCC_NS + 'itemQuantities'))
+        self.assertIsNotNone(root.find('.//' + DCC_NS + 'itemQuantity'))
+        self.assertEqual(
+            len(root.findall(
+                './/' + DCC_NS + 'refTypeDefinition['
+                + DCC_NS + 'namespace="basic"]')),
+            1,
+        )
 
     def test_sem_valor_nominal_nao_emite_item_quantities(self):
         root = etree.fromstring(gerar(carregar(EXEMPLO_PONTO_UNICO)))
@@ -332,7 +332,7 @@ class TestRotaGenerateNominal(unittest.TestCase):
         self.assertEqual(resp.status_code, 201)
         return resp.get_json()['api_key']
 
-    def test_valor_nominal_sem_basic_retorna_400(self):
+    def test_valor_nominal_sem_basic_retorna_200(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)
         dados['valor_nominal'] = {'valor': '100', 'unidade': '\\ohm'}
 
@@ -340,8 +340,10 @@ class TestRotaGenerateNominal(unittest.TestCase):
             '/dcc/generate', json=dados,
             headers={'X-API-Key': self._api_key()})
 
-        self.assertEqual(resp.status_code, 400)
-        self.assertIn('basic', resp.get_json()['error'])
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.mimetype, 'text/xml')
+        root = etree.fromstring(resp.data)
+        self.assertIsNotNone(root.find('.//' + DCC_NS + 'itemQuantity'))
 
     def test_valor_nominal_com_basic_retorna_200(self):
         dados = adicionar_basic(carregar(EXEMPLO_PONTO_UNICO))

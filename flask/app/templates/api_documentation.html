@@ -314,7 +314,7 @@ Content-Type: application/json</div>
                                     </tr>
                                     <tr>
                                         <td>valor_nominal</td>
-                                        <td>Valor nominal estruturado do item (<code>dcc:itemQuantities/dcc:itemQuantity</code> com <code>refType="basic_nominalValue"</code>). Exige o namespace <code>basic</code> em <code>refTypeDefinitions</code>; caso contrário, retorna <strong>400</strong>.</td>
+                                        <td>Valor nominal estruturado do item (<code>dcc:itemQuantities/dcc:itemQuantity</code> com <code>refType="basic_nominalValue"</code>).</td>
                                         <td><span class="optional">Opcional</span></td>
                                         <td>"valor_nominal": {"valor": "100", "unidade": "\\kilo\\ohm"}</td>
                                         <td>Subchaves: <code>valor</code>, <code>unidade</code>, <code>nome</code>, <code>descricao</code>. Também aceita o formato legado <code>valor_nominal</code> + <code>valnom_unit</code>. Ver <a href="#nominal-value">Valor Nominal</a>.</td>
@@ -335,7 +335,7 @@ Content-Type: application/json</div>
                                     </tr>
                                     <tr>
                                         <td>cmc</td>
-                                        <td>Booleano que indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando <code>true</code>, o statement de CMC é emitido no formato estruturado (com <code>refType="basic_isInCMC"</code> apenas se o namespace <code>basic</code> for declarado)</td>
+                                        <td>Booleano que indica se o certificado possui a declaração de CMC (MRA/CIPM). Quando <code>true</code>, o statement de CMC é emitido no formato estruturado com <code>refType="basic_isInCMC"</code></td>
                                         <td><span class="required">Obrigatória</span></td>
                                         <td>"cmc": true</td>
                                         <td>O statement de CMC é único; <code>in_cmc</code> adiciona a cobertura ponto a ponto.</td>
@@ -454,7 +454,7 @@ Content-Type: application/json</div>
                         <div class="card-body">
                             <p>Array com definições de refTypes.</p>
 			    <!-- <p>Obs.: o refType basic é sempre incluído por padrão. Utilizar esse campo apenas para definir refTypes adicionais.</p> -->
-			    <p>Atualmente, nenhum refType é incluído por padrão. Se desejar usar refTypes, utilize este campo para definir as entradas.</p>
+                            <p>O namespace <code>basic</code> é incluído automaticamente pelo gerador. Utilize este campo para definir refTypes adicionais; se enviar o <code>basic</code>, a definição não é duplicada.</p>
                             <p><strong>Tipo:</strong> <span class="optional">Opcional</span></p>
                             <p><strong>Documentação:</strong> <a href="https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2&/basic" target="_blank">https://digilab.ptb.de/dkd/refType/vocab/index.php?tema=2&/basic</a></p>
                             
@@ -511,7 +511,17 @@ Content-Type: application/json</div>
                                     </tr>
                                 </tbody>
                             </table>
-                            <p class="mt-3"><strong>Namespace <code>basic</code>:</strong> o gerador não declara o namespace <code>basic</code> automaticamente. Quando o cliente o declara em <code>refTypeDefinitions</code>: cada item de <code>metodo_medicao</code> vira <code>dcc:usedMethod refType="basic_calibrationMethod"</code>, o bloco da declaração da incerteza vira <code>dcc:usedMethod refType="basic_methodMeasurementUncertainty"</code> e o statement de CMC recebe <code>refType="basic_isInCMC"</code>. Sem a declaração, esses elementos ficam sem <code>refType</code> e o campo <code>valor_nominal</code> retorna <strong>400</strong>.</p>
+                            <p class="mt-3"><strong>Namespace <code>basic</code> (padrão):</strong> o gerador declara o namespace <code>basic</code> automaticamente; o cliente não precisa enviá-lo. Se enviar, a definição é preservada e não duplicada. Os seguintes RefTypes <code>basic_*</code> são emitidos automaticamente:</p>
+                            <ul>
+                                <li><code>basic_calibrationMethod</code> — cada item de <code>metodo_medicao</code>;</li>
+                                <li><code>basic_methodMeasurementUncertainty</code> — bloco da declaração da incerteza;</li>
+                                <li><code>basic_isInCMC</code> — statement de CMC;</li>
+                                <li><code>basic_nominalValue</code> — valor nominal do item;</li>
+                                <li><code>basic_serialNumber</code> — número de série do item;</li>
+                                <li><code>basic_identificationNumber</code> — código de identificação do item;</li>
+                                <li><code>basic_certificateNumber</code> — número do certificado em <code>coreData</code>;</li>
+                                <li><code>basic_resultScope</code> — statement da declaração ABNT NBR ISO/IEC 17025.</li>
+                            </ul>
                             <p class="mt-3"><strong>Namespace <code>electromagnetic</code>:</strong> o gerador não infere nem adiciona definições. Se o payload usar um refType desse namespace, o cliente deve enviar a definição correspondente em <code>refTypeDefinitions</code>. Se não enviar, a definição não é usada.</p>
                         </div>
                     </div>
@@ -1186,9 +1196,8 @@ Content-Type: application/json</div>
                                 <p>O DCC 3.3.0 não possui campo nativo de CMC. A API implementa o mecanismo
                                     <code>basic_isInCMC</code> (DKD-E 7-2, §4.5): o
                                     <code>dcc:statement</code> de CMC já emitido quando <code>cmc=true</code>
-                                    é adaptado com <code>id</code> e, quando o namespace <code>basic</code>
-                                    é declarado, <code>refType="basic_isInCMC"</code> em
-                                    <code>administrativeData/statements</code>, sem criar um segundo
+                                    é adaptado com <code>id</code> e <code>refType="basic_isInCMC"</code>
+                                    em <code>administrativeData/statements</code>, sem criar um segundo
                                     statement. Cada <code>dcc:quantity</code> de resultado é vinculada por
                                     <code>dcc:measurementMetaData/dcc:metaData[@refId]</code>, usando
                                     <code>dcc:valid</code> (ponto único) ou <code>dcc:validXMLList</code>
@@ -1200,7 +1209,7 @@ Content-Type: application/json</div>
                                     <li>Os vínculos por ponto são gerados se houver ao menos um <code>in_cmc</code> ou se <code>cmc_padrao</code> for informado. O statement de CMC é emitido quando <code>cmc=true</code> ou quando há marcação.</li>
                                     <li>Para indicar <strong>somente as exceções</strong>, use <code>"cmc_padrao": true</code> e <code>"in_cmc": false</code> nos pontos fora da CMC.</li>
                                     <li><code>cmc_declaracao</code> personaliza <code>id</code>, <code>nome</code>, <code>referencia</code>, <code>link</code>, <code>descricao</code> e <code>autoridade</code>.</li>
-                                    <li>O namespace <code>basic</code> <strong>não</strong> é declarado automaticamente. Sem a declaração em <code>refTypeDefinitions</code>, o statement de CMC é emitido sem <code>refType="basic_isInCMC"</code> (a marcação por ponto continua funcionando).</li>
+                                    <li>O namespace <code>basic</code> é declarado automaticamente (sem duplicar se o cliente já o enviou), e o statement de CMC recebe sempre <code>refType="basic_isInCMC"</code>.</li>
                                 </ul>
 
                                 <h6 class="mt-3">Exemplo</h6>
@@ -1336,9 +1345,9 @@ Content-Type: application/json</div>
 
                             <ul class="mt-3">
                                 <li>Campo opcional; sem ele não há <code>itemQuantities</code>.</li>
-                                <li>O namespace <code>basic</code> <strong>não</strong> é declarado
-                                    automaticamente. Envie a definição em <code>refTypeDefinitions</code>;
-                                    caso contrário, <code>valor_nominal</code> retorna <strong>400</strong>.</li>
+                                <li>O namespace <code>basic</code> é declarado automaticamente; o valor
+                                    nominal usa <code>refType="basic_nominalValue"</code> sem exigir
+                                    declaração do cliente.</li>
                                 <li>A visualização exibe o valor em <strong>Características do Item</strong>
                                     como <code>Valor nominal: 100 kΩ</code>.</li>
                                 <li>O valor nominal não recebe incerteza de medição; ele documenta o valor

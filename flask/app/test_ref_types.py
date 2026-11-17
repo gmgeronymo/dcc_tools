@@ -218,17 +218,22 @@ class TestRefTypePassThrough(unittest.TestCase):
             'Definicao do cliente',
         )
 
-    def test_sem_basic_metodos_nao_recebem_refType(self):
+    def test_sem_basic_metodos_recebem_refType_padrao(self):
         dados = remover_definicao_basic(carregar())
-        dados.pop('cmc', None)
 
         root = arvore(gerar(dados))
         metodos = used_methods(root)
 
         self.assertEqual(len(metodos), 2)
-        for metodo in metodos:
-            self.assertIsNone(metodo.get('refType'))
-        self.assertEqual(len(definicoes(root, 'basic')), 0)
+        self.assertEqual(
+            metodos[0].get('refType'),
+            'basic_calibrationMethod',
+        )
+        self.assertEqual(
+            metodos[-1].get('refType'),
+            'basic_methodMeasurementUncertainty',
+        )
+        self.assertEqual(len(definicoes(root, 'basic')), 1)
 
     def test_com_basic_metodos_recebem_refType(self):
         dados = adicionar_definicao_basic(remover_definicao_basic(carregar()))
@@ -246,6 +251,83 @@ class TestRefTypePassThrough(unittest.TestCase):
             'basic_methodMeasurementUncertainty',
         )
         self.assertEqual(len(definicoes(root, 'basic')), 1)
+
+    def test_basic_declarado_por_padrao_sem_ref_type_definitions(self):
+        dados = carregar()
+        dados.pop('refTypeDefinitions', None)
+
+        root = arvore(gerar(dados))
+
+        self.assertEqual(len(definicoes(root, 'basic')), 1)
+
+    def test_item_identifications_recebem_refTypes(self):
+        dados = carregar()
+        root = arvore(gerar(dados))
+
+        item = root.find('.//' + DCC_NS + 'item')
+        identificacoes = item.findall(
+            DCC_NS + 'identifications/' + DCC_NS + 'identification')
+
+        serial = [
+            ident for ident in identificacoes
+            if ident.findtext(DCC_NS + 'issuer') == 'manufacturer'
+        ]
+        codigo = [
+            ident for ident in identificacoes
+            if ident.findtext(DCC_NS + 'issuer') == 'customer'
+        ]
+
+        self.assertEqual(len(serial), 1)
+        self.assertEqual(serial[0].get('refType'), 'basic_serialNumber')
+        self.assertEqual(serial[0].findtext(DCC_NS + 'value'), dados['num_serie'])
+
+        self.assertEqual(len(codigo), 1)
+        self.assertEqual(codigo[0].get('refType'), 'basic_identificationNumber')
+        self.assertEqual(
+            codigo[0].findtext(DCC_NS + 'value'), dados['cod_identificacao'])
+
+    def test_coreData_tem_certificateNumber_com_refType(self):
+        dados = carregar()
+        root = arvore(gerar(dados))
+
+        core_data = root.find('.//' + DCC_NS + 'coreData')
+        identificacoes = core_data.findall(
+            DCC_NS + 'identifications/' + DCC_NS + 'identification')
+
+        certificado = [
+            ident for ident in identificacoes
+            if ident.get('refType') == 'basic_certificateNumber'
+        ]
+        self.assertEqual(len(certificado), 1)
+        self.assertEqual(
+            certificado[0].findtext(DCC_NS + 'issuer'), 'calibrationLaboratory')
+        self.assertEqual(
+            certificado[0].findtext(DCC_NS + 'value'), dados['num_certif'])
+
+        # o processo Inmetro continua sendo o primeiro do issuer
+        # calibrationLaboratory (a visualizacao usa o primeiro match)
+        do_laboratorio = [
+            ident for ident in identificacoes
+            if ident.findtext(DCC_NS + 'issuer') == 'calibrationLaboratory'
+        ]
+        self.assertEqual(
+            do_laboratorio[0].findtext(DCC_NS + 'value'),
+            dados['num_processo'])
+
+    def test_declaracao_17025_tem_resultScope(self):
+        root = arvore(gerar(carregar()))
+
+        statements = [
+            statement for statement in root.iter(DCC_NS + 'statement')
+            if statement.get('refType') == 'basic_resultScope'
+        ]
+
+        self.assertEqual(len(statements), 1)
+        self.assertEqual(
+            statements[0].findtext(DCC_NS + 'norm'),
+            'ABNT NBR ISO/IEC 17025',
+        )
+        self.assertIsNotNone(statements[0].find(DCC_NS + 'declaration'))
 
     def test_basic_declarado_uma_vez_nao_duplica_definicao(self):
         dados = adicionar_definicao_basic(carregar())
