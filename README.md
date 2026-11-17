@@ -43,7 +43,9 @@ emitidos continuam válidos para validação e visualização.
 │   │   └── static/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
-│   └── build.sh
+│   ├── build.sh
+│   ├── send_api_update_email.sh
+│   └── .env.example
 ├── doc/
 └── README.md
 ```
@@ -105,6 +107,22 @@ Atenção:
 - Faça backup do arquivo SQLite (`flask/app/dcc_auth.db`).
 - Se o servidor de e-mail restringir o envio por origem (IP do servidor), ajuste-o quando a aplicação
   mudar de host/IP.
+
+### Comunicado de atualização da API por e-mail
+
+O script `flask/send_api_update_email.sh` envia o comunicado de atualização da API para os
+usuários **ativos** cadastrados no SQLite (`flask/app/dcc_auth.db`), usando a mesma camada SMTP da
+recuperação de senha (`flask/app/email_service.py` e variáveis do `flask/.env`). Ele exibe os
+e-mails de destino e a mensagem completa e exige confirmação antes do envio.
+
+```bash
+cd flask
+./send_api_update_email.sh --dry-run   # pré-visualiza destinatários e mensagem
+./send_api_update_email.sh             # pede confirmação (s/N) e envia
+```
+
+O script não altera o banco, envia uma mensagem individual por destinatário (sem expor os demais
+e-mails) e requer `DCC_EMAIL_ENABLED=true`, `SMTP_HOST` e `SMTP_FROM` configurados.
 
 ### Desenvolvimento local (sem Docker)
 
@@ -189,7 +207,9 @@ Schema `3.2.0` is no longer accepted for generation (returns `400`). Previously 
 │   │   └── static/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
-│   └── build.sh
+│   ├── build.sh
+│   ├── send_api_update_email.sh
+│   └── .env.example
 ├── doc/
 └── README.md
 ```
@@ -251,6 +271,22 @@ Notes:
 - Back up the SQLite file (`flask/app/dcc_auth.db`).
 - If the mail server restricts sending by source (server IP), adjust it when the application changes
   host/IP.
+
+### API update email notice
+
+The `flask/send_api_update_email.sh` script emails the API update notice to **active** users
+registered in the SQLite database (`flask/app/dcc_auth.db`), using the same SMTP layer as password
+recovery (`flask/app/email_service.py` and `flask/.env`). It prints the recipient addresses and the
+full message and requires confirmation before sending.
+
+```bash
+cd flask
+./send_api_update_email.sh --dry-run   # preview recipients and message
+./send_api_update_email.sh             # ask for confirmation (y/N) and send
+```
+
+The script does not modify the database, sends one message per recipient (without exposing other
+addresses), and requires `DCC_EMAIL_ENABLED=true`, `SMTP_HOST`, and `SMTP_FROM`.
 
 ### Local development (without Docker)
 

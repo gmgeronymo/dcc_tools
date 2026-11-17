@@ -56,6 +56,7 @@ XML             ──POST /dcc/visualizar_dcc──▶  HTML legível
 │   ├── Dockerfile
 │   ├── docker-compose.yml        # serviço dccgenerator; volume ./app:/app; porta 9099:80
 │   ├── build.sh                  # docker build -t dccgenerator .
+│   ├── send_api_update_email.sh  # comunicado de atualização da API por e-mail
 │   ├── .env.example              # modelo das variáveis de ambiente
 │   └── app/
 │       ├── main.py               # aplicação Flask, rotas e lógica DCC (~1.900 linhas)
@@ -510,6 +511,24 @@ curl -I http://localhost:9099/dcc/
 curl -I http://localhost:9099/dcc/llm_doc
 curl -I http://localhost:9099/dcc/llm_doc.md
 ```
+
+### Comunicado de atualização da API por e-mail
+
+`flask/send_api_update_email.sh` envia o comunicado de atualização da API para os usuários
+**ativos** com e-mail cadastrado no SQLite de autenticação, usando a mesma camada SMTP da
+recuperação de senha (`flask/app/email_service.py` e variáveis do `flask/.env`).
+
+```bash
+cd flask
+./send_api_update_email.sh --dry-run   # apenas exibe destinatários e mensagem
+./send_api_update_email.sh             # exibe e pede confirmação (s/N) antes de enviar
+```
+
+- Consulta `users` com `active=1` e `email` preenchido (somente leitura).
+- Envia uma mensagem individual por destinatário; não expõe os demais e-mails.
+- Requer `DCC_EMAIL_ENABLED=true`, `SMTP_HOST` e `SMTP_FROM`.
+- Execute no host (com `flask/.env` e `flask/app/dcc_auth.db`) ou copie o script para `/app` e
+  execute no container (com as variáveis de ambiente já injetadas).
 
 ### Testes com `Flask test_client`
 
