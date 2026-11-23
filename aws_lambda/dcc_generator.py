@@ -188,7 +188,7 @@ def dccGen(dcc_version, dados, declaracao) :
     calibrationLaboratoryContact = etree.SubElement(calibrationLaboratory, etree.QName(nsmap['dcc'], 'contact'))
     campo_name(calibrationLaboratoryContact, dados['nome_lab']+'('+dados['sigla_lab']+')')
     campo_texto(calibrationLaboratoryContact,'eMail','samci@inmetro.gov.br')
-    campo_texto(calibrationLaboratoryContact,'phone','+55 21 2679 9077/9010')
+    campo_texto(calibrationLaboratoryContact,'phone','+55 21 2679 9077/9210')
     calibrationLaboratoryLocation = etree.SubElement(calibrationLaboratoryContact, etree.QName(nsmap['dcc'], 'location'))
     campo_texto(calibrationLaboratoryLocation,'city','Xerém - Duque de Caxias')
     campo_texto(calibrationLaboratoryLocation,'countryCode','BR')
