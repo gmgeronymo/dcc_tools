@@ -1,6 +1,6 @@
 # Análise e proposta de implementação — CMC/KCDB no dccGenerator
 
-**Status:** implementado em 13/11/2026 (`flask/app/main.py`, `flask/app/test_cmc.py`).  
+**Status:** implementado em 13/11/2026 e padronizado em `dcc:validXMLList` em 25/11/2026 (`flask/app/main.py`, `flask/app/test_cmc.py`).
 **Diferenças em relação à proposta:** a API aceita **um ou mais** CMC IDs no campo `cmc_declaracao.cmc_id` (texto ou lista); os links são **sempre derivados** do ID (não há campo para enviar links) e `norm`/`data_verificacao` **não** são aceitos. O sufixo de versão `-X` (dígito) é removido do identificador usado no XML e no link; o ID é normalizado para maiúsculas.  
 **Data:** 13/11/2026  
 **Alvo:** `dcc_tools` — `flask/app/main.py`, `flask/app/test_cmc.py`, `certificado_pdf_template.html`  
@@ -29,7 +29,7 @@ O certificado já possui a marcação de CMC no formato recomendado pelo vocabul
   ...
   <dcc:measurementMetaData>
     <dcc:metaData refId="inCMC">
-      <dcc:valid>true</dcc:valid>
+      <dcc:validXMLList>true</dcc:validXMLList>
     </dcc:metaData>
   </dcc:measurementMetaData>
 </dcc:quantity>
@@ -47,14 +47,14 @@ O DCC 3.3.0 não possui campo nativo de CMC. A marcação é feita por:
 
 1. `dcc:statement` com `refType="basic_isInCMC"` e um `id`;
 2. `dcc:measurementMetaData/dcc:metaData` com `refId` apontando para esse `id`;
-3. `dcc:valid` (ponto único) ou `dcc:validXMLList` (vários pontos).
+3. `dcc:validXMLList` sempre, inclusive para um ponto único (um booleano por valor).
 
 O vocabulário `basic_isInCMC` define:
 
 - `true`: o resultado está **na faixa coberta pela CMC** e a **incerteza declarada é maior ou igual à incerteza da CMC**;
 - `false`: uma das duas condições não é atendida;
 - ausência de `valid`: assume-se `false`;
-- o `dcc:statement` **não deve conter** `dcc:valid`;
+- o `dcc:statement` **não deve conter** `dcc:validXMLList`;
 - a autoridade responsável deve ser o BIPM ou o organismo de acreditação.
 
 O problema atual não é a ausência do booleano, mas a **falta de um identificador específico e resolvível da CMC**. Com o link genérico, um consumidor não consegue:
@@ -75,7 +75,7 @@ O problema atual não é a ausência do booleano, mas a **falta de um identifica
 - opcionalmente, `dcc:link` com `?type=json` ou `?type=xml`;
 - opcionalmente, `dcc:norm` com `CIPM MRA-G-13`;
 - opcionalmente, `dcc:date` com a data de verificação da CMC;
-- manter `dcc:valid` apenas no resultado;
+- manter `dcc:validXMLList` apenas no resultado;
 - registrar no processo a faixa, a U_CMC, a data de consulta e a comparação.
 
 ### 3.2 Não adotar
@@ -83,7 +83,7 @@ O problema atual não é a ausência do booleano, mas a **falta de um identifica
 - copiar a tabela completa da CMC para `dcc:data` como se fosse resultado;
 - criar `refType` local para “valor da CMC”;
 - usar `dcc:conformity` para CMC;
-- colocar `dcc:valid` dentro do `dcc:statement`;
+- colocar `dcc:validXMLList` dentro do `dcc:statement`;
 - usar o CMC ID como `dcc:statement/@id`;
 - usar a página inicial do KCDB como único link.
 
@@ -97,7 +97,7 @@ O *Good Practice* DKD-E 7-2 recomenda:
 
 - `dcc:statement` com `refType="basic_isInCMC"`;
 - `dcc:reference` apontando para o escopo de acreditação ou para a base do BIPM;
-- `dcc:valid` no resultado, no nível mais alto aplicável;
+- `dcc:validXMLList` no resultado, no nível mais alto aplicável;
 - `dcc:measurementMetaData` quando apenas parte dos pontos estiver coberta.
 
 O exemplo para NMI usa apenas:
@@ -108,7 +108,7 @@ O exemplo para NMI usa apenas:
 
 O próprio documento antecipa que, no futuro, seria possível um link para uma base de CMC legível por máquina. Esse recurso já existe no BIPM.
 
-> Observação: o exemplo do DKD-E 7-2 é baseado em versão antiga do esquema e coloca `dcc:valid` dentro do `statement`. O vocabulário atual (revisão de 22/04/2026) determina que o `statement` **não** contenha `valid` e que o vínculo seja feito por `id`/`refId`. O certificado atual já segue o formato novo.
+> Observação: o exemplo do DKD-E 7-2 é baseado em versão antiga do esquema e coloca um marcador `valid` dentro do `statement`. O vocabulário atual (revisão de 22/04/2026) determina que o `statement` **não** contenha `dcc:validXMLList` e que o vínculo seja feito por `id`/`refId`. O gerador atual segue o formato novo.
 
 ### 4.2 Vocabulário `basic_isInCMC`
 
@@ -212,13 +212,13 @@ Manter exatamente como está:
   ...
   <dcc:measurementMetaData>
     <dcc:metaData refId="inCMC">
-      <dcc:valid>true</dcc:valid>
+      <dcc:validXMLList>true</dcc:validXMLList>
     </dcc:metaData>
   </dcc:measurementMetaData>
 </dcc:quantity>
 ```
 
-Para vários pontos, usar `dcc:validXMLList` com um booleano por valor, na mesma ordem.
+Usar sempre `dcc:validXMLList`, inclusive para um ponto único, com um booleano por valor, na mesma ordem.
 
 ---
 
@@ -232,7 +232,7 @@ Em `flask/app/main.py`:
 - `CMC_ID_PATTERN` — valida o `id` interno do XML, **não** o CMC ID do KCDB;
 - `CMC_STATEMENT_DEFAULTS` — nome, referência, link, descrição e autoridade;
 - `resolve_cmc_config(dados)` — resolve `cmc`, `cmc_padrao`, `resultados[].in_cmc` e `cmc_declaracao`;
-- `add_cmc_metadata(parent, ref_id, statuses)` — gera `measurementMetaData` com `valid`/`validXMLList`;
+- `add_cmc_metadata(parent, ref_id, statuses)` — gera `measurementMetaData` com `validXMLList`;
 - `add_cmc_statement(statements, dados, config, declaracao)` — gera o `statement` com `id`, `refType="basic_isInCMC"`, `reference`, `link`, `declaration` e `respAuthority`;
 - `dccGen` integra a configuração ao XML.
 
@@ -243,7 +243,7 @@ Em `flask/app/test_cmc.py` já há testes para:
 - erro para `id` inválido;
 - statement sem duplicação;
 - lista mista com `validXMLList`;
-- ponto único com `valid`;
+- ponto único com `validXMLList`;
 - preservação do statement MRA.
 
 ### 6.2 O que falta
@@ -452,7 +452,7 @@ if config.get('data_verificacao'):
     campo_texto(statement, 'date', config['data_verificacao'])
 ```
 
-Manter a ordem do XSD. Não emitir `dcc:valid` no statement.
+Manter a ordem do XSD. Não emitir `dcc:validXMLList` no statement.
 
 ### 8.4 `dccGen`
 
@@ -587,7 +587,7 @@ Não imprimir a tabela completa da CMC no PDF por padrão. Se o cliente exigir, 
 - [ ] Emitir link permanente derivado.
 - [ ] Suportar múltiplos `dcc:link`.
 - [ ] Emitir `dcc:norm` e `dcc:date` opcionais na ordem correta.
-- [ ] Manter `dcc:valid` fora do statement.
+- [ ] Manter `dcc:validXMLList` fora do statement.
 - [ ] Atualizar `test_cmc.py`.
 - [ ] Atualizar `test_validation.py`.
 - [ ] Atualizar `test_visualizacao.py` e o template PDF.

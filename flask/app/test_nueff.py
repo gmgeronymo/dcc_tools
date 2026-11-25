@@ -256,6 +256,9 @@ class TestNueffGeneration(unittest.TestCase):
         self.assertTrue(coverage_factor)
         self.assertTrue(coverage_probability)
         self.assertEqual(coverage_probability[0].text, '0.9545')
+        for node in coverage_factor:
+            for token in node.text.split():
+                self.assertRegex(token, r'^\d+\.\d{2}$')
 
 
 if __name__ == '__main__':

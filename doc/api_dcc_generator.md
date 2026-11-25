@@ -568,8 +568,8 @@ O schema DCC 3.3.0 **não possui campo nativo de CMC**. O gerador implementa o m
    `refType="basic_isInCMC"` em `administrativeData/statements` — não há um segundo statement;
 2. em cada `dcc:quantity` de resultado, adiciona
    `dcc:measurementMetaData/dcc:metaData[@refId="<id>"]`;
-3. usa `dcc:valid` para um ponto único ou `dcc:validXMLList` para vários pontos, com um booleano por
-   valor, na mesma ordem de `si:valueXMLList`.
+3. usa `dcc:validXMLList` sempre, inclusive para um ponto único, com um booleano por valor, na
+   mesma ordem de `si:valueXMLList`.
 
 **Campos de entrada**
 
@@ -679,7 +679,7 @@ XML gerado (trecho) com um CMC ID:
     <dcc:content lang="pt">CIPM-MRA</dcc:content>
   </dcc:name>
   <dcc:description>
-    <dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:valid ...</dcc:content>
+    <dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:validXMLList ...</dcc:content>
   </dcc:description>
   <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
   <dcc:link>https://www.bipm.org/kcdb/</dcc:link>
@@ -708,8 +708,8 @@ XML gerado (trecho) com um CMC ID:
 </dcc:quantity>
 ```
 
-Quando o mensurando tem um único ponto, o gerador usa `<dcc:valid>true</dcc:valid>` (ou `false`) em
-vez de `validXMLList`.
+O gerador usa `<dcc:validXMLList>true</dcc:validXMLList>` (ou `false`) também quando o mensurando
+tem um único ponto.
 
 O namespace `basic` é declarado automaticamente em `administrativeData/refTypeDefinitions`. Assim, o
 statement recebe sempre `refType="basic_isInCMC"` e qualquer outro RefType `basic_*` pode ser usado
@@ -722,8 +722,8 @@ marcação é uma afirmação sobre o resultado declarado, não sobre a adequaç
 Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 
 > Não use `dcc:conformity` para indicar CMC: ele declara conformidade com requisito, não cobertura de
-> CMC. Também não coloque `dcc:valid` dentro do `dcc:statement`; o `valid` pertence aos vínculos
-> (`metaData`).
+> CMC. Também não coloque `dcc:validXMLList` dentro do `dcc:statement`; o marcador pertence aos
+> vínculos (`metaData`).
 
 **Visualização human-readable.** Em `POST /dcc/visualizar_dcc`, as tabelas de resultados com
 `measurementMetaData` recebem a coluna **CMC** (`Sim`/`Não`) alinhada a cada ponto. Quando há pontos
@@ -887,10 +887,11 @@ Na tabela de resultados (`dcc:list`), cada coluna é uma `dcc:quantity` com `si:
 (`si:valueExpandedMUXMLList`, `si:coverageFactorXMLList`, `si:coverageProbabilityXMLList`).
 
 - `si:coverageProbabilityXMLList` é fixo em `0.9545`.
+- O fator de abrangência (`k`) é sempre formatado com duas casas decimais, tanto em `si:coverageFactor` quanto em `si:coverageFactorXMLList` (ex.: `2` → `2.00`; `2.1` → `2.10`).
 - Quando `nueff` está presente, uma `dcc:quantity` adicional é adicionada ao final da mesma `dcc:list`
   (ver §6).
 - Quando `in_cmc`/`cmc_padrao` estão presentes, a `dcc:quantity` de resultado recebe
-  `dcc:measurementMetaData/dcc:metaData[@refId]` com `dcc:valid` ou `dcc:validXMLList`, e o
+  `dcc:measurementMetaData/dcc:metaData[@refId]` com `dcc:validXMLList`, e o
   `administrativeData/statements` recebe o `dcc:statement` com `refType="basic_isInCMC"` (ver §2.13).
 - O namespace `basic` é declarado automaticamente e os RefTypes básicos são emitidos nos métodos,
   identificações, CMC, valor nominal e declaração 17025 (ver §2.3). O número do certificado também

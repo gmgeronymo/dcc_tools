@@ -890,7 +890,7 @@ DKD‑E 7‑2, §4.5:
   `refType="basic_isInCMC"` — não é criado um segundo statement;
 - adiciona um `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` de resultado quando
   há marcação por ponto;
-- usa `dcc:valid` (ponto único) ou `dcc:validXMLList` (um booleano por ponto, na ordem dos valores).
+- usa `dcc:validXMLList` sempre, inclusive para um ponto único (um booleano por ponto, na ordem dos valores).
 
 ### 11.1 Campos
 
@@ -928,7 +928,7 @@ XML resultante (trechos):
 ```xml
 <dcc:statement id="inCMC" refType="basic_isInCMC">
   <dcc:name><dcc:content lang="pt">CIPM-MRA</dcc:content></dcc:name>
-  <dcc:description><dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:valid ...</dcc:content></dcc:description>
+  <dcc:description><dcc:content lang="pt">Todos os resultados são acompanhados por um elemento dcc:validXMLList ...</dcc:content></dcc:description>
   <dcc:reference>CIPM-MRA — Apêndice C / KCDB</dcc:reference>
   <dcc:link>https://www.bipm.org/kcdb/</dcc:link>
   <dcc:declaration><dcc:content lang="pt">Este certificado é consistente com as CMCs...</dcc:content></dcc:declaration>
@@ -951,8 +951,8 @@ XML resultante (trechos):
 </dcc:quantity>
 ```
 
-Com um único ponto, o XML usa `<dcc:valid>true</dcc:valid>` (ou `false`). O namespace `basic` é
-declarado automaticamente, então o statement recebe sempre `refType="basic_isInCMC"`.
+Com um único ponto, o XML usa `<dcc:validXMLList>true</dcc:validXMLList>` (ou `false`). O namespace
+`basic` é declarado automaticamente, então o statement recebe sempre `refType="basic_isInCMC"`.
 
 ### 11.3 Critério metrológico
 
@@ -962,16 +962,16 @@ Um ponto só deve ser marcado com `true` quando **as duas condições** forem at
 2. a incerteza declarada é maior ou igual à incerteza da CMC, comparadas na mesma base estatística
    (mesmo `k` ou ambas convertidas para incerteza padrão).
 
-Não use `dcc:conformity` para indicar CMC e não coloque `dcc:valid` dentro do `dcc:statement`.
+Não use `dcc:conformity` para indicar CMC e não coloque `dcc:validXMLList` dentro do `dcc:statement`.
 Referência: DKD‑E 7‑2, §4.5, e vocabulário de `refType` do DKD/PTB.
 
 ### 11.4 Como a marcação aparece na visualização
 
 Em `POST /dcc/visualizar_dcc`, cada tabela de resultados cujo XML tenha
-`measurementMetaData/metaData` com `dcc:valid` ou `dcc:validXMLList` recebe uma coluna **CMC**:
+`measurementMetaData/metaData` com `dcc:validXMLList` recebe uma coluna **CMC**:
 
-- `Sim`: `dcc:valid`/`validXMLList` = `true` (ou `1`);
-- `Não`: `dcc:valid`/`validXMLList` = `false` (ou `0`).
+- `Sim`: `dcc:validXMLList` = `true` (ou `1`);
+- `Não`: `dcc:validXMLList` = `false` (ou `0`).
 
 Quando há pontos marcados com `Não`, a última seção do certificado (**Observações**) recebe uma
 observação numerada após as observações já existentes, informando que esses pontos não estão
@@ -1131,7 +1131,7 @@ em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
 | 1.1 | 06/11/2026 | Ajuste para ambiente de intranet: baixar/anexar o `.md` em vez de depender da URL interna. |
 | 1.2 | 06/11/2026 | Nome do arquivo unificado para `llm_doc.md`, igual ao caminho de download. |
 | 2.0 | 12/11/2026 | Schema 3.3.0 como único suportado para geração; incerteza absoluta em `si:expandedMU`; `relative_uncertainty_in_dcc` exige `unc_relativa`; referências oficiais. |
-| 2.1 | 13/11/2026 | Marcação de pontos dentro/fora da CMC com `in_cmc`, `cmc_padrao` e `cmc_declaracao` (`basic_isInCMC`, `dcc:valid`/`dcc:validXMLList`). |
+| 2.1 | 13/11/2026 | Marcação de pontos dentro/fora da CMC com `in_cmc`, `cmc_padrao` e `cmc_declaracao` (`basic_isInCMC`). |
 | 2.2 | 13/11/2026 | Reaproveita o statement de CMC existente (`cmc=true`) no formato `basic_isInCMC`, sem criar um segundo statement. |
 | 2.3 | 13/11/2026 | Referência a certificado do padrão que também é DCC via `tabela_rastreabilidade[].hash_sha256` e `hash_procedure`, com `sha256` em `dcc:procedure` e o digest em `dcc:value`. |
 | 2.4 | 13/11/2026 | Visualização human-readable com capa no modelo NIE-Dimci-014, coluna CMC (`Dentro`/`Fora`) por ponto e observação automática de pontos fora da CMC. |
@@ -1140,6 +1140,8 @@ em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
 | 2.7 | 13/11/2026 | `caracteristicas_item` passa a ser opcional; quando omitido/vazio, o statement "Características do Item" não é emitido e o valor nominal estruturado pode ser usado isoladamente. |
 | 2.8 | 13/11/2026 | Referência à CMC no KCDB por `cmc_id` (texto ou lista), com link permanente derivado. |
 | 2.9 | 13/11/2026 | Índice `current` aceita `refType="electromagnetic_measuringCurrent"` enviado pelo cliente; o gerador não infere refType nem adiciona definições. |
+| 2.10 | 25/11/2026 | Fator de abrangência (`k`) sempre formatado com duas casas decimais em `si:coverageFactor` e `si:coverageFactorXMLList`. |
+| 2.11 | 25/11/2026 | Marcação CMC padronizada em `dcc:validXMLList`, inclusive para um ponto único. |
 | 2.10 | 16/11/2026 | Exemplo de definição do namespace `basic` em `refTypeDefinitions`; quando ele é declarado pelo cliente, os `usedMethod` recebem `refType="basic_calibrationMethod"` (métodos) e `refType="basic_methodMeasurementUncertainty"` (incerteza). |
 | 2.11 | 16/11/2026 | O namespace `basic` deixa de ser declarado automaticamente: o `refType="basic_isInCMC"` só é emitido quando o cliente declara `basic` e `valor_nominal` sem essa declaração retorna 400 (revertido na 2.13). |
 | 2.12 | 16/11/2026 | Campo opcional `declaracao_incerteza_norm` (texto ou lista) emitido como `dcc:norm` no `usedMethod` da declaração da incerteza (ex.: `JCGM 100:2008`). |

@@ -28,14 +28,7 @@
     <xsl:variable name="cmcOutsideCount">
       <xsl:variable name="allCmcValues">
         <xsl:for-each select="//dcc:results/dcc:result/dcc:data/dcc:list/dcc:quantity/dcc:measurementMetaData/dcc:metaData[1]">
-          <xsl:choose>
-            <xsl:when test="dcc:validXMLList">
-              <xsl:value-of select="dcc:validXMLList"/>
-            </xsl:when>
-            <xsl:when test="dcc:valid">
-              <xsl:value-of select="dcc:valid"/>
-            </xsl:when>
-          </xsl:choose>
+          <xsl:value-of select="dcc:validXMLList"/>
           <xsl:text> </xsl:text>
         </xsl:for-each>
       </xsl:variable>
@@ -944,14 +937,7 @@
                       <xsl:variable name="quantities" select="dcc:data/dcc:list/dcc:quantity"/>
                       <xsl:variable name="cmcValues">
                         <xsl:for-each select="dcc:data/dcc:list/dcc:quantity/dcc:measurementMetaData/dcc:metaData[1]">
-                          <xsl:choose>
-                            <xsl:when test="dcc:validXMLList">
-                              <xsl:value-of select="normalize-space(dcc:validXMLList)"/>
-                            </xsl:when>
-                            <xsl:when test="dcc:valid">
-                              <xsl:value-of select="normalize-space(dcc:valid)"/>
-                            </xsl:when>
-                          </xsl:choose>
+                          <xsl:value-of select="normalize-space(dcc:validXMLList)"/>
                         </xsl:for-each>
                       </xsl:variable>
                       <xsl:variable name="hasCmc" select="normalize-space($cmcValues) != ''"/>
@@ -1279,7 +1265,7 @@
           </xsl:if>
         </xsl:for-each>
 
-        <!-- Coluna CMC: Sim/Não conforme dcc:valid(XMLList) -->
+        <!-- Coluna CMC: Sim/Não conforme dcc:validXMLList -->
         <xsl:if test="$hasCmc">
           <xsl:variable name="cmcStatus">
             <xsl:call-template name="get-token-at-position">

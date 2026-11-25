@@ -1200,7 +1200,7 @@ Content-Type: application/json</div>
                                     em <code>administrativeData/statements</code>, sem criar um segundo
                                     statement. Cada <code>dcc:quantity</code> de resultado é vinculada por
                                     <code>dcc:measurementMetaData/dcc:metaData[@refId]</code>, usando
-                                    <code>dcc:valid</code> (ponto único) ou <code>dcc:validXMLList</code>
+                                    <code>dcc:validXMLList</code>, inclusive quando há um ponto único,
                                     (um booleano por ponto, na ordem de <code>si:valueXMLList</code>).</p>
 
                                 <ul>
@@ -1224,7 +1224,7 @@ Content-Type: application/json</div>
                                 <h6 class="mt-3">XML gerado (trecho)</h6>
                                 <div class="example-box">&lt;dcc:statement id="inCMC" refType="basic_isInCMC"&gt;
   &lt;dcc:name&gt;&lt;dcc:content lang="pt"&gt;CIPM-MRA&lt;/dcc:content&gt;&lt;/dcc:name&gt;
-  &lt;dcc:description&gt;&lt;dcc:content lang="pt"&gt;Todos os resultados são acompanhados por um elemento dcc:valid ...&lt;/dcc:content&gt;&lt;/dcc:description&gt;
+  &lt;dcc:description&gt;&lt;dcc:content lang="pt"&gt;Todos os resultados são acompanhados por um elemento dcc:validXMLList ...&lt;/dcc:content&gt;&lt;/dcc:description&gt;
   &lt;dcc:reference&gt;CIPM-MRA — Apêndice C / KCDB&lt;/dcc:reference&gt;
   &lt;dcc:link&gt;https://www.bipm.org/kcdb/&lt;/dcc:link&gt;
   &lt;dcc:declaration&gt;&lt;dcc:content lang="pt"&gt;Este certificado é consistente com as CMCs...&lt;/dcc:content&gt;&lt;/dcc:declaration&gt;

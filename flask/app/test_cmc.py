@@ -270,7 +270,7 @@ class TestGeracaoCmc(unittest.TestCase):
         self.assertEqual(valores[0], 'true')
         self.assertTrue(all(v == 'false' for v in valores[1:]))
 
-    def test_ponto_unico_usa_valid(self):
+    def test_ponto_unico_usa_valid_xml_list(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)
         dados['resultados'][0]['in_cmc'] = 'Não'
 
@@ -278,8 +278,8 @@ class TestGeracaoCmc(unittest.TestCase):
         quantity = quantidade_resultado(root, 'V.m.')
         self.assertIsNotNone(quantity)
         meta = quantity.find(DCC_NS + 'measurementMetaData/' + DCC_NS + 'metaData')
-        self.assertEqual(meta.findtext(DCC_NS + 'valid'), 'false')
-        self.assertIsNone(meta.find(DCC_NS + 'validXMLList'))
+        self.assertEqual(meta.findtext(DCC_NS + 'validXMLList'), 'false')
+        self.assertIsNone(meta.find(DCC_NS + 'valid'))
 
     def test_declaracao_personalizada(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)
@@ -308,7 +308,8 @@ class TestGeracaoCmc(unittest.TestCase):
 
         meta = metadados_cmc(root, 'escopoRBC')
         self.assertEqual(len(meta), 1)
-        self.assertEqual(meta[0].findtext(DCC_NS + 'valid'), 'true')
+        self.assertEqual(meta[0].findtext(DCC_NS + 'validXMLList'), 'true')
+        self.assertIsNone(meta[0].find(DCC_NS + 'valid'))
 
     def test_namespace_basic_declarado_automaticamente(self):
         dados = carregar(EXEMPLO_JSON)
@@ -332,7 +333,8 @@ class TestGeracaoCmc(unittest.TestCase):
 
         meta = metadados_cmc(root)
         self.assertEqual(len(meta), 1)
-        self.assertEqual(meta[0].findtext(DCC_NS + 'valid'), 'true')
+        self.assertEqual(meta[0].findtext(DCC_NS + 'validXMLList'), 'true')
+        self.assertIsNone(meta[0].find(DCC_NS + 'valid'))
 
     def test_com_basic_statement_tem_refType(self):
         dados = carregar(EXEMPLO_PONTO_UNICO)

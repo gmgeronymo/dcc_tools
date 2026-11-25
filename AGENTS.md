@@ -359,7 +359,7 @@ testar a navegação.
   (`id` + `refType="basic_isInCMC"`), sem criar um segundo statement.
 - Estrutura no XML 3.3.0: `dcc:statement[@refType="basic_isInCMC"]` +
   `dcc:measurementMetaData/dcc:metaData[@refId=...]` +
-  `dcc:valid` (ponto único) ou `dcc:validXMLList` (vários pontos, alinhado a
+  `dcc:validXMLList` (sempre, inclusive para um ponto único, alinhado a
   `si:valueXMLList`). Não usar `dcc:conformity` para CMC.
 - A declaração textual do MRA é preservada como `dcc:declaration` dentro do mesmo statement.
 - O namespace `basic` é declarado automaticamente pelo gerador (sem duplicar quando o cliente já o

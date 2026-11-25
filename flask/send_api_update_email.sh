@@ -167,8 +167,8 @@ Resumo das mudanças
   autoridade do statement.
 - cmc_declaracao.cmc_id (texto ou lista) para referenciar entradas do KCDB; o link permanente é
   derivado do ID.
-- O XML usa dcc:statement com refType="basic_isInCMC", dcc:valid (ponto único) ou
-  dcc:validXMLList (vários pontos).
+- O XML usa dcc:statement com refType="basic_isInCMC" e dcc:validXMLList
+  (sempre, inclusive para um ponto único).
 
 2.2 Rastreabilidade com certificado do padrão que também é DCC
 - tabela_rastreabilidade[].hash_sha256 (SHA-256 do XML do DCC do padrão) e

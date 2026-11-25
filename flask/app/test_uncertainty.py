@@ -36,9 +36,13 @@ from lxml import etree  # noqa: E402
 
 import auth  # noqa: E402
 from main import (  # noqa: E402
+    add_expanded_uncertainty,
+    add_expanded_uncertainty_list,
     app,
     declaracoes,
     dccGen,
+    format_coverage_factor,
+    nsmap,
     resolve_dcc_version,
     resolve_uncertainty_norm,
     validate_relative_uncertainty,
@@ -255,6 +259,45 @@ class TestRotaGenerateUncertaintyNorm(unittest.TestCase):
         method = used_method_incerteza(root)
         self.assertEqual(
             method.findtext(DCC_NS + 'norm'), 'JCGM 100:2008')
+
+
+class TestCoverageFactorFormatting(unittest.TestCase):
+
+    def test_inteiro_recebe_duas_casas(self):
+        self.assertEqual(format_coverage_factor('2'), '2.00')
+        self.assertEqual(format_coverage_factor(2), '2.00')
+
+    def test_uma_casa_recebe_zero(self):
+        self.assertEqual(format_coverage_factor('2.1'), '2.10')
+
+    def test_duas_casas_preservadas(self):
+        self.assertEqual(format_coverage_factor('2.13'), '2.13')
+
+    def test_virgula_decimal_aceita(self):
+        self.assertEqual(format_coverage_factor('2,13'), '2.13')
+
+    def test_vazio_usa_padrao(self):
+        self.assertEqual(format_coverage_factor(None), '2.00')
+        self.assertEqual(format_coverage_factor(''), '2.00')
+
+    def test_coverage_factor_escalar(self):
+        parent = etree.Element('parent')
+        add_expanded_uncertainty(parent, '0.010', '2')
+        node = parent.find('.//si:coverageFactor', nsmap)
+        self.assertIsNotNone(node)
+        self.assertEqual(node.text, '2.00')
+
+    def test_coverage_factor_em_lista(self):
+        parent = etree.Element('parent')
+        add_expanded_uncertainty_list(
+            parent,
+            ['1e-5', '2e-5', '3e-5'],
+            ['2', '2.1', '2.13'],
+            '0.9545',
+        )
+        node = parent.find('.//si:coverageFactorXMLList', nsmap)
+        self.assertIsNotNone(node)
+        self.assertEqual(node.text, '2.00 2.10 2.13')
 
 
 if __name__ == '__main__':

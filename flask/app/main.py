@@ -65,6 +65,7 @@ import tempfile
 import pandas as pd
 
 import math
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 # namespaces
 nsmap = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'dcc': 'https://ptb.de/dcc', 'si': 'https://ptb.de/si'}
@@ -104,6 +105,18 @@ app.permanent_session_lifetime = timedelta(hours=int(os.environ.get('DCC_SESSION
 auth.init_db()
 
 # funcoes auxiliares
+
+def format_coverage_factor(value):
+    """Formata o fator de abrangencia (k) com duas casas decimais."""
+    text = '' if value is None else str(value).strip().replace(',', '.')
+    if not text:
+        text = '2'
+    try:
+        number = Decimal(text)
+    except InvalidOperation:
+        return str(value)
+    return format(number.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP), 'f')
+
 
 def format_two_sig_scientific(number):
     if number == 0:
@@ -263,7 +276,7 @@ def is_truthy(value):
 # O schema DCC 3.3.0 nao possui campo nativo de CMC. A marcacao e feita com:
 #   1) dcc:statement id=... refType="basic_isInCMC" em administrativeData;
 #   2) dcc:measurementMetaData/dcc:metaData refId=... na dcc:quantity resultante;
-#   3) dcc:valid (ponto unico) ou dcc:validXMLList (um booleano por ponto).
+#   3) dcc:validXMLList (um booleano por ponto, inclusive com um unico ponto).
 #
 # O statement reaproveita a declaracao de CMC existente (cmc=True), sem criar
 # um segundo statement. A entrada JSON usa:
@@ -287,8 +300,8 @@ CMC_STATEMENT_DEFAULTS = {
     'referencia': 'CIPM-MRA — Apêndice C / KCDB',
     'link': 'https://www.bipm.org/kcdb/',
     'descricao': (
-        'Todos os resultados são acompanhados por um elemento dcc:valid '
-        '(ou dcc:validXMLList) com refId para este dcc:statement. O valor '
+        'Todos os resultados são acompanhados por um elemento dcc:validXMLList '
+        'com refId para este dcc:statement. O valor '
         '"true" indica que (a) o resultado está dentro do escopo coberto '
         'pela CMC e (b) a incerteza declarada é maior ou igual à incerteza '
         'da CMC.'
@@ -488,10 +501,10 @@ def resolve_cmc_config(dados):
 
 
 def add_cmc_metadata(parent, ref_id, statuses):
-    """Adiciona dcc:measurementMetaData com dcc:valid/validXMLList.
+    """Adiciona dcc:measurementMetaData com dcc:validXMLList.
 
-    Para um unico ponto usa dcc:valid; para listas usa dcc:validXMLList com
-    um booleano por valor, na mesma ordem de si:valueXMLList.
+    O gerador usa sempre dcc:validXMLList, inclusive com um unico ponto,
+    mantendo um booleano por valor na ordem de si:valueXMLList.
     """
     measurement_metadata = etree.SubElement(
         parent, etree.QName(nsmap['dcc'], 'measurementMetaData'))
@@ -500,13 +513,9 @@ def add_cmc_metadata(parent, ref_id, statuses):
         refId=ref_id)
 
     bools = ['true' if status else 'false' for status in statuses]
-    if len(bools) == 1:
-        valid = etree.SubElement(meta_data, etree.QName(nsmap['dcc'], 'valid'))
-        valid.text = bools[0]
-    else:
-        valid_list = etree.SubElement(
-            meta_data, etree.QName(nsmap['dcc'], 'validXMLList'))
-        valid_list.text = ' '.join(bools)
+    valid_list = etree.SubElement(
+        meta_data, etree.QName(nsmap['dcc'], 'validXMLList'))
+    valid_list.text = ' '.join(bools)
 
 
 def has_ref_type_definition(dados, namespace):
@@ -753,7 +762,7 @@ def add_expanded_uncertainty(parent, uncertainty, coverage_factor, probability='
     value.text = str(uncertainty)
     coverage_factor_node = etree.SubElement(
         expanded_mu, etree.QName(nsmap['si'], 'coverageFactor'))
-    coverage_factor_node.text = str(coverage_factor)
+    coverage_factor_node.text = format_coverage_factor(coverage_factor)
     coverage_probability_node = etree.SubElement(
         expanded_mu, etree.QName(nsmap['si'], 'coverageProbability'))
     coverage_probability_node.text = str(probability)
@@ -774,7 +783,8 @@ def add_expanded_uncertainty_list(parent, uncertainties, coverage_factors, proba
     value.text = ' '.join(str(item) for item in uncertainties)
     coverage_factor_node = etree.SubElement(
         expanded_mu, etree.QName(nsmap['si'], 'coverageFactorXMLList'))
-    coverage_factor_node.text = ' '.join(str(item) for item in coverage_factors)
+    coverage_factor_node.text = ' '.join(
+        format_coverage_factor(item) for item in coverage_factors)
     coverage_probability_node = etree.SubElement(
         expanded_mu, etree.QName(nsmap['si'], 'coverageProbabilityXMLList'))
     coverage_probability_node.text = str(probability)
