@@ -21,6 +21,7 @@ Principais funcionalidades:
 - Referência a uma ou mais entradas do KCDB (`cmc_id`), com link permanente do BIPM no `dcc:statement`
 - Declaração estruturada do valor nominal do item (`valor_nominal`; `basic_nominalValue` no XML, conforme DKD-E 1-1)
 - Referência a certificados de padrão que também são DCC, com hash SHA-256 (`tabela_rastreabilidade[].hash_sha256`)
+- Vínculo de resultados a condições de influência por `id`/`refId` (por exemplo, temperatura média de cada ponto), com agrupamento automático dos resultados por condição
 - Cadastro de usuários com API-KEY e proteção das funções de geração/upload
 - Troca de senha e recuperação de senha por e-mail (`@inmetro.gov.br`)
 
@@ -185,6 +186,7 @@ Main capabilities:
 - Reference to one or more KCDB entries (`cmc_id`), with the BIPM permanent link in `dcc:statement`
 - Structured declaration of the item nominal value (`valor_nominal`; `basic_nominalValue` in the XML, per DKD-E 1-1)
 - Reference to standard certificates that are also DCCs, using a SHA-256 hash (`tabela_rastreabilidade[].hash_sha256`)
+- Linking results to influence conditions via `id`/`refId` (for example, each point's mean temperature), with automatic grouping of results by condition
 - User registration with API-KEY and protection of generation/upload functions
 - Password change and e-mail password recovery (`@inmetro.gov.br`)
 

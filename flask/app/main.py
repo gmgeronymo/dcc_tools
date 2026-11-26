@@ -505,9 +505,15 @@ def add_cmc_metadata(parent, ref_id, statuses):
 
     O gerador usa sempre dcc:validXMLList, inclusive com um unico ponto,
     mantendo um booleano por valor na ordem de si:valueXMLList.
+    Reaproveita o measurementMetaData existente para nao duplicar o elemento
+    quando tambem houver refId de condicoes de influencia.
     """
-    measurement_metadata = etree.SubElement(
-        parent, etree.QName(nsmap['dcc'], 'measurementMetaData'))
+    measurement_metadata = parent.find(
+        etree.QName(nsmap['dcc'], 'measurementMetaData'))
+    if measurement_metadata is None:
+        measurement_metadata = etree.SubElement(
+            parent, etree.QName(nsmap['dcc'], 'measurementMetaData'))
+
     meta_data = etree.SubElement(
         measurement_metadata, etree.QName(nsmap['dcc'], 'metaData'),
         refId=ref_id)
@@ -516,6 +522,129 @@ def add_cmc_metadata(parent, ref_id, statuses):
     valid_list = etree.SubElement(
         meta_data, etree.QName(nsmap['dcc'], 'validXMLList'))
     valid_list.text = ' '.join(bools)
+
+
+def normalize_ref_ids(value, field_name='refId'):
+    """Normaliza e valida um IDREFS vindo do JSON (string ou lista).
+
+    Aceita uma string com IDs separados por espaco ou uma lista de strings.
+    Retorna a lista de IDs sem duplicatas, preservando a ordem.
+    """
+    if value is None:
+        return []
+
+    if isinstance(value, str):
+        parts = value.split()
+    elif isinstance(value, (list, tuple)):
+        parts = []
+        for item in value:
+            if item is None:
+                continue
+            if not isinstance(item, str):
+                raise ValueError(
+                    "'%s' deve conter apenas strings de identificadores."
+                    % field_name
+                )
+            parts.extend(item.split())
+    else:
+        raise ValueError(
+            "'%s' deve ser uma string ou uma lista de identificadores."
+            % field_name
+        )
+
+    refs = []
+    vistos = set()
+    for part in parts:
+        ref = part.strip()
+        if ref == '':
+            continue
+        if not CMC_ID_PATTERN.match(ref):
+            raise ValueError(
+                "Identificador inválido em '%s': %r. Use letras, números, "
+                "ponto, hífen ou sublinhado, começando por letra ou "
+                "sublinhado." % (field_name, ref)
+            )
+        if ref not in vistos:
+            vistos.add(ref)
+            refs.append(ref)
+
+    return refs
+
+
+def validate_influence_condition_ids(dados, cmc_config):
+    """Valida os ids das condicoes de influencia e devolve o conjunto usado.
+
+    O id e opcional e precisa ser unico no documento (xs:ID). Tambem nao pode
+    colidir com o id do statement de CMC quando ele for emitido.
+    """
+    ids = set()
+    informacoes = dados.get('informacoes_pertinentes', []) or []
+
+    if not isinstance(informacoes, list):
+        return ids
+
+    for i, informacao in enumerate(informacoes):
+        if not isinstance(informacao, dict):
+            continue
+
+        raw_id = informacao.get('id')
+        if raw_id is None or str(raw_id).strip() == '':
+            continue
+
+        cond_id = str(raw_id).strip()
+        if not CMC_ID_PATTERN.match(cond_id):
+            raise ValueError(
+                "Identificador inválido em 'informacoes_pertinentes[%d].id': "
+                "%r. Use letras, números, ponto, hífen ou sublinhado, "
+                "começando por letra ou sublinhado." % (i, cond_id)
+            )
+        if cond_id in ids:
+            raise ValueError(
+                "Identificador duplicado em 'informacoes_pertinentes[].id': %r."
+                % cond_id
+            )
+        if cmc_config.get('statement') and cond_id == cmc_config.get('id'):
+            raise ValueError(
+                "O id %r de 'informacoes_pertinentes' conflita com o id do "
+                "statement de CMC." % cond_id
+            )
+
+        ids.add(cond_id)
+
+    return ids
+
+
+def validate_result_ref_ids(resultados, influence_condition_ids):
+    """Valida os refIds de um resultado contra as condicoes declaradas."""
+    refs = normalize_ref_ids(resultados.get('refId'))
+    for ref in refs:
+        if ref not in influence_condition_ids:
+            raise ValueError(
+                "'refId' %r não corresponde a nenhum 'id' declarado em "
+                "'informacoes_pertinentes'." % ref
+            )
+    return refs
+
+
+def add_ref_metadata(parent, ref_ids):
+    """Adiciona dcc:metaData[@refId] para condicoes de influencia.
+
+    Reaproveita o measurementMetaData existente (por exemplo, o da CMC).
+    """
+    if not ref_ids:
+        return
+
+    measurement_metadata = parent.find(
+        etree.QName(nsmap['dcc'], 'measurementMetaData'))
+    if measurement_metadata is None:
+        measurement_metadata = etree.SubElement(
+            parent, etree.QName(nsmap['dcc'], 'measurementMetaData'))
+
+    etree.SubElement(
+        measurement_metadata,
+        etree.QName(nsmap['dcc'], 'metaData'),
+        refId=' '.join(ref_ids)
+    )
 
 
 def has_ref_type_definition(dados, namespace):
@@ -902,6 +1031,9 @@ def dccGen(dcc_version, dados, declaracao) :
     # marcacao de pontos dentro/fora da CMC (opcional)
     cmc_config = resolve_cmc_config(dados)
 
+    # ids das condicoes de influencia (opcional; usados por refId nos resultados)
+    influence_condition_ids = validate_influence_condition_ids(dados, cmc_config)
+
     # valor nominal estruturado do item (opcional)
     nominal_config = resolve_nominal_value(dados)
 
@@ -1223,12 +1355,16 @@ def dccGen(dcc_version, dados, declaracao) :
 
     # loop para incluir todas as informacoes pertinentes a atividade realizada
     for informacoes_pertinentes in dados['informacoes_pertinentes'] :
-        # opcional: refType
-        # se o campo for enviado, adicionar
+        # opcionais: refType e id (id permite o vinculo por refId nos resultados)
+        condicao_atributos = {}
         if 'refType' in informacoes_pertinentes :
-            influenceCondition = etree.SubElement(influenceConditions, etree.QName(nsmap['dcc'], 'influenceCondition'), refType=informacoes_pertinentes['refType'])
-        else :
-            influenceCondition = etree.SubElement(influenceConditions, etree.QName(nsmap['dcc'], 'influenceCondition'))
+            condicao_atributos['refType'] = informacoes_pertinentes['refType']
+        if informacoes_pertinentes.get('id') is not None and str(informacoes_pertinentes['id']).strip() != '' :
+            condicao_atributos['id'] = str(informacoes_pertinentes['id']).strip()
+        influenceCondition = etree.SubElement(
+            influenceConditions,
+            etree.QName(nsmap['dcc'], 'influenceCondition'),
+            **condicao_atributos)
         campo_name(influenceCondition,informacoes_pertinentes['name'])
         data = etree.SubElement(influenceCondition, etree.QName(nsmap['dcc'], 'data'))
 
@@ -1286,172 +1422,222 @@ def dccGen(dcc_version, dados, declaracao) :
     # possibilidade de mais de uma tabela de resultados
 
     indexes = {}
-
-    # value, unc e k
-    # listas de listas, referenciados ao mensurando
-    value = {}
-    unc = {}
-    unc_input = {}
-    k = {}
-    # graus de liberdade efetivos (opcional)
-    nueff = {}
-    # status CMC por ponto (opcional)
-    cmc_status = {}
-    
-    # organizar nomes e unidades dos mensurandos e indices de forma indexada
     mensurando_data = {}
     indices_data = {}
+    grupos = {}
+    valores_por_mensurando = {}
+    nueff_por_mensurando = {}
 
     # mensurando
-    if 'mensurando' in dados :
-        for i, linha in enumerate(dados['mensurando']) : 
-            indexes[linha['label']] = {}
-            value[linha['label']] = []
-            unc[linha['label']] = []
-            unc_input[linha['label']] = []
-            k[linha['label']] = []
-            nueff[linha['label']] = []
-            cmc_status[linha['label']] = []
-            # dados
-            mensurando_data[linha['label']] = linha
-            indices_data[linha['label']] = {}
+    if 'mensurando' in dados:
+        for linha in dados['mensurando']:
+            label = linha['label']
+            indexes[label] = {}
+            mensurando_data[label] = linha
+            indices_data[label] = {}
+            grupos[label] = {}
+            valores_por_mensurando[label] = []
+            nueff_por_mensurando[label] = []
 
     # indices auxiliares -> campo 'indexes'
-    if 'indices' in dados :            
-        #for index in dados['indices'] :
-        for i, linha in enumerate(dados['indices']) :
+    if 'indices' in dados:
+        for linha in dados['indices']:
             indexes[linha['mensurando']][linha['label']] = []
             indices_data[linha['mensurando']][linha['label']] = linha
 
+    # loop resultados: agrupa por mensurando e por refId
+    # (pontos que compartilham as mesmas condicoes de influencia ficam
+    #  na mesma tabela; refIds diferentes geram tabelas separadas, com
+    #  o vinculo dcc:metaData/@refId na quantity do valor medido)
+    for resultados in dados.get('resultados', []):
+        mensurando = resultados.get('mensurando')
+        if mensurando not in grupos:
+            continue
 
-    # loop resultados
-    for i, resultados in enumerate(dados['resultados']) :
-    # criar vetores com os dados para usar nas si:realListXMLList
-        for mensurando in indexes :
-            if resultados['mensurando'] == mensurando :
-                for index in indexes[mensurando] :
-                    if index in resultados:
-                        indexes[mensurando][index].append(resultados[index])
-    
-                # resultados
-                value[mensurando].append(resultados['value'])                
-                unc_input[mensurando].append(resultados['unc'])
+        ref_ids = validate_result_ref_ids(resultados, influence_condition_ids)
+        ref_key = ' '.join(sorted(set(ref_ids)))
 
-                # se incerteza esta em ppm, converter para valor absoluto
-                input_unc_relative = is_truthy(mensurando_data[mensurando].get('unc_relativa'))
-                if input_unc_relative :
-                    unc[mensurando].append(format_two_sig_scientific(float(resultados['unc']) * 1e-6 * float(resultados['value'])))
-                else :
-                    unc[mensurando].append(resultados['unc'])
-                
-                k[mensurando].append(resultados['k'])
+        if ref_key not in grupos[mensurando]:
+            grupos[mensurando][ref_key] = {
+                'ref_ids': ref_ids,
+                'indices': {index: [] for index in indexes[mensurando]},
+                'value': [],
+                'unc': [],
+                'unc_input': [],
+                'k': [],
+                'nueff': [],
+                'cmc_status': [],
+            }
 
-                # marcacao CMC do ponto: in_cmc explicito ou cmc_padrao
-                in_cmc, _ = optional_bool(
-                    resultados, 'in_cmc', cmc_config['default'])
-                cmc_status[mensurando].append(in_cmc)
+        grupo = grupos[mensurando][ref_key]
 
-                # graus de liberdade efetivos (opcional)
-                if 'nueff' in resultados and resultados['nueff'] is not None :
-                    nueff[mensurando].append(resultados['nueff'])
+        for index in indexes[mensurando]:
+            grupo['indices'][index].append(resultados.get(index, ''))
+
+        grupo['value'].append(resultados['value'])
+        grupo['unc_input'].append(resultados['unc'])
+
+        # se incerteza esta em ppm, converter para valor absoluto
+        input_unc_relative = is_truthy(
+            mensurando_data[mensurando].get('unc_relativa'))
+        if input_unc_relative:
+            grupo['unc'].append(format_two_sig_scientific(
+                float(resultados['unc']) * 1e-6 * float(resultados['value'])))
+        else:
+            grupo['unc'].append(resultados['unc'])
+
+        grupo['k'].append(resultados['k'])
+
+        # marcacao CMC do ponto: in_cmc explicito ou cmc_padrao
+        in_cmc, _ = optional_bool(
+            resultados, 'in_cmc', cmc_config['default'])
+        grupo['cmc_status'].append(in_cmc)
+
+        # graus de liberdade efetivos (opcional)
+        if 'nueff' in resultados and resultados['nueff'] is not None:
+            grupo['nueff'].append(resultados['nueff'])
+
+        valores_por_mensurando[mensurando].append(resultados['value'])
+        nueff_por_mensurando[mensurando].append(resultados.get('nueff'))
+
+    # regra all-or-nothing do nueff no nivel do mensurando (como antes)
+    for mensurando in mensurando_data:
+        if any(valor is not None for valor in nueff_por_mensurando[mensurando]):
+            validate_nueff(
+                nueff_por_mensurando[mensurando],
+                len(valores_por_mensurando[mensurando]))
 
     # results
-    results = etree.SubElement(measurementResult, etree.QName(nsmap['dcc'], 'results'))
-    # loop resultados
-    for mensurando in mensurando_data :
+    results = etree.SubElement(
+        measurementResult, etree.QName(nsmap['dcc'], 'results'))
 
-        result = etree.SubElement(results, etree.QName(nsmap['dcc'], 'result'))
-        # usar o campo 'mensurando' para dar nome ao grupo results
-        campo_name(result, mensurando_data[mensurando]['name'])
-        data = etree.SubElement(result, etree.QName(nsmap['dcc'], 'data'))
-        # list -> dados em formato de tabela, mesmo se for um ponto unico
-        lista = etree.SubElement(data, etree.QName(nsmap['dcc'], 'list'))
+    # loop resultados (um dcc:result por grupo de refId)
+    for mensurando in mensurando_data:
+        for grupo in grupos[mensurando].values():
+            if not grupo['value']:
+                continue
 
-        label = None
-        for index in indexes[mensurando] :
+            result = etree.SubElement(
+                results, etree.QName(nsmap['dcc'], 'result'))
+            # usar o campo 'mensurando' para dar nome ao grupo results
+            campo_name(result, mensurando_data[mensurando]['name'])
+            data = etree.SubElement(
+                result, etree.QName(nsmap['dcc'], 'data'))
+            # list -> dados em formato de tabela, mesmo se for um ponto unico
+            lista = etree.SubElement(
+                data, etree.QName(nsmap['dcc'], 'list'))
 
-            # se for label, sem unidade
-            if 'unit' not in indices_data[mensurando][index] :
-                label = ' '.join(indexes[mensurando][index])
-            
-            else :
+            label = None
+            for index in indexes[mensurando]:
+
+                # se for label, sem unidade
+                if 'unit' not in indices_data[mensurando][index]:
+                    label = ' '.join(grupo['indices'][index])
+                    continue
+
                 # se existir refType, incluir
-                if 'refType' in indices_data[mensurando][index] :
-                    quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'), refType=indices_data[mensurando][index]['refType'])
-                else :
-                    quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
-                    
-                campo_name(quantity,indices_data[mensurando][index]['name'])
-                si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
-                si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
-                si_valueXMLList.text = ' '.join(indexes[mensurando][index])
-                si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
+                if 'refType' in indices_data[mensurando][index]:
+                    quantity = etree.SubElement(
+                        lista, etree.QName(nsmap['dcc'], 'quantity'),
+                        refType=indices_data[mensurando][index]['refType'])
+                else:
+                    quantity = etree.SubElement(
+                        lista, etree.QName(nsmap['dcc'], 'quantity'))
+
+                campo_name(quantity, indices_data[mensurando][index]['name'])
+                si_realListXMLList = etree.SubElement(
+                    quantity, etree.QName(nsmap['si'], 'realListXMLList'))
+                si_valueXMLList = etree.SubElement(
+                    si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
+                si_valueXMLList.text = ' '.join(grupo['indices'][index])
+                si_unitXMLList = etree.SubElement(
+                    si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
                 si_unitXMLList.text = indices_data[mensurando][index]['unit']
 
+            # resultados de medicao
+            # refType: opcional
+            if 'refType' in mensurando_data[mensurando]:
+                quantity = etree.SubElement(
+                    lista, etree.QName(nsmap['dcc'], 'quantity'),
+                    refType=mensurando_data[mensurando]['refType'])
+            else:
+                quantity = etree.SubElement(
+                    lista, etree.QName(nsmap['dcc'], 'quantity'))
 
-        # resultados de medicao
-        # refType: opcional
-        if 'refType' in mensurando_data[mensurando] :
-            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'), refType=mensurando_data[mensurando]['refType'])
-        else :
-            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
-            
-        # nome da coluna de resultados 
-        campo_name(quantity, mensurando_data[mensurando]['col_name'])
-        # sempre manter resultado completo legado em si:realListXMLList
-        si_realListXMLList = etree.SubElement(quantity, etree.QName(nsmap['si'], 'realListXMLList'))
+            # nome da coluna de resultados
+            campo_name(quantity, mensurando_data[mensurando]['col_name'])
+            # sempre manter resultado completo legado em si:realListXMLList
+            si_realListXMLList = etree.SubElement(
+                quantity, etree.QName(nsmap['si'], 'realListXMLList'))
 
-        if label :
-            si_labelXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'labelXMLList'))
-            si_labelXMLList.text = label
+            if label:
+                si_labelXMLList = etree.SubElement(
+                    si_realListXMLList,
+                    etree.QName(nsmap['si'], 'labelXMLList'))
+                si_labelXMLList.text = label
 
-        si_valueXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
-        si_valueXMLList.text = ' '.join(value[mensurando])
-        si_unitXMLList = etree.SubElement(si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
-        si_unitXMLList.text = mensurando_data[mensurando]['unit']
+            si_valueXMLList = etree.SubElement(
+                si_realListXMLList, etree.QName(nsmap['si'], 'valueXMLList'))
+            si_valueXMLList.text = ' '.join(grupo['value'])
+            si_unitXMLList = etree.SubElement(
+                si_realListXMLList, etree.QName(nsmap['si'], 'unitXMLList'))
+            si_unitXMLList.text = mensurando_data[mensurando]['unit']
 
-        # incerteza expandida no bloco SI (D-SI 2.2.1)
-        add_expanded_uncertainty_list(
-            si_realListXMLList,
-            unc[mensurando],
-            k[mensurando],
-            '0.9545',
-        )
+            # incerteza expandida no bloco SI (D-SI 2.2.1)
+            add_expanded_uncertainty_list(
+                si_realListXMLList,
+                grupo['unc'],
+                grupo['k'],
+                '0.9545',
+            )
 
-        # opcional: bloco dcc:relativeUncertainty completo (resultado + incerteza)
-        if is_truthy(mensurando_data[mensurando].get('relative_uncertainty_in_dcc')):
-            relative_uncertainty = etree.SubElement(quantity, etree.QName(nsmap['dcc'], 'relativeUncertainty'))
-            relative_uncertainty_xml_list = etree.SubElement(relative_uncertainty, etree.QName(nsmap['dcc'], 'relativeUncertaintyXmlList'))
+            # opcional: bloco dcc:relativeUncertainty completo
+            if is_truthy(mensurando_data[mensurando].get(
+                    'relative_uncertainty_in_dcc')):
+                relative_uncertainty = etree.SubElement(
+                    quantity, etree.QName(nsmap['dcc'], 'relativeUncertainty'))
+                relative_uncertainty_xml_list = etree.SubElement(
+                    relative_uncertainty,
+                    etree.QName(nsmap['dcc'], 'relativeUncertaintyXmlList'))
 
-            if label :
-                si_relative_labelXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'labelXMLList'))
-                si_relative_labelXMLList.text = label
+                if label:
+                    si_relative_labelXMLList = etree.SubElement(
+                        relative_uncertainty_xml_list,
+                        etree.QName(nsmap['si'], 'labelXMLList'))
+                    si_relative_labelXMLList.text = label
 
-            # relative uncertainty values
-            si_relative_valueXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'valueXMLList'))
-            si_relative_valueXMLList.text = ' '.join(unc_input[mensurando])
-            si_relative_unitXMLList = etree.SubElement(relative_uncertainty_xml_list, etree.QName(nsmap['si'], 'unitXMLList'))
-            si_relative_unitXMLList.text = mensurando_data[mensurando].get('relative_unc_unit', '\\micro\\one')
+                # relative uncertainty values
+                si_relative_valueXMLList = etree.SubElement(
+                    relative_uncertainty_xml_list,
+                    etree.QName(nsmap['si'], 'valueXMLList'))
+                si_relative_valueXMLList.text = ' '.join(grupo['unc_input'])
+                si_relative_unitXMLList = etree.SubElement(
+                    relative_uncertainty_xml_list,
+                    etree.QName(nsmap['si'], 'unitXMLList'))
+                si_relative_unitXMLList.text = mensurando_data[mensurando].get(
+                    'relative_unc_unit', '\\micro\\one')
 
-        # opcional: marcacao dos pontos dentro/fora da CMC
-        # dcc:measurementMetaData deve vir apos relativeUncertainty e antes
-        # de usedMethods/usedSoftware/measuringEquipments/influenceConditions
-        if cmc_config['enabled'] and cmc_status[mensurando]:
-            add_cmc_metadata(quantity, cmc_config['id'], cmc_status[mensurando])
+            # opcional: marcacao dos pontos dentro/fora da CMC
+            if cmc_config['enabled'] and grupo['cmc_status']:
+                add_cmc_metadata(
+                    quantity, cmc_config['id'], grupo['cmc_status'])
 
-        # opcional: graus de liberdade efetivos (nueff)
-        # representados como uma dcc:quantity adicional na mesma dcc:list,
-        # usando dcc:charsXMLList (representacao textual, sem unidade)
-        if nueff[mensurando] :
-            validate_nueff(nueff[mensurando], len(value[mensurando]))
+            # vinculo com condicoes de influencia (refId -> id da condicao)
+            add_ref_metadata(quantity, grupo['ref_ids'])
 
-            quantity = etree.SubElement(lista, etree.QName(nsmap['dcc'], 'quantity'))
+            # opcional: graus de liberdade efetivos (nueff)
+            if grupo['nueff']:
+                validate_nueff(grupo['nueff'], len(grupo['value']))
 
-            campo_name(quantity, 'Graus de liberdade efetivos')
+                quantity = etree.SubElement(
+                    lista, etree.QName(nsmap['dcc'], 'quantity'))
 
-            charsXMLList = etree.SubElement(quantity, etree.QName(nsmap['dcc'], 'charsXMLList'))
-            charsXMLList.text = serialize_nueff(nueff[mensurando])
-   
+                campo_name(quantity, 'Graus de liberdade efetivos')
+
+                charsXMLList = etree.SubElement(
+                    quantity, etree.QName(nsmap['dcc'], 'charsXMLList'))
+                charsXMLList.text = serialize_nueff(grupo['nueff'])
+
     return etree.tostring(dcc, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
 

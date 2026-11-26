@@ -389,6 +389,19 @@ testar a navegação.
   `refTypeDefinitions`; o gerador não infere nem adiciona esses namespaces.
 - Os exemplos em `static/examples/` incluem `electromagnetic_measuringCurrent` quando aplicável.
 
+### Vínculo resultado ↔ condição de influência (`id`/`refId`)
+
+- `informacoes_pertinentes[].id` (opcional) define o `dcc:influenceCondition/@id` (XML ID,
+  único no documento, padrão `[A-Za-z_][A-Za-z0-9._-]*`).
+- `resultados[].refId` (opcional; string com IDs separados por espaço ou lista) adiciona
+  `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` do valor medido.
+- Resultados do mesmo `mensurando` com o mesmo conjunto de `refId` ficam no mesmo
+  `dcc:result`; conjuntos diferentes geram blocos `dcc:result` separados.
+- `id`/`refId` inválidos, duplicados, desconhecidos ou conflitantes com o `id` da CMC retornam
+  `400`.
+- A mesma `measurementMetaData` pode conter o `metaData` da CMC e o da condição.
+- Referência: `doc/api_dcc_generator.md` §2.11.1 e `doc/implementacao_influence_refid.md`.
+
 ### Valor nominal do item (`valor_nominal`)
 
 - `valor_nominal` (raiz, objeto opcional) declara o valor nominal (valor de placa/impresso) do item

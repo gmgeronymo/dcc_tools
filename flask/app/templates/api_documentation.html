@@ -132,6 +132,7 @@
                         <li><a href="#measurand">Mensurando</a></li>
                         <li><a href="#indices">Índices</a></li>
                         <li><a href="#results">Resultados</a></li>
+                        <li><a href="#influence-refid">Vínculo por refId</a></li>
                         <li><a href="#cmc-marking">Marcação CMC</a></li>
                         <li><a href="#nominal-value">Valor Nominal</a></li>
 			<li><a href="#obs">Observações</a></li>
@@ -623,6 +624,7 @@ Content-Type: application/json</div>
                             <h5 class="mt-4">Exemplo:</h5>
                             <div class="example-box">"informacoes_pertinentes": [
     {
+        "id": "iC_temp",
         "name": "Temperatura",
         "value": "23.2",
         "unc": "1.0",
@@ -667,6 +669,12 @@ Content-Type: application/json</div>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr>
+                                        <td>id</td>
+                                        <td>Identificador da condição no XML (XML ID), usado por <code>resultados[].refId</code>. Deve ser único no documento e seguir <code>[A-Za-z_][A-Za-z0-9._-]*</code>.</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"id": "iC_temp"</td>
+                                    </tr>
                                     <tr>
                                         <td>name</td>
                                         <td>Nome da informação pertinente</td>
@@ -735,6 +743,7 @@ Content-Type: application/json</div>
                                     </tr>
                                 </tbody>
                             </table>
+                            <p class="mt-3"><strong>Vínculo com os resultados (<code>id</code>/<code>refId</code>):</strong> o <code>id</code> opcional vira <code>dcc:influenceCondition/@id</code>. Para associar a condição a um resultado, informe <code>resultados[].refId</code> com esse id. Resultados do mesmo mensurando com <code>refId</code> diferentes são separados em blocos de resultado distintos. Veja <a href="#influence-refid">Vínculo por refId</a>.</p>
                         </div>
                     </div>
                 </div>
@@ -1107,7 +1116,8 @@ Content-Type: application/json</div>
         "value": "1.0002341",
         "unc": "0.14",
         "k": "2",
-        "current": "1.0"
+        "current": "1.0",
+        "refId": "iC_temp"
     },
     {
         "mensurando": "acdc",
@@ -1118,7 +1128,8 @@ Content-Type: application/json</div>
         "unc": "44",
         "k": "2.13",
         "nueff": "58.4",
-        "in_cmc": true
+        "in_cmc": true,
+        "refId": "iC_temp"
     },
     {
         "mensurando": "acdc",
@@ -1129,7 +1140,8 @@ Content-Type: application/json</div>
         "unc": "37",
         "k": "2.28",
         "nueff": "62.1",
-        "in_cmc": false
+        "in_cmc": false,
+        "refId": "iC_temp"
     }
 ]</div>
                             
@@ -1175,6 +1187,12 @@ Content-Type: application/json</div>
                                         <td>"in_cmc": false</td>
                                     </tr>
                                     <tr>
+                                        <td>refId</td>
+                                        <td>ID(s) de <code>informacoes_pertinentes[].id</code> que se aplicam a este resultado (string com IDs separados por espaço ou lista). Gera <code>dcc:measurementMetaData/dcc:metaData[@refId]</code> no valor medido.</td>
+                                        <td><span class="optional">Opcional</span></td>
+                                        <td>"refId": "iC_temp"</td>
+                                    </tr>
+                                    <tr>
                                         <td>nueff</td>
                                         <td>Graus de liberdade efetivos (νeff) do resultado. Deve ser um valor numérico e positivo (aceita valores fracionários). O infinito (`+∞`) pode ser informado como <code>"inf"</code>.</td>
                                         <td><span class="optional">Opcional</span></td>
@@ -1190,6 +1208,21 @@ Content-Type: application/json</div>
                             </table>
 
                             <p class="mt-3"><strong>Graus de liberdade efetivos (<code>nueff</code>):</strong> campo opcional. Quando presente, a API gera uma <code>dcc:quantity</code> adicional na mesma <code>dcc:list</code> de resultados, nomeada <em>Graus de liberdade efetivos</em>, com os valores em <code>dcc:charsXMLList</code> (representação textual, sem unidade). O número de valores de <code>nueff</code> deve ser igual ao número de resultados do mensurando associado. Valores <code>0</code>, negativos, <code>-inf</code>, <code>null</code>, vazios, <code>NaN</code> ou não numéricos são rejeitados; o infinito positivo pode ser informado como <code>"inf"</code> e é representado como <code>inf</code> no XML. Se omitido, o certificado é gerado sem a quantidade adicional, preservando o comportamento anterior.</p>
+
+                            <div id="influence-refid" class="mt-4">
+                                <h5>Vínculo do resultado com condições de influência (<code>id</code>/<code>refId</code>)</h5>
+                                <p>O schema DCC 3.3.0 associa uma <code>dcc:influenceCondition</code> a uma lista/quantidade por <code>id</code>/<code>refId</code>. Informe <code>id</code> em <code>informacoes_pertinentes[]</code> e <code>refId</code> nos resultados que sofrem aquela condição.</p>
+                                <p>Resultados do mesmo mensurando com o mesmo conjunto de <code>refId</code> permanecem no mesmo bloco de resultado; conjuntos diferentes geram blocos separados. Sem <code>refId</code>, o comportamento é o mesmo de antes.</p>
+                                <div class="example-box">"informacoes_pertinentes": [
+  { "id": "iC_temp_1", "name": "Temperatura", "value": "20.000", "unc": "0.019", "unit": "\degreecelsius", "refType": "basic_temperature" },
+  { "id": "iC_temp_2", "name": "Temperatura", "value": "19.999", "unc": "0.019", "unit": "\degreecelsius", "refType": "basic_temperature" }
+],
+"resultados": [
+  { "mensurando": "rstdc", "current": "1", "value": "25.0000376", "unc": "0.25", "k": "2", "refId": "iC_temp_1" },
+  { "mensurando": "rstdc", "current": "5", "value": "25.0000374", "unc": "0.25", "k": "2", "refId": "iC_temp_2" }
+]</div>
+                                <p>O XML gera <code>&lt;dcc:influenceCondition id="iC_temp_1"&gt;</code> e, na quantidade do valor medido, <code>&lt;dcc:measurementMetaData&gt;&lt;dcc:metaData refId="iC_temp_1"/&gt;&lt;/dcc:measurementMetaData&gt;</code>. Cada <code>id</code> deve ser único e cada <code>refId</code> deve referenciar um <code>id</code> declarado.</p>
+                            </div>
 
                             <div id="cmc-marking" class="mt-4">
                                 <h5>Marcação de pontos dentro/fora da CMC (<code>in_cmc</code>)</h5>

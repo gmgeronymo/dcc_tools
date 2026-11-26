@@ -1,7 +1,7 @@
 # DCC Tools — Guia de acesso à API para LLMs
 
-**Versão:** 2.13
-**Atualizado em:** 17/11/2026
+**Versão:** 2.14
+**Atualizado em:** 26/11/2026
 **Público:** usuários, desenvolvedores e assistentes de IA (ChatGPT, Claude, Gemini, Copilot, agentes de código).
 **Idioma:** português (pt-BR).
 
@@ -640,7 +640,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | Chave | Tipo | Obrigatório | Conteúdo |
 | --- | --- | --- | --- |
 | `cliente` | objeto | sim | `nome`, `email`, `cidade`, `pais`, `cep`, `uf`, `endereco`, `numero`. |
-| `informacoes_pertinentes` | array | sim (pode ser vazio) | Condições ambientais: `name`, `value` ou `value_min`/`value_max` ou `text`, `unc`, `k`, `unit`, `refType`. |
+| `informacoes_pertinentes` | array | sim (pode ser vazio) | Condições ambientais: `id` opcional, `name`, `value` ou `value_min`/`value_max` ou `text`, `unc`, `k`, `unit`, `refType`. O `id` permite o vínculo por `resultados[].refId`. |
 | `declaracao_rastreabilidade` | string | sim | Texto da declaração de rastreabilidade. |
 | `tabela_rastreabilidade` | array | não | `name`, `origem`, `certificado`, `cod_id`, `hash_sha256` e `hash_procedure` opcionais. |
 | `declaracao_incerteza` | string | sim | Texto da declaração de incerteza. |
@@ -649,7 +649,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
 | `metodo_medicao_equation` | array de strings | não | Equações em LaTeX, alinhadas por índice a `metodo_medicao`. |
 | `mensurando` | array | sim (≥ 1) | `label`, `name`, `col_name`, `unit`, `unc_relativa`, `refType`, `relative_uncertainty_in_dcc`, `relative_unc_unit`. |
 | `indices` | array | não | `mensurando`, `label`, `name`, `unit`, `refType`. |
-| `resultados` | array | sim | `mensurando`, `value`, `unc`, `k`, uma chave por índice, `nueff` opcional e `in_cmc` opcional. |
+| `resultados` | array | sim | `mensurando`, `value`, `unc`, `k`, uma chave por índice, `nueff` opcional, `in_cmc` opcional e `refId` opcional (vínculo com `informacoes_pertinentes[].id`). |
 | `observacoes` | array de strings | não | Cada item vira um statement "Observação N". |
 | `software` | array | não | `name`, `version` de softwares adicionais. |
 | `refTypeDefinitions` | array | não | `name`, `description`, `namespace`, `link`. |
@@ -751,7 +751,7 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
     "numero": "50"
   },
   "informacoes_pertinentes": [
-    { "name": "Temperatura", "value": "23.2", "unc": "1.0", "unit": "\\degreecelsius" },
+    { "id": "iC_temp", "name": "Temperatura", "value": "23.2", "unc": "1.0", "unit": "\\degreecelsius" },
     { "name": "Umidade relativa", "value": "49", "unc": "10", "unit": "\\percent" }
   ],
   "declaracao_rastreabilidade": "Os resultados da calibração são rastreados ao Sistema Internacional de Unidades (SI).",
@@ -771,8 +771,8 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
     { "mensurando": "acdc", "label": "frequency", "name": "Frequência", "unit": "\\kilo\\hertz" }
   ],
   "resultados": [
-    { "mensurando": "acdc", "frequency": "0.01", "value": "-280", "unc": "44", "k": "2.13", "in_cmc": true },
-    { "mensurando": "acdc", "frequency": "0.02", "value": "3", "unc": "37", "k": "2.28", "in_cmc": false }
+    { "mensurando": "acdc", "frequency": "0.01", "value": "-280", "unc": "44", "k": "2.13", "in_cmc": true, "refId": "iC_temp" },
+    { "mensurando": "acdc", "frequency": "0.02", "value": "3", "unc": "37", "k": "2.28", "in_cmc": false, "refId": "iC_temp" }
   ]
 }
 ```
@@ -787,6 +787,9 @@ exatamente como abaixo, incluindo acentos. A ordem das chaves é irrelevante.
   da CMC (ver seção 11).
 - Cada `resultados[]` deve referenciar um `mensurando` existente pelo `label`.
 - Cada índice definido em `indices` deve existir nos resultados daquele mensurando.
+- `resultados[].refId` é opcional e vincula o resultado a uma ou mais condições de
+  `informacoes_pertinentes[].id` (ver §8.6). Resultados do mesmo mensurando com `refId`
+  diferentes são separados em blocos de resultado distintos.
 - Para múltiplos mensurandos, repita o bloco em `mensurando`, referencie os índices em `indices` e
   agrupe os resultados por `mensurando`.
 - Quando `mensurando[].unc_relativa` é `true`, o valor de `unc` é tratado como relativo (ppm) e
@@ -821,6 +824,39 @@ Regras:
 - Sem `hash_sha256` (ou com string vazia), o gerador mantém `analogue` em `dcc:procedure` e
   `dcc:value`, representando certificado analógico.
 - O campo `certificado` deve conter o identificador do certificado (para DCC, o `uniqueIdentifier`).
+
+### 8.6 Vínculo de resultados a condições de influência (`id`/`refId`)
+
+O schema DCC 3.3.0 liga uma `dcc:influenceCondition` a uma lista/quantidade por
+`id`/`refId`:
+
+- `informacoes_pertinentes[].id` (opcional): vira `dcc:influenceCondition/@id`.
+- `resultados[].refId` (opcional): string com IDs separados por espaço ou lista de strings.
+  Gera `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` do valor medido.
+
+Exemplo com uma temperatura por ponto:
+
+```json
+"informacoes_pertinentes": [
+  { "id": "iC_temp_1", "name": "Temperatura", "value": "20.000", "unc": "0.019", "unit": "\\degreecelsius", "refType": "basic_temperature" },
+  { "id": "iC_temp_2", "name": "Temperatura", "value": "19.999", "unc": "0.019", "unit": "\\degreecelsius", "refType": "basic_temperature" }
+],
+"resultados": [
+  { "mensurando": "rstdc", "current": "1", "value": "25.0000376", "unc": "0.25", "k": "2", "refId": "iC_temp_1" },
+  { "mensurando": "rstdc", "current": "5", "value": "25.0000374", "unc": "0.25", "k": "2", "refId": "iC_temp_2" }
+]
+```
+
+Regras:
+
+- `id` deve ser único no documento e seguir `[A-Za-z_][A-Za-z0-9._-]*`; não pode conflitar com o
+  `id` do statement de CMC (`inCMC` por padrão) quando ele é emitido.
+- Cada token de `refId` deve corresponder a um `id` declarado em `informacoes_pertinentes`.
+- Resultados do mesmo mensurando com o mesmo conjunto de `refId` ficam no mesmo bloco de
+  resultado; conjuntos diferentes geram blocos separados.
+- Sem `refId`, o comportamento é o mesmo de antes (um bloco por mensurando).
+- Quando a CMC também é marcada, a mesma `dcc:measurementMetaData` contém dois `dcc:metaData`
+  (CMC e condição).
 
 ---
 
@@ -1081,6 +1117,7 @@ em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
 | `400` `{"error": "No JSON provided"}` | Corpo vazio ou `Content-Type` errado. | Envie JSON e defina `Content-Type: application/json`. |
 | `400` `{"error": "Invalid JSON: ..."}` | JSON malformado. | Valide o JSON; lembre-se de escapar `\` nas unidades D-SI. |
 | `400` `{"error": "<mensagem>"}` | Regra de validação violada (ex.: `nueff` inválido, `in_cmc` não booleano, `hash_sha256`/`hash_procedure` inválido, `declaracao_incerteza_norm` com tipo inválido). | Leia a mensagem e ajuste o campo indicado. |
+| `400` `{"error": "<mensagem>"}` | `informacoes_pertinentes[].id` inválido/duplicado ou `resultados[].refId` desconhecido/tipo inválido. | Use um `id` único no padrão `[A-Za-z_][A-Za-z0-9._-]*` e referencie apenas IDs declarados em `informacoes_pertinentes`. |
 | `500` `{"error": "Erro ao gerar o DCC: ..."}` | Campo obrigatório ausente, tipo inesperado ou falha interna. | Confira a seção 8 e os campos obrigatórios; se persistir, contate o administrador com o payload e o horário. |
 | `/dcc/validate_xml` retorna HTML com erros | XML inválido, `schemaLocation` ausente ou schema em host não confiável. | Confira o XML e o `xsi:schemaLocation`; o schema precisa estar em `ptb.de`/`w3.org` (ou na allowlist). |
 | `/dcc/upload_json` retorna texto simples | Comportamento esperado dessa rota de conveniência. | Prefira `/dcc/generate` para respostas JSON/XML consistentes. |
@@ -1146,3 +1183,4 @@ em `cmc_declaracao.cmc_id` — um texto ou uma lista de textos:
 | 2.11 | 16/11/2026 | O namespace `basic` deixa de ser declarado automaticamente: o `refType="basic_isInCMC"` só é emitido quando o cliente declara `basic` e `valor_nominal` sem essa declaração retorna 400 (revertido na 2.13). |
 | 2.12 | 16/11/2026 | Campo opcional `declaracao_incerteza_norm` (texto ou lista) emitido como `dcc:norm` no `usedMethod` da declaração da incerteza (ex.: `JCGM 100:2008`). |
 | 2.13 | 17/11/2026 | Namespace `basic` volta a ser padrão (declarado automaticamente, sem duplicar); novos RefTypes básicos: `basic_serialNumber`, `basic_identificationNumber`, `basic_certificateNumber` e `basic_resultScope` na declaração 17025. |
+| 2.14 | 26/11/2026 | Vínculo de resultados a condições de influência por `id`/`refId`; agrupamento automático de resultados por conjunto de `refId`. |

@@ -344,7 +344,7 @@ formatos: valor único, intervalo ou texto.
 
 ```json
 "informacoes_pertinentes": [
-  { "name": "Temperatura", "value": "23.2", "unc": "1.0", "k": "2", "unit": "\\degreecelsius", "refType": "basic_temperature" },
+  { "id": "iC_temp", "name": "Temperatura", "value": "23.2", "unc": "1.0", "k": "2", "unit": "\\degreecelsius", "refType": "basic_temperature" },
   { "name": "Umidade relativa", "value": "49", "unc": "10", "unit": "\\percent" },
   { "name": "Temperatura (intervalo)", "value_min": "20", "value_max": "25", "unc": "1.0", "unit": "\\degreecelsius" },
   { "name": "Exemplo textual", "text": "Texto descritivo." }
@@ -353,6 +353,7 @@ formatos: valor único, intervalo ou texto.
 
 | Chave | Tipo | Obrigatório | Descrição |
 | --- | --- | --- | --- |
+| `id` | string | não | Identificador da `dcc:influenceCondition` (XML ID). Usado por `resultados[].refId` para vincular a condição ao resultado. Deve ser único no documento e seguir o padrão `[A-Za-z_][A-Za-z0-9._-]*`. |
 | `name` | string | sim | Nome da informação. |
 | `value` | string | sim (formato único) | Valor numérico único. |
 | `value_min` | string | sim (formato intervalo) | Limite inferior. |
@@ -364,6 +365,10 @@ formatos: valor único, intervalo ou texto.
 | `refType` | string | não | RefType da informação. |
 | `refType_min` | string | não | RefType do limite inferior (intervalo). |
 | `refType_max` | string | não | RefType do limite superior (intervalo). |
+
+> Quando `id` é informado, o XML gera `<dcc:influenceCondition id="...">`. O vínculo com os
+> resultados é feito por `resultados[].refId`; ver §2.11.1. O `id` também não pode coincidir com o
+> `id` do statement de CMC (`inCMC` por padrão) quando esse statement é emitido.
 
 ### 2.6 `declaracao_rastreabilidade` e `tabela_rastreabilidade`
 
@@ -537,7 +542,8 @@ Array de medições. Cada item referencia um `mensurando`, possui `value`/`unc`/
     "value": "-280",
     "unc": "44",
     "k": "2.13",
-    "nueff": "58.4"
+    "nueff": "58.4",
+    "refId": "iC_temp"
   }
 ]
 ```
@@ -551,9 +557,55 @@ Array de medições. Cada item referencia um `mensurando`, possui `value`/`unc`/
 | `<índice>` | string/number | depende | Uma chave para cada índice definido do mensurando (ex.: `faixa`, `voltage`, `frequency`). |
 | `nueff` | string/number | não | Graus de liberdade efetivos (νeff). Ver §6. |
 | `in_cmc` | boolean | não | `true` se o ponto está coberto pela CMC; `false` se está fora. Se omitido, usa `cmc_padrao` (padrão `false`). Ver §2.13. |
+| `refId` | string ou lista | não | Identificador(es) de `informacoes_pertinentes[].id` que se aplicam a este resultado. Gera `dcc:measurementMetaData/dcc:metaData[@refId]` na `dcc:quantity` do valor medido. Ver §2.11.1. |
 
 > Os valores são convertidos internamente para string na saída XML. Recomenda-se enviar como string para
 > preservar a representação exata (ex.: `"2.13"`).
+
+### 2.11.1 Vínculo entre resultados e condições de influência (`id`/`refId`)
+
+O schema DCC 3.3.0 vincula uma condição de influência a uma **lista ou quantidade** por meio de
+`dcc:influenceCondition/@id` + `dcc:measurementMetaData/dcc:metaData/@refId`
+([PTB DCC Wiki — References with id and refId](https://wiki.dcc.ptb.de/en/id_refid)).
+
+- `informacoes_pertinentes[].id` é opcional e cria o `id` da condição.
+- `resultados[].refId` é opcional e aceita uma string (IDs separados por espaço) ou uma lista de IDs.
+- O gerador adiciona um `dcc:metaData refId="..."` na `dcc:quantity` do valor medido.
+- **Agrupamento:** resultados do mesmo `mensurando` com o mesmo conjunto de `refId` ficam no mesmo
+  `dcc:result`; resultados com `refId` diferentes são separados em blocos `dcc:result` distintos.
+  Sem `refId`, o comportamento é o mesmo de antes (um bloco por mensurando).
+- **Validação:** cada `id` deve ser único e seguir `[A-Za-z_][A-Za-z0-9._-]*`; cada token de `refId`
+  deve corresponder a um `id` declarado em `informacoes_pertinentes`. `id`/`refId` inválidos,
+  duplicados ou desconhecidos retornam `400`.
+- Quando a CMC também está marcada, a mesma `dcc:measurementMetaData` contém dois `dcc:metaData`:
+  um com `refId` do statement de CMC (`inCMC` por padrão) e outro com o `refId` da condição.
+
+Exemplo — uma condição de temperatura por ponto e vínculo individual:
+
+```json
+"informacoes_pertinentes": [
+  { "id": "iC_temp_1", "name": "Temperatura", "value": "20.000", "unc": "0.019", "unit": "\\degreecelsius", "refType": "basic_temperature" },
+  { "id": "iC_temp_2", "name": "Temperatura", "value": "19.999", "unc": "0.019", "unit": "\\degreecelsius", "refType": "basic_temperature" }
+],
+"resultados": [
+  { "mensurando": "rstdc", "current": "1", "value": "25.0000376", "unc": "0.25", "k": "2", "refId": "iC_temp_1" },
+  { "mensurando": "rstdc", "current": "5", "value": "25.0000374", "unc": "0.25", "k": "2", "refId": "iC_temp_2" }
+]
+```
+
+XML resultante (trecho):
+
+```xml
+<dcc:influenceCondition refType="basic_temperature" id="iC_temp_1">...</dcc:influenceCondition>
+...
+<dcc:quantity refType="basic_measuredValue">
+  <dcc:name><dcc:content lang="pt">Valor medido</dcc:content></dcc:name>
+  <si:realListXMLList>...</si:realListXMLList>
+  <dcc:measurementMetaData>
+    <dcc:metaData refId="iC_temp_1"/>
+  </dcc:measurementMetaData>
+</dcc:quantity>
+```
 
 ### 2.12 `observacoes` (opcional)
 
@@ -972,6 +1024,8 @@ A rota `/dcc/generate` retorna:
 | `400` | `tabela_rastreabilidade[].hash_sha256` inválido | `{"error": "Valor inválido para 'tabela_rastreabilidade[].hash_sha256': ..."}` |
 | `400` | `tabela_rastreabilidade[].hash_procedure` inválido | `{"error": "Valor inválido para 'tabela_rastreabilidade[].hash_procedure': ..."}` |
 | `400` | `declaracao_incerteza_norm` com tipo inválido | `{"error": "O campo 'declaracao_incerteza_norm' deve ser um texto ou uma lista de textos."}` |
+| `400` | `informacoes_pertinentes[].id` inválido, duplicado ou conflitante com o `id` da CMC | `{"error": "Identificador inválido em 'informacoes_pertinentes[...].id': ..."}` / `{"error": "Identificador duplicado em 'informacoes_pertinentes[].id': ..."}` |
+| `400` | `resultados[].refId` inválido, sem `id` declarado ou tipo inválido | `{"error": "'refId' ... não corresponde a nenhum 'id' declarado em 'informacoes_pertinentes'."}` |
 | `500` | Erro inesperado na geração | `{"error": "Erro ao gerar o DCC: ..."}` |
 
 Mensagens de erro de `nueff` (exemplos):
